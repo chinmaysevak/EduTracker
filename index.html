@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>EduTrack - Student Assistant</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="A modern student management application with attendance tracking, study materials, and progress monitoring" />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="EduTracker0" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    
+    <!-- PWA Icons -->
+    <link rel="apple-touch-startup-image" href="/logo.svg" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/logo.svg" />
+    
+    <!-- Splash Screen for iOS -->
+    <link rel="apple-touch-startup-image" media="(device-width: 414px)" href="/logo.svg" />
+    <link rel="apple-touch-startup-image" media="(device-width: 375px)" href="/logo.svg" />
+    <link rel="apple-touch-startup-image" media="(device-width: 428px)" href="/logo.svg" />
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((error) => {
+              console.log('SW registration failed: ', error);
+            });
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root">
+        <div style="color: white; padding: 20px; font-family: sans-serif;">
+            <h1>Initializing App...</h1>
+            <p>If this message stays, the app failed to load.</p>
+        </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- PWA Install Prompt -->
+    <script>
+      let deferredPrompt;
+      
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+      });
+      
+      // You can add a custom install button in your app
+      // Example: 
+      // const installButton = document.createElement('button');
+      // installButton.textContent = 'Install App';
+      // installButton.onclick = () => {
+      //   if (deferredPrompt) {
+      //     deferredPrompt.prompt();
+      //     deferredPrompt.userChoice.then((choiceResult) => {
+      //       console.log('Install choice:', choiceResult.outcome);
+      //     });
+      //   }
+      // };
+      // document.body.appendChild(installButton);
+    </script>
+  </body>
+</html>
