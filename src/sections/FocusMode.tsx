@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Play, Pause, Square, Minimize2 } from 'lucide-react';
+import { Play, Pause, Square, Minimize2, Volume2, VolumeX } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSubjects } from '@/hooks/useData';
 import { useFocusEngine } from '@/hooks/useFocusEngine';
+import { useAmbientSounds } from '@/hooks/useAmbientSounds';
 import { toast } from 'sonner';
 
 interface FocusModeProps {
@@ -35,6 +36,9 @@ export default function FocusMode({ onExit }: FocusModeProps) {
     const [selectedBreakDuration, setSelectedBreakDuration] = useState(5);
     const [selectedSubjectId, setSelectedSubjectId] = useState<string>(session.subjectId || '');
 
+    // Ambient sounds
+    const { isPlaying: isSoundPlaying, currentSoundId, toggleSound, updateVolume, volume, stopSound: stopAmbientSound, sounds } = useAmbientSounds();
+
     // Sync local selection with active session if exists
     useEffect(() => {
         if (session.isActive && session.subjectId) {
@@ -59,6 +63,7 @@ export default function FocusMode({ onExit }: FocusModeProps) {
     const handleStop = () => {
         if (window.confirm("Are you sure? You will lose progress for this session.")) {
             stopSession();
+            stopAmbientSound();
         }
     };
 
@@ -210,8 +215,50 @@ export default function FocusMode({ onExit }: FocusModeProps) {
                 </CardContent>
             </Card>
 
-            {/* Motivational Quote or Stats */}
-            <div className="mt-8 text-center max-w-md text-muted-foreground text-sm animate-in fade-in delay-500 duration-700">
+            {/* Ambient Sounds Control */}
+            <div className="mt-6 w-full max-w-sm">
+                <Card className="border shadow-lg">
+                    <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Ambient Sounds</span>
+                            <div className="flex items-center gap-2">
+                                {isSoundPlaying ? (
+                                    <Volume2 className="w-3.5 h-3.5 text-emerald-500" />
+                                ) : (
+                                    <VolumeX className="w-3.5 h-3.5 text-muted-foreground" />
+                                )}
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="1"
+                                    step="0.05"
+                                    value={volume}
+                                    onChange={e => updateVolume(Number(e.target.value))}
+                                    className="w-16 h-1 accent-primary cursor-pointer"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                            {sounds.map(sound => (
+                                <button
+                                    key={sound.id}
+                                    onClick={() => toggleSound(sound.id)}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${currentSoundId === sound.id && isSoundPlaying
+                                            ? 'bg-primary text-primary-foreground shadow-md scale-105'
+                                            : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                                        }`}
+                                >
+                                    <span>{sound.icon}</span>
+                                    <span>{sound.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Motivational Quote */}
+            <div className="mt-4 text-center max-w-md text-muted-foreground text-sm animate-in fade-in delay-500 duration-700">
                 <p>"The successful warrior is the average man, with laser-like focus." — Bruce Lee</p>
             </div>
         </div>

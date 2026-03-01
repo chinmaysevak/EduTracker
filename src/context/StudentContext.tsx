@@ -3,10 +3,9 @@ import { useAuth } from './AuthContext';
 import { useSubjects } from '@/hooks/useData';
 import { useAttendance } from '@/hooks/useData';
 import { useTimetable } from '@/hooks/useData';
-import { useStudyMaterials } from '@/hooks/useData';
-import { usePlaylists } from '@/hooks/useData';
+import { useResources } from '@/hooks/useData';
 import { useStudyTasks } from '@/hooks/useData';
-import { useCourseProgress } from '@/hooks/useData';
+import { useSyllabus } from '@/hooks/useData';
 import { useNotifications } from '@/hooks/useData';
 import { useUserProfile } from '@/hooks/useData';
 
@@ -15,10 +14,9 @@ interface StudentContextType {
     subjects: ReturnType<typeof useSubjects>;
     attendance: ReturnType<typeof useAttendance>;
     timetable: ReturnType<typeof useTimetable>;
-    materials: ReturnType<typeof useStudyMaterials>;
-    playlists: ReturnType<typeof usePlaylists>;
+    resources: ReturnType<typeof useResources>;
     tasks: ReturnType<typeof useStudyTasks>;
-    progress: ReturnType<typeof useCourseProgress>;
+    syllabus: ReturnType<typeof useSyllabus>;
     notifications: ReturnType<typeof useNotifications>;
     profile: ReturnType<typeof useUserProfile>;
 }
@@ -36,10 +34,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     const subjects = useSubjects(undefined, userId);
     const attendance = useAttendance(userId);
     const timetable = useTimetable(userId);
-    const materials = useStudyMaterials(userId);
-    const playlists = usePlaylists(userId);
+    const resources = useResources(userId);
     const tasks = useStudyTasks(userId);
-    const progress = useCourseProgress(userId);
+    const syllabus = useSyllabus(userId);
     const notifications = useNotifications(userId);
     const profile = useUserProfile(userId);
 
@@ -54,10 +51,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         subjects,
         attendance,
         timetable,
-        materials,
-        playlists,
+        resources,
         tasks,
-        progress,
+        syllabus,
         notifications,
         profile
     };

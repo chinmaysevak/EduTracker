@@ -17,7 +17,7 @@ import {
   useAttendance,
   useTimetable,
   useStudyTasks,
-  useCourseProgress
+  useSyllabus
 } from '@/hooks/useData';
 import { AttendanceWidget } from '@/components/dashboard/AttendanceWidget';
 import {
@@ -28,11 +28,11 @@ import { WelcomeSection } from '@/components/dashboard/WelcomeSection';
 import { TimetableWidget } from '@/components/dashboard/TimetableWidget';
 import { ResumeSessionCard } from '@/components/dashboard/ResumeSessionCard';
 import { WeeklyPerformanceWidget } from '@/components/dashboard/WeeklyPerformanceWidget';
+import { BackupReminderWidget } from '@/components/dashboard/BackupReminderWidget';
 import type { ModuleType } from '@/types';
 
 interface DashboardProps {
   onNavigate: (module: ModuleType) => void;
-  dailyQuote?: { text: string; author: string; };
 }
 
 export default function Dashboard({ onNavigate }: DashboardProps) {
@@ -40,10 +40,11 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   const { calculateSubjectAttendance } = useAttendance();
   const { getTodayClasses } = useTimetable();
   const { getPendingTasks, getOverdueTasks } = useStudyTasks();
-  const { getOverallProgress } = useCourseProgress();
+  const { getOverallProgress } = useSyllabus();
 
   const todayClasses = getTodayClasses();
-  const overallProgress = getOverallProgress();
+  const subjectIds = subjects.map(s => s.id);
+  const overallProgress = getOverallProgress(subjectIds);
   const pendingTasksCount = getPendingTasks().length;
   const overdueTasksCount = getOverdueTasks().length;
 
@@ -52,6 +53,9 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
       <WelcomeSection onNavigate={onNavigate} />
 
       <TimetableWidget />
+
+      {/* Backup Reminder */}
+      <BackupReminderWidget />
 
       {/* Hero Section: Action Panel & Smart Widgets */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -94,9 +98,9 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 <Target className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </div>
             </div>
-            <p className="text-2xl font-semibold">{overallProgress}%</p>
+            <p className="text-2xl font-semibold">{overallProgress.student}%</p>
             <p className="text-sm text-muted-foreground">Overall Progress</p>
-            <Progress value={overallProgress} className="h-1.5 mt-3" />
+            <Progress value={overallProgress.student} className="h-1.5 mt-3" />
           </CardContent>
         </Card>
 

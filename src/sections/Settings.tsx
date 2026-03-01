@@ -1,5 +1,5 @@
 // ============================================
-// Settings Section - Import/Export Functionality
+// Settings Section - Profile, Theme, Import/Export, Logout
 // ============================================
 
 import { useState, useRef } from 'react';
@@ -9,7 +9,11 @@ import {
   Trash2,
   FileText,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  User,
+  Moon,
+  Sun,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,14 +21,30 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useImportExport } from '@/hooks/useImportExport';
+import { useTheme } from '@/hooks/useTheme';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 export default function Settings() {
   const { exportData, importData, clearAllData } = useImportExport();
+  const { toggleTheme, isDark } = useTheme();
+  const { user, updateProfile, logout } = useAuth();
   const [isImporting, setIsImporting] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [password, setPassword] = useState('');
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState(user?.name || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSaveName = () => {
+    const name = editedName.trim();
+    if (name) {
+      updateProfile(name);
+      setIsEditingName(false);
+      toast.success('Profile updated.');
+    }
+  };
 
   const handleExport = () => {
     exportData();
@@ -74,9 +94,111 @@ export default function Settings() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">
-          Manage your data with import and export functionality
+          Manage your profile, preferences, and data
         </p>
       </div>
+
+      {/* Profile Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Edit Profile
+          </CardTitle>
+          <CardDescription>
+            Update your profile information
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="profile-name">Your Name</Label>
+              <div className="flex gap-2">
+                {isEditingName ? (
+                  <>
+                    <Input
+                      id="profile-name"
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      placeholder="Enter your name"
+                    />
+                    <Button onClick={handleSaveName} size="sm">Save</Button>
+                    <Button variant="outline" onClick={() => setIsEditingName(false)} size="sm">Cancel</Button>
+                  </>
+                ) : (
+                  <>
+                    <Input
+                      id="profile-name"
+                      value={user?.name || ''}
+                      disabled
+                    />
+                    <Button onClick={() => { setEditedName(user?.name || ''); setIsEditingName(true); }} size="sm">Edit</Button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Theme Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            {isDark ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            Appearance
+          </CardTitle>
+          <CardDescription>
+            Customize the look and feel of the app
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button
+            onClick={toggleTheme}
+            variant="outline"
+            className="w-full sm:w-auto"
+          >
+            {isDark ? (
+              <>
+                <Sun className="h-4 w-4 mr-2" />
+                Switch to Light Mode
+              </>
+            ) : (
+              <>
+                <Moon className="h-4 w-4 mr-2" />
+                Switch to Dark Mode
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Logout Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <LogOut className="h-5 w-5" />
+            Logout
+          </CardTitle>
+          <CardDescription>
+            Sign out of your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button
+            onClick={() => {
+              if (confirm('Are you sure you want to logout?')) {
+                logout();
+              }
+            }}
+            variant="destructive"
+            className="w-full sm:w-auto"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Export Data */}
       <Card>

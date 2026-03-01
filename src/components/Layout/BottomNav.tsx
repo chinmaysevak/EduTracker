@@ -10,7 +10,7 @@ export default function BottomNav({ activeModule, onChange }: BottomNavProps) {
     const items: { id: ModuleType; label: string; icon: React.ElementType }[] = [
         { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
         { id: 'materials', label: 'Materials', icon: BookOpen },
-        { id: 'planner', label: 'Planner', icon: ClipboardList },
+        { id: 'planner', label: 'Academic Planner', icon: ClipboardList },
         { id: 'progress', label: 'Analytics', icon: TrendingUp },
         { id: 'settings', label: 'Settings', icon: Settings },
     ];

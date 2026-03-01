@@ -29,27 +29,33 @@ export interface Subject {
   examDate?: string; // ISO date string
 }
 
-// Study Material Types
-export interface StudyMaterial {
-  id: string;
-  subjectId: string;
-  title: string;
-  type: 'note' | 'pdf' | 'link';
-  content: string;
-  fileId?: string; // Reference to IndexedDB file
-  createdAt: string;
-}
+// Resource Types
+export type ResourceType = 'file' | 'link' | 'youtube' | 'note';
 
-// YouTube Playlist Types
-export interface YouTubePlaylist {
+export interface Resource {
   id: string;
-  subjectId: string;
+  type: ResourceType;
   title: string;
-  url: string;
-  thumbnail?: string;
-  channelName?: string;
-  videoCount?: number;
-  addedAt: string;
+  subjectId: string;
+  createdAt: string;
+  isFavorite: boolean;
+  tags?: string[];
+
+  // File specific
+  fileUrl?: string; // object URL or IndexedDB fallback
+  fileType?: string;
+  fileSize?: number;
+  fileId?: string; // Reference to IndexedDB file
+
+  // Link specific
+  url?: string;
+
+  // YouTube specific
+  youtubeUrl?: string;
+  thumbnailUrl?: string;
+
+  // Note specific
+  content?: string;
 }
 
 // Study Planner Types
@@ -106,24 +112,37 @@ export interface FocusSession {
   notes?: string;
 }
 
-// Course Progress Types
-export interface CourseProgress {
+// Syllabus Progress Types
+export interface SyllabusUnit {
+  id: string;
   subjectId: string;
-  totalUnits: number;
-  teacherCompletedUnits: number;
-  studentCompletedUnits: number;
+  name: string;
+  teacherCompleted: boolean;
+  studentCompleted: boolean;
+  order: number;
 }
+
+export interface SyllabusTopic {
+  id: string;
+  unitId: string;
+  name: string;
+  teacherCompleted: boolean;
+  studentCompleted: boolean;
+  order: number;
+}
+
+
 
 // Navigation Types
 export type ModuleType =
   | 'dashboard'
   | 'attendance'
-  | 'materials'
-  | 'learning-hub'
   | 'planner'
+  | 'resources'
   | 'progress'
   | 'settings'
-  | 'focus';
+  | 'focus'
+  | 'materials';
 
 // Timetable Types
 export interface TimetableSlot {
@@ -157,10 +176,9 @@ export interface EduTrackerExport {
   data: {
     subjects: Subject[];
     attendance: DailyAttendance[];
-    materials: StudyMaterial[];
-    playlists: YouTubePlaylist[];
     tasks: StudyTask[];
-    progress: CourseProgress[];
+    units?: SyllabusUnit[];
+    topics?: SyllabusTopic[];
     notifications: Notification[];
     timetable: Record<string, string[]>;
     customTimes: Record<string, { startTime: string; endTime: string }[]>;
@@ -184,4 +202,29 @@ export interface FocusSessionLog {
   endTime: string;
   durationMinutes: number;
   date: string; // YYYY-MM-DD
+}
+
+// Exam Types
+export interface Exam {
+  id: string;
+  subjectId: string;
+  title: string;
+  examDate: string;
+  syllabus?: string;
+  preparationStatus: 'not_started' | 'in_progress' | 'completed';
+  notes?: string;
+  createdAt: string;
+}
+
+// Study Session Types
+export interface StudySession {
+  id: string;
+  subjectId: string;
+  title: string;
+  sessionDate: string;
+  startTime: string;
+  endTime: string;
+  completed: boolean;
+  notes?: string;
+  createdAt: string;
 }

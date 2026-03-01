@@ -66,3 +66,9 @@ export async function clearAllFiles() {
   const db = await initDB();
   await db.clear('files');
 }
+
+export async function getFileUrl(id: string): Promise<string> {
+  const file = await getFile(id);
+  if (!file) throw new Error('File not found in database');
+  return URL.createObjectURL(file.data);
+}

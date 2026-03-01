@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   CalendarCheck,
   BookOpen,
-  PlayCircle,
   ClipboardList,
   TrendingUp,
   Settings as SettingsIcon,
@@ -17,10 +16,7 @@ import {
   Bell,
   Search,
   Trash2,
-  ChevronRight,
-  Quote,
-  HelpCircle,
-  User
+  ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
@@ -49,25 +45,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
 import {
   useSubjects,
-  useStudyMaterials,
   useStudyTasks,
-  useNotifications
+  useNotifications,
+  useResources
 } from '@/hooks/useData';
 import type { ModuleType } from '@/types';
 
 // Import module components
 import Dashboard from '@/sections/Dashboard';
 import AttendanceTracker from '@/sections/AttendanceTracker';
-import StudyMaterials from '@/sections/StudyMaterials';
-import LearningHub from '@/sections/LearningHub';
 import StudyPlanner from '@/sections/StudyPlanner';
+import Resources from '@/pages/Resources';
 import ProgressTracker from '@/sections/ProgressTracker';
 import Settings from '@/sections/Settings';
 import LoginPage from '@/sections/LoginPage';
@@ -77,23 +69,10 @@ import FocusMode from '@/sections/FocusMode';
 const navItems: { id: ModuleType; label: string; icon: React.ElementType }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'attendance', label: 'Attendance', icon: CalendarCheck },
-  { id: 'materials', label: 'Materials', icon: BookOpen },
-  { id: 'learning-hub', label: 'Learning', icon: PlayCircle },
-  { id: 'planner', label: 'Planner', icon: ClipboardList },
+  { id: 'planner', label: 'Academic Planner', icon: ClipboardList },
+  { id: 'resources', label: 'Resources', icon: BookOpen },
   { id: 'progress', label: 'Progress', icon: TrendingUp },
   { id: 'settings', label: 'Settings', icon: SettingsIcon },
-];
-
-// Daily quotes for inspiration
-const dailyQuotes = [
-  { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
-  { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
-  { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
-  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
-  { text: "Education is the passport to the future.", author: "Malcolm X" },
-  { text: "Your time is limited, don't waste it living someone else's life.", author: "Steve Jobs" },
-  { text: "The beautiful thing about learning is that no one can take it away from you.", author: "B.B. King" },
-  { text: "Knowledge is power. Information is liberating.", author: "Kofi Annan" },
 ];
 
 function App() {
@@ -103,53 +82,21 @@ function App() {
   const { toggleTheme, isDark } = useTheme();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [searchOpen, setSearchOpen] = useState(false);
-  const [currentQuote, setCurrentQuote] = useState(dailyQuotes[0]);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
-  const [aboutOpen, setAboutOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [profileNameInput, setProfileNameInput] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  const { isAuthenticated, user, logout, updateProfile } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, user, logout } = useAuth();
   const userName = user?.name || '';
 
-
-
-  const openProfileDialog = () => {
-    setProfileNameInput(userName);
-    setProfileOpen(true);
-  };
-  const saveProfile = () => {
-    const name = profileNameInput.trim();
-    if (name) {
-      try {
-        updateProfile(name);
-        setProfileOpen(false);
-        toast.success('Profile updated.');
-      } catch {
-        toast.error('Could not save name.');
-      }
-    }
-  };
-
-  // Data hooks
   const { subjects } = useSubjects();
-  const { materials } = useStudyMaterials();
   const { tasks } = useStudyTasks();
+  const { resources } = useResources();
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
 
   // Update time every minute for live clock (hour:min display)
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
-  }, []);
-
-  // Change quote based on day
-  useEffect(() => {
-    const startOfYear = new Date(currentTime.getFullYear(), 0, 0);
-    const diff = currentTime.getTime() - startOfYear.getTime();
-    const dayOfYear = Math.floor(diff / 1000 / 60 / 60 / 24);
-    setCurrentQuote(dailyQuotes[dayOfYear % dailyQuotes.length]);
   }, []);
 
   useEffect(() => {
@@ -179,15 +126,14 @@ function App() {
 
   const renderModule = () => {
     switch (activeModule) {
-      case 'dashboard': return <Dashboard onNavigate={setActiveModule} dailyQuote={currentQuote} />;
+      case 'dashboard': return <Dashboard onNavigate={setActiveModule} />;
       case 'attendance': return <AttendanceTracker />;
-      case 'materials': return <StudyMaterials />;
-      case 'learning-hub': return <LearningHub />;
       case 'planner': return <StudyPlanner />;
+      case 'resources': return <Resources />;
       case 'progress': return <ProgressTracker />;
       case 'settings': return <Settings />;
       case 'focus': return <FocusMode onExit={() => setActiveModule('dashboard')} />;
-      default: return <Dashboard onNavigate={setActiveModule} dailyQuote={currentQuote} />;
+      default: return <Dashboard onNavigate={setActiveModule} />;
     }
   };
 
@@ -231,16 +177,6 @@ function App() {
       });
     });
 
-    materials.slice(0, 10).forEach(material => {
-      items.push({
-        title: material.title,
-        subtitle: 'Material',
-        icon: BookOpen,
-        action: () => { setActiveModule('materials'); setSearchOpen(false); },
-        group: 'Materials'
-      });
-    });
-
     tasks.slice(0, 10).forEach(task => {
       items.push({
         title: task.description,
@@ -251,8 +187,18 @@ function App() {
       });
     });
 
+    resources.forEach(resource => {
+      items.push({
+        title: resource.title,
+        subtitle: resource.type.charAt(0).toUpperCase() + resource.type.slice(1),
+        icon: BookOpen,
+        action: () => { setActiveModule('resources'); setSearchOpen(false); },
+        group: 'Resources'
+      });
+    });
+
     return items;
-  }, [subjects, materials, tasks]);
+  }, [subjects, tasks, resources]);
 
   const groupedSearchItems = useMemo(() => {
     const groups: Record<string, typeof searchData> = {};
@@ -262,6 +208,20 @@ function App() {
     });
     return groups;
   }, [searchData]);
+
+  // Show loading spinner while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center shadow-xl">
+            <span className="text-white font-bold text-xl">E</span>
+          </div>
+          <div className="w-6 h-6 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   // Show login page if not authenticated
   if (!isAuthenticated) {
@@ -379,116 +339,8 @@ function App() {
         {/* Bottom Actions */}
         <div className={`border-t border-border/50 space-y-2 relative z-20 ${isSidebarCollapsed ? 'p-2' : 'p-3'
           }`}>
-          {!isSidebarCollapsed && userName && (
-            <div className="px-3 py-2 rounded-xl bg-muted/50 border border-border/50 mb-2">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Signed in as</p>
-              <p className="text-sm font-medium truncate">{userName}</p>
-              <Button variant="ghost" size="sm" className="w-full mt-1 h-7 text-xs rounded-lg" onClick={openProfileDialog}>
-                <User className="w-3 h-3 mr-1" /> Edit profile
-              </Button>
-            </div>
-          )}
-          <Button
-            variant="ghost"
-            className={`w-full justify-start gap-3 h-10 rounded-xl text-muted-foreground hover:text-foreground ${isSidebarCollapsed ? 'px-3' : ''
-              }`}
-            onClick={() => setAboutOpen(true)}
-            title={isSidebarCollapsed ? 'About & Help' : ''}
-          >
-            <HelpCircle className="w-4 h-4 flex-shrink-0" />
-            {!isSidebarCollapsed && <span className="text-sm">About & Help</span>}
-          </Button>
-          <Button
-            variant="ghost"
-            className={`w-full justify-start gap-3 h-10 rounded-xl text-muted-foreground hover:text-foreground ${isSidebarCollapsed ? 'px-3' : ''
-              }`}
-            onClick={toggleTheme}
-            title={isSidebarCollapsed ? (isDark ? 'Light Mode' : 'Dark Mode') : ''}
-          >
-            {isDark ? <Sun className="w-4 h-4 flex-shrink-0" /> : <Moon className="w-4 h-4 flex-shrink-0" />}
-            {!isSidebarCollapsed && <span className="text-sm">{isDark ? 'Light Mode' : 'Dark Mode'}</span>}
-          </Button>
-          {!isSidebarCollapsed && (
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-3 h-10 rounded-xl text-muted-foreground hover:text-red-500"
-              onClick={() => setLogoutDialogOpen(true)}
-            >
-              <span className="text-sm">Logout</span>
-            </Button>
-          )}
-          {isSidebarCollapsed && (
-            <Button
-              variant="ghost"
-              className="w-full justify-center gap-3 h-10 rounded-xl text-muted-foreground hover:text-red-500 px-3"
-              onClick={() => setLogoutDialogOpen(true)}
-              title="Logout"
-            >
-              <span className="text-sm">Logout</span>
-            </Button>
-          )}
         </div>
-
-        {/* Daily Quote - Only show when not collapsed */}
-        {!isSidebarCollapsed && (
-          <div className="px-3 pb-3 relative z-20">
-            <div className="p-3 rounded-xl bg-muted/50 border border-border/50">
-              <div className="flex items-center gap-2 mb-2">
-                <Quote className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground font-medium">Daily Inspiration</span>
-              </div>
-              <p className="text-xs text-foreground leading-relaxed line-clamp-3">
-                "{currentQuote.text}"
-              </p>
-              <p className="text-[10px] text-muted-foreground mt-2">— {currentQuote.author}</p>
-            </div>
-          </div>
-        )}
       </aside>
-
-      {/* About & Help Dialog */}
-      <Dialog open={aboutOpen} onOpenChange={setAboutOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>About EduTrack</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 text-sm text-muted-foreground">
-            <p>
-              EduTrack is your student assistant. Use it to track attendance, manage study materials, plan tasks, follow your progress, and keep a weekly schedule.
-            </p>
-            <div>
-              <p className="font-medium text-foreground mb-1">Keyboard shortcut</p>
-              <p>Press <kbd className="inline-flex h-6 items-center rounded border bg-muted px-2 font-mono text-xs">Ctrl+K</kbd> (or <kbd className="inline-flex h-6 items-center rounded border bg-muted px-2 font-mono text-xs">⌘K</kbd> on Mac) to open search and jump to any section.
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Profile (Edit name) Dialog */}
-      <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="profile-name">Your name</Label>
-              <Input
-                id="profile-name"
-                value={profileNameInput}
-                onChange={(e) => setProfileNameInput(e.target.value)}
-                placeholder="Enter your name"
-                className="rounded-xl"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setProfileOpen(false)}>Cancel</Button>
-            <Button onClick={saveProfile} disabled={!profileNameInput.trim()}>Save</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Logout confirmation */}
       <AlertDialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
