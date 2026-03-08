@@ -24,12 +24,20 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers,
   });
 
+  let isRedirecting = false;
+
   if (res.status === 401) {
-    // Token expired or invalid — clear it
-    localStorage.removeItem('edutracker-token');
-    localStorage.removeItem('edutracker-user');
-    window.location.reload();
-    throw new Error('Session expired');
+    // DO NOT intercept and force reload if the user is literally trying to login or register
+    if (!path.includes('/auth/login') && !path.includes('/auth/register')) {
+      if (!isRedirecting) {
+        isRedirecting = true;
+        // Token expired or invalid — clear it
+        localStorage.removeItem('edutracker-token');
+        localStorage.removeItem('edutracker-user');
+        window.location.href = '/login?expired=true';
+      }
+      return new Promise(() => { });
+    }
   }
 
   if (!res.ok) {

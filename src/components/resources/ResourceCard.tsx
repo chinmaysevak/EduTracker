@@ -1,4 +1,4 @@
-import { FileText, Link as LinkIcon, Youtube, File as FileIcon, Star, Trash2, Edit2, ExternalLink } from 'lucide-react';
+import { Link as LinkIcon, Youtube, File as FileIcon, Star, Trash2, Edit2, ExternalLink, NotebookPen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
 import type { Resource, Subject } from '@/types';
@@ -14,19 +14,19 @@ interface ResourceCardProps {
 
 const getResourceIcon = (type: Resource['type']) => {
     switch (type) {
-        case 'file': return <FileIcon className="w-5 h-5 text-blue-500" />;
-        case 'link': return <LinkIcon className="w-5 h-5 text-emerald-500" />;
+        case 'file': return <FileIcon className="w-5 h-5 text-indigo-400" />;
+        case 'link': return <LinkIcon className="w-5 h-5 text-green-400" />;
         case 'youtube': return <Youtube className="w-5 h-5 text-red-500" />;
-        case 'note': return <FileText className="w-5 h-5 text-amber-500" />;
+        case 'note': return <NotebookPen className="w-5 h-5 text-yellow-400" />;
     }
 };
 
 const getResourceColor = (type: Resource['type']) => {
     switch (type) {
-        case 'file': return 'border-blue-500/20 bg-blue-500/5 hover:border-blue-500/40';
-        case 'link': return 'border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/40';
+        case 'file': return 'border-indigo-500/20 bg-indigo-500/5 hover:border-indigo-500/40';
+        case 'link': return 'border-green-500/20 bg-green-500/5 hover:border-green-500/40';
         case 'youtube': return 'border-red-500/20 bg-red-500/5 hover:border-red-500/40';
-        case 'note': return 'border-amber-500/20 bg-amber-500/5 hover:border-amber-500/40';
+        case 'note': return 'border-yellow-500/20 bg-yellow-500/5 hover:border-yellow-500/40';
     }
 };
 

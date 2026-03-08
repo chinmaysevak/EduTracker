@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { SmartAcademicEngine } from '@/lib/academicEngine';
 import type { StudyRecommendation, AcademicPerformanceIndex, RiskAssessment, WeeklyPlan, ProductivityMetrics } from '@/types/academic';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useSubjects, useStudyTasks, useAttendance } from '@/hooks/useData';
 
 export function useSmartAcademicAssistant() {
   const [recommendations, setRecommendations] = useState<StudyRecommendation[]>([]);
@@ -9,54 +10,84 @@ export function useSmartAcademicAssistant() {
   const [riskAssessment, setRiskAssessment] = useState<RiskAssessment | null>(null);
   const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlan | null>(null);
   const [productivityMetrics, setProductivityMetrics] = useState<ProductivityMetrics | null>(null);
-  
+
   const [savedPlans, setSavedPlans] = useLocalStorage<WeeklyPlan[]>('edu-tracker-study-plans', []);
 
-  // Generate daily recommendations
+  // Pull data from existing hooks
+  const { subjects } = useSubjects();
+  const { tasks } = useStudyTasks();
+  const { attendanceData } = useAttendance();
+
+  // Use refs to avoid stale closures and infinite loops
+  const subjectsRef = useRef(subjects);
+  const tasksRef = useRef(tasks);
+  const attendanceRef = useRef(attendanceData);
+
+  subjectsRef.current = subjects;
+  tasksRef.current = tasks;
+  attendanceRef.current = attendanceData;
+
+  // Compute all analytics when data changes (single effect, no circular deps)
+  useEffect(() => {
+    try {
+      setRecommendations(SmartAcademicEngine.generateDailyRecommendations(subjects, tasks, attendanceData));
+    } catch (error) {
+      console.error('Error generating recommendations:', error);
+    }
+    try {
+      setPerformanceIndex(SmartAcademicEngine.calculatePerformanceIndex(subjects, tasks, attendanceData));
+    } catch (error) {
+      console.error('Error calculating performance:', error);
+    }
+    try {
+      setRiskAssessment(SmartAcademicEngine.assessRisk(subjects, tasks, attendanceData));
+    } catch (error) {
+      console.error('Error assessing risk:', error);
+    }
+    try {
+      setProductivityMetrics(SmartAcademicEngine.calculateProductivityMetrics(subjects, tasks, attendanceData));
+    } catch (error) {
+      console.error('Error calculating productivity:', error);
+    }
+  }, [subjects, tasks, attendanceData]);
+
+  // Manual refresh actions (use refs to avoid dep chains)
   const generateRecommendations = useCallback(() => {
     try {
-      const newRecommendations = SmartAcademicEngine.generateDailyRecommendations();
-      setRecommendations(newRecommendations);
+      setRecommendations(SmartAcademicEngine.generateDailyRecommendations(subjectsRef.current, tasksRef.current, attendanceRef.current));
     } catch (error) {
       console.error('Error generating recommendations:', error);
     }
   }, []);
 
-  // Calculate performance index
   const calculatePerformance = useCallback(() => {
     try {
-      const performance = SmartAcademicEngine.calculatePerformanceIndex();
-      setPerformanceIndex(performance);
+      setPerformanceIndex(SmartAcademicEngine.calculatePerformanceIndex(subjectsRef.current, tasksRef.current, attendanceRef.current));
     } catch (error) {
       console.error('Error calculating performance:', error);
     }
   }, []);
 
-  // Assess risk
   const assessRisk = useCallback(() => {
     try {
-      const risk = SmartAcademicEngine.assessRisk();
-      setRiskAssessment(risk);
+      setRiskAssessment(SmartAcademicEngine.assessRisk(subjectsRef.current, tasksRef.current, attendanceRef.current));
     } catch (error) {
       console.error('Error assessing risk:', error);
     }
   }, []);
 
-  // Generate weekly plan
   const generateWeeklyPlan = useCallback(() => {
     try {
-      const plan = SmartAcademicEngine.generateWeeklyPlan();
+      const plan = SmartAcademicEngine.generateWeeklyPlan(subjectsRef.current, tasksRef.current);
       setWeeklyPlan(plan);
     } catch (error) {
       console.error('Error generating weekly plan:', error);
     }
   }, []);
 
-  // Calculate productivity metrics
   const calculateProductivity = useCallback(() => {
     try {
-      const metrics = SmartAcademicEngine.calculateProductivityMetrics();
-      setProductivityMetrics(metrics);
+      setProductivityMetrics(SmartAcademicEngine.calculateProductivityMetrics(subjectsRef.current, tasksRef.current, attendanceRef.current));
     } catch (error) {
       console.error('Error calculating productivity:', error);
     }
@@ -76,18 +107,10 @@ export function useSmartAcademicAssistant() {
     }
   }, [savedPlans]);
 
-  // Initialize all calculations
-  useEffect(() => {
-    generateRecommendations();
-    calculatePerformance();
-    assessRisk();
-    calculateProductivity();
-  }, [generateRecommendations, calculatePerformance, assessRisk, calculateProductivity]);
-
   // Generate smart notifications
   const generateSmartNotifications = useCallback(() => {
     const notifications = [];
-    
+
     if (riskAssessment?.level === 'high') {
       notifications.push({
         title: 'High Risk Alert',
@@ -96,7 +119,7 @@ export function useSmartAcademicAssistant() {
         priority: 'high'
       });
     }
-    
+
     if (performanceIndex?.level === 'poor' || performanceIndex?.level === 'critical') {
       notifications.push({
         title: 'Performance Warning',
@@ -105,7 +128,7 @@ export function useSmartAcademicAssistant() {
         priority: 'medium'
       });
     }
-    
+
     if (recommendations.length > 0) {
       notifications.push({
         title: 'Study Recommendations',
@@ -114,7 +137,7 @@ export function useSmartAcademicAssistant() {
         priority: 'medium'
       });
     }
-    
+
     return notifications;
   }, [riskAssessment, performanceIndex, recommendations]);
 
@@ -126,7 +149,7 @@ export function useSmartAcademicAssistant() {
     weeklyPlan,
     productivityMetrics,
     savedPlans,
-    
+
     // Actions
     generateRecommendations,
     calculatePerformance,
@@ -138,3 +161,4 @@ export function useSmartAcademicAssistant() {
     generateSmartNotifications
   };
 }
+

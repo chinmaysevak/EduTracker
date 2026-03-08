@@ -1,72 +1,67 @@
 import { SmartAdvisor } from '@/components/SmartAdvisor';
 import { WeeklyPlanGenerator } from '@/components/WeeklyPlanGenerator';
 import { ProductivityAnalytics } from '@/components/ProductivityAnalytics';
-import { Tabs, Tab } from '@heroui/react';
-import { Brain, Calendar, BarChart3 } from 'lucide-react';
+import { AiChatAdvisor } from '@/components/AiChatAdvisor';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Brain, Calendar, BarChart3, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
 export default function SmartAdvisorPage() {
-  const [activeTab, setActiveTab] = useState('advisor');
+  const [activeTab, setActiveTab] = useState('ai-chat');
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold gradient-text">Smart Academic Advisor</h2>
-          <p className="text-muted-foreground mt-1">
+          <h2 className="text-2xl font-bold gradient-text">Smart Academic Advisor</h2>
+          <p className="text-muted-foreground text-sm">
             AI-powered insights and personalized study recommendations
           </p>
         </div>
       </div>
 
       {/* Main Content */}
-      <Tabs 
-        selectedKey={activeTab} 
-        onSelectionChange={(key) => setActiveTab(key as string)}
-        variant="underlined"
-        classNames={{
-          tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
-          cursor: "w-full bg-transparent",
-          tab: "max-w-fit px-0 h-12",
-          tabContent: "group-data-[selected=true]:text-violet-600"
-        }}
+      <Tabs
+        defaultValue="ai-chat"
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full"
       >
-        <Tab 
-          key="advisor" 
-          title={
-            <div className="flex items-center gap-2">
-              <Brain className="w-4 h-4" />
-              <span>Daily Advisor</span>
-            </div>
-          }
-        />
-        <Tab 
-          key="planner" 
-          title={
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <span>Study Planner</span>
-            </div>
-          }
-        />
-        <Tab 
-          key="analytics" 
-          title={
-            <div className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              <span>Productivity</span>
-            </div>
-          }
-        />
-      </Tabs>
+        <TabsList className="grid w-full grid-cols-4 md:w-[520px]">
+          <TabsTrigger value="ai-chat" className="gap-2">
+            <Sparkles className="w-4 h-4" />
+            <span className="hidden sm:inline">AI Chat</span>
+          </TabsTrigger>
+          <TabsTrigger value="advisor" className="gap-2">
+            <Brain className="w-4 h-4" />
+            <span className="hidden sm:inline">Insights</span>
+          </TabsTrigger>
+          <TabsTrigger value="planner" className="gap-2">
+            <Calendar className="w-4 h-4" />
+            <span className="hidden sm:inline">Planner</span>
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-2">
+            <BarChart3 className="w-4 h-4" />
+            <span className="hidden sm:inline">Productivity</span>
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Tab Content */}
-      <div className="mt-6">
-        {activeTab === 'advisor' && <SmartAdvisor />}
-        {activeTab === 'planner' && <WeeklyPlanGenerator />}
-        {activeTab === 'analytics' && <ProductivityAnalytics />}
-      </div>
+        <div className="mt-4">
+          <TabsContent value="ai-chat" className="mt-0">
+            <AiChatAdvisor />
+          </TabsContent>
+          <TabsContent value="advisor" className="mt-0">
+            <SmartAdvisor />
+          </TabsContent>
+          <TabsContent value="planner" className="mt-0">
+            <WeeklyPlanGenerator />
+          </TabsContent>
+          <TabsContent value="analytics" className="mt-0">
+            <ProductivityAnalytics />
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 }

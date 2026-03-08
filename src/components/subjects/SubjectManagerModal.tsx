@@ -3,6 +3,7 @@ import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -118,9 +119,15 @@ export function SubjectManagerModal({ subjectId, isOpen, onClose }: SubjectManag
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <Button onClick={handleAddTopic} size="sm" className="h-9 w-9 p-0 rounded-lg btn-gradient shrink-0 mb-[1px]">
+                            <SubmitButton
+                                onClick={handleAddTopic}
+                                size="sm"
+                                className="h-9 w-9 p-0 rounded-lg btn-gradient shrink-0 mb-[1px]"
+                                isLoading={newTopicName.length > 0 && topics.some(t => t.name === newTopicName && t.id.startsWith('temp-'))}
+                                loadingText=""
+                            >
                                 <Plus className="w-4 h-4" />
-                            </Button>
+                            </SubmitButton>
                         </div>
 
                         {/* Topics List */}

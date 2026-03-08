@@ -19,7 +19,8 @@ import {
   BookOpen,
   Timer,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  X
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +41,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSubjects, useStudyTasks, useExams, useStudyPlannerSessions } from '@/hooks/useData';
 import { toast } from 'sonner';
+import { useConfetti } from '@/components/ui/Confetti';
 import type { StudyTask, Exam, StudySession } from '@/types';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday } from 'date-fns';
 
@@ -63,6 +64,9 @@ export default function StudyPlanner() {
   const [sessionToDelete, setSessionToDelete] = useState<StudySession | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
+
+  const { fire: fireConfetti, ConfettiCanvas } = useConfetti();
 
   const [taskFormData, setTaskFormData] = useState({
     subjectId: '',
@@ -90,6 +94,14 @@ export default function StudyPlanner() {
     endTime: '10:00',
     notes: ''
   });
+
+  const handleToggleWithConfetti = (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (task && task.status !== 'completed') {
+      fireConfetti();
+    }
+    toggleTaskStatus(taskId);
+  };
 
   const filteredTasks = tasks.filter(t => {
     const matchesSubject = selectedSubject === 'all' || t.subjectId === selectedSubject;
@@ -342,54 +354,57 @@ export default function StudyPlanner() {
         </div>
 
         <div className="flex gap-2">
-          <Dialog open={isAddTaskDialogOpen} onOpenChange={setIsAddTaskDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="btn-gradient rounded-xl gap-2">
-                <Plus className="w-4 h-4" />
-                Add Task
-              </Button>
-            </DialogTrigger>
-            <TaskDialog
-              formData={taskFormData}
-              setFormData={setTaskFormData}
-              subjects={subjects}
-              onSubmit={handleAddTask}
-              title="Add New Task"
-            />
-          </Dialog>
+          <Button className="btn-gradient rounded-xl gap-2" onClick={() => setIsAddTaskDialogOpen(true)}>
+            <Plus className="w-4 h-4" />
+            Add Task
+          </Button>
 
-          <Dialog open={isAddExamDialogOpen} onOpenChange={setIsAddExamDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="rounded-xl gap-2">
-                <BookOpen className="w-4 h-4" />
-                Add Exam
-              </Button>
-            </DialogTrigger>
-            <ExamDialog
-              formData={examFormData}
-              setFormData={setExamFormData}
-              subjects={subjects}
-              onSubmit={handleAddExam}
-              title="Add New Exam"
-            />
-          </Dialog>
+          <Button variant="outline" className="rounded-xl gap-2" onClick={() => setIsAddExamDialogOpen(true)}>
+            <BookOpen className="w-4 h-4" />
+            Add Exam
+          </Button>
 
-          <Dialog open={isAddSessionDialogOpen} onOpenChange={setIsAddSessionDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="rounded-xl gap-2">
-                <Timer className="w-4 h-4" />
-                Add Session
-              </Button>
-            </DialogTrigger>
-            <SessionDialog
-              formData={sessionFormData}
-              setFormData={setSessionFormData}
-              subjects={subjects}
-              onSubmit={handleAddSession}
-              title="Add Study Session"
-            />
-          </Dialog>
+          <Button variant="outline" className="rounded-xl gap-2" onClick={() => setIsAddSessionDialogOpen(true)}>
+            <Timer className="w-4 h-4" />
+            Add Session
+          </Button>
         </div>
+
+        {/* Standalone Task Modal */}
+        {isAddTaskDialogOpen && (
+          <TaskDialog
+            formData={taskFormData}
+            setFormData={setTaskFormData}
+            subjects={subjects}
+            onSubmit={handleAddTask}
+            title="Add New Task"
+            onClose={() => setIsAddTaskDialogOpen(false)}
+          />
+        )}
+
+        {/* Standalone Exam Modal */}
+        {isAddExamDialogOpen && (
+          <ExamDialog
+            formData={examFormData}
+            setFormData={setExamFormData}
+            subjects={subjects}
+            onSubmit={handleAddExam}
+            title="Add New Exam"
+            onClose={() => setIsAddExamDialogOpen(false)}
+          />
+        )}
+
+        {/* Standalone Session Modal */}
+        {isAddSessionDialogOpen && (
+          <SessionDialog
+            formData={sessionFormData}
+            setFormData={setSessionFormData}
+            subjects={subjects}
+            onSubmit={handleAddSession}
+            title="Add Study Session"
+            onClose={() => setIsAddSessionDialogOpen(false)}
+          />
+        )}
       </div>
 
       {/* Stats Overview */}
@@ -438,6 +453,33 @@ export default function StudyPlanner() {
             </Select>
           </div>
 
+
+          {/* Bulk Actions Bar */}
+          {selectedTaskIds.length > 0 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between p-3 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800/50 rounded-xl gap-3">
+              <span className="text-sm font-semibold text-violet-700 dark:text-violet-300">
+                {selectedTaskIds.length} task{selectedTaskIds.length !== 1 ? 's' : ''} selected
+              </span>
+              <div className="flex w-full sm:w-auto gap-2">
+                <Button size="sm" variant="outline" className="flex-1 sm:flex-none border-violet-200 hover:bg-violet-100 dark:border-violet-800 dark:hover:bg-violet-800 whitespace-nowrap" onClick={() => {
+                  selectedTaskIds.forEach(id => toggleTaskStatus(id));
+                  setSelectedTaskIds([]);
+                  toast.success('Tasks updated');
+                }}>
+                  <CheckCircle2 className="w-4 h-4 mr-1.5" /> Mark Completed
+                </Button>
+                <Button size="sm" variant="destructive" className="flex-1 sm:flex-none" onClick={() => {
+                  if (confirm('Delete selected tasks?')) {
+                    selectedTaskIds.forEach(id => deleteTask(id));
+                    setSelectedTaskIds([]);
+                    toast.success('Tasks deleted');
+                  }
+                }}>
+                  <Trash2 className="w-4 h-4 mr-1.5" /> Delete
+                </Button>
+              </div>
+            </div>
+          )}
           {/* Tasks List */}
           <div className="space-y-3">
             {pendingTasks.length === 0 ? (
@@ -671,55 +713,56 @@ export default function StudyPlanner() {
       </Tabs>
 
       {/* Edit Task Dialog */}
-      <Dialog open={!!editingTask} onOpenChange={() => { setEditingTask(null); resetTaskForm(); }}>
-        <DialogContent className="sm:max-w-lg card-modern border-0">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">Edit Task</DialogTitle>
-          </DialogHeader>
-          <TaskDialog
-            formData={taskFormData}
-            setFormData={setTaskFormData}
-            subjects={subjects}
-            onSubmit={handleUpdateTask}
-            title="Update Task"
-            isEdit
-          />
-        </DialogContent>
-      </Dialog>
+      {editingTask && (
+        <TaskDialog
+          formData={taskFormData}
+          setFormData={setTaskFormData}
+          subjects={subjects}
+          onSubmit={handleUpdateTask}
+          title="Update Task"
+          onClose={() => { setEditingTask(null); resetTaskForm(); }}
+          isEdit
+        />
+      )}
 
       {/* Edit Exam Dialog */}
-      <Dialog open={!!editingExam} onOpenChange={() => { setEditingExam(null); resetExamForm(); }}>
-        <DialogContent className="sm:max-w-lg card-modern border-0">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">Edit Exam</DialogTitle>
-          </DialogHeader>
-          <ExamDialog
-            formData={examFormData}
-            setFormData={setExamFormData}
-            subjects={subjects}
-            onSubmit={handleUpdateExam}
-            title="Update Exam"
-            isEdit
-          />
-        </DialogContent>
-      </Dialog>
+      {editingExam && (
+        <ExamDialog
+          formData={examFormData}
+          setFormData={setExamFormData}
+          subjects={subjects}
+          onSubmit={handleUpdateExam}
+          title="Update Exam"
+          onClose={() => { setEditingExam(null); resetExamForm(); }}
+          isEdit
+        />
+      )}
 
       {/* Edit Session Dialog */}
-      <Dialog open={!!editingSession} onOpenChange={() => { setEditingSession(null); resetSessionForm(); }}>
-        <DialogContent className="sm:max-w-lg card-modern border-0">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">Edit Study Session</DialogTitle>
-          </DialogHeader>
-          <SessionDialog
-            formData={sessionFormData}
-            setFormData={setSessionFormData}
-            subjects={subjects}
-            onSubmit={handleUpdateSession}
-            title="Update Session"
-            isEdit
-          />
-        </DialogContent>
-      </Dialog>
+      {editingSession && (
+        <SessionDialog
+          formData={sessionFormData}
+          setFormData={setSessionFormData}
+          subjects={subjects}
+          onSubmit={handleUpdateSession}
+          title="Update Study Session"
+          onClose={() => { setEditingSession(null); resetSessionForm(); }}
+          isEdit
+        />
+      )}
+
+      {/* Edit Session Dialog */}
+      {editingSession && (
+        <SessionDialog
+          formData={sessionFormData}
+          setFormData={setSessionFormData}
+          subjects={subjects}
+          onSubmit={handleUpdateSession}
+          title="Update Session"
+          onClose={() => { setEditingSession(null); resetSessionForm(); }}
+          isEdit
+        />
+      )}
 
       {/* Delete Task Confirmation */}
       <AlertDialog open={!!taskToDelete} onOpenChange={(open) => !open && setTaskToDelete(null)}>
@@ -756,6 +799,8 @@ export default function StudyPlanner() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {ConfettiCanvas}
 
       {/* Delete Session Confirmation */}
       <AlertDialog open={!!sessionToDelete} onOpenChange={(open) => !open && setSessionToDelete(null)}>
@@ -830,72 +875,84 @@ interface TaskDialogProps {
   subjects: { id: string; name: string }[];
   onSubmit: () => void;
   title: string;
+  onClose: () => void;
   isEdit?: boolean;
 }
 
-function TaskDialog({ formData, setFormData, subjects, onSubmit, title, isEdit }: TaskDialogProps) {
+function TaskDialog({ formData, setFormData, subjects, onSubmit, title, onClose, isEdit }: TaskDialogProps) {
   return (
-    <DialogContent className="sm:max-w-lg card-modern border-0">
-      <DialogHeader>
-        <DialogTitle className="text-xl font-bold flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-            <ListTodo className="w-5 h-5 text-white" />
-          </div>
-          {title}
-        </DialogTitle>
-      </DialogHeader>
-      <div className="space-y-4 pt-4">
-        <div>
-          <Label className="text-sm font-medium">Subject *</Label>
-          <Select value={formData.subjectId} onValueChange={(v) => setFormData({ ...formData, subjectId: v })}>
-            <SelectTrigger className="mt-1.5 rounded-xl h-12">
-              <SelectValue placeholder="Select subject" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              {subjects.map(s => (
-                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="w-full max-w-lg max-h-[90vh] flex flex-col bg-card border border-border/50 rounded-xl shadow-2xl">
+        <div className="flex items-center justify-between p-4 border-b border-border/50 flex-shrink-0">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+              <ListTodo className="w-5 h-5 text-white" />
+            </div>
+            {title}
+          </h2>
+          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full h-8 w-8">
+            <X className="w-4 h-4" />
+          </Button>
         </div>
-        <div>
-          <Label className="text-sm font-medium">Task Description *</Label>
-          <Input value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="e.g., Complete Chapter 5 exercises" className="mt-1.5 rounded-xl h-12" />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="overflow-y-auto p-4 sm:p-6 space-y-4 flex-1 min-h-0">
           <div>
-            <Label className="text-sm font-medium">Est. Time (mins)</Label>
-            <Input type="number" value={formData.estimatedMinutes} onChange={(e) => setFormData({ ...formData, estimatedMinutes: e.target.value })} placeholder="e.g. 60" className="mt-1.5 rounded-xl h-12" />
+            <Label className="text-sm font-medium">Subject *</Label>
+            <Select value={formData.subjectId} onValueChange={(v) => setFormData({ ...formData, subjectId: v })}>
+              <SelectTrigger className="mt-1.5 rounded-xl h-12">
+                <SelectValue placeholder="Select subject" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                {subjects.map(s => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
-            <Label className="text-sm font-medium">Marks / Weight</Label>
-            <Input type="number" value={formData.marks} onChange={(e) => setFormData({ ...formData, marks: e.target.value })} placeholder="e.g. 100" className="mt-1.5 rounded-xl h-12" />
+            <Label className="text-sm font-medium">Task Description *</Label>
+            <Input value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="e.g., Complete Chapter 5 exercises" className="mt-1.5 rounded-xl h-12" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-sm font-medium">Est. Time (mins)</Label>
+              <Input type="number" value={formData.estimatedMinutes} onChange={(e) => setFormData({ ...formData, estimatedMinutes: e.target.value })} placeholder="e.g. 60" className="mt-1.5 rounded-xl h-12" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium">Marks / Weight</Label>
+              <Input type="number" value={formData.marks} onChange={(e) => setFormData({ ...formData, marks: e.target.value })} placeholder="e.g. 100" className="mt-1.5 rounded-xl h-12" />
+            </div>
+          </div>
+          <div>
+            <Label className="text-sm font-medium">Target Date *</Label>
+            <Input type="date" value={formData.targetDate} onChange={(e) => setFormData({ ...formData, targetDate: e.target.value })} className="mt-1.5 rounded-xl h-12" />
+          </div>
+          <div>
+            <Label className="text-sm font-medium">Priority</Label>
+            <Select value={formData.priority} onValueChange={(v) => setFormData({ ...formData, priority: v as 'low' | 'medium' | 'high' })}>
+              <SelectTrigger className="mt-1.5 rounded-xl h-12">
+                <SelectValue placeholder="Select priority" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex gap-3 pt-2">
+            <Button variant="outline" onClick={onClose} className="flex-1 rounded-xl h-12">
+              Cancel
+            </Button>
+            <Button onClick={onSubmit} className="flex-1 btn-gradient rounded-xl h-12">
+              {isEdit ? 'Update Task' : 'Add Task'}
+            </Button>
           </div>
         </div>
-        <div>
-          <Label className="text-sm font-medium">Target Date *</Label>
-          <Input type="date" value={formData.targetDate} onChange={(e) => setFormData({ ...formData, targetDate: e.target.value })} className="mt-1.5 rounded-xl h-12" />
-        </div>
-        <div>
-          <Label className="text-sm font-medium">Priority</Label>
-          <Select value={formData.priority} onValueChange={(v) => setFormData({ ...formData, priority: v as 'low' | 'medium' | 'high' })}>
-            <SelectTrigger className="mt-1.5 rounded-xl h-12">
-              <SelectValue placeholder="Select priority" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <Button onClick={onSubmit} className="w-full btn-gradient rounded-xl h-12">
-          {isEdit ? 'Update Task' : 'Add Task'}
-        </Button>
       </div>
-    </DialogContent>
+    </div>
   );
 }
+
 
 interface ExamDialogProps {
   formData: {
@@ -917,68 +974,79 @@ interface ExamDialogProps {
   subjects: { id: string; name: string }[];
   onSubmit: () => void;
   title: string;
+  onClose: () => void;
   isEdit?: boolean;
 }
 
-function ExamDialog({ formData, setFormData, subjects, onSubmit, title, isEdit }: ExamDialogProps) {
+function ExamDialog({ formData, setFormData, subjects, onSubmit, title, onClose, isEdit }: ExamDialogProps) {
   return (
-    <DialogContent className="sm:max-w-lg card-modern border-0">
-      <DialogHeader>
-        <DialogTitle className="text-xl font-bold flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
-            <BookOpen className="w-5 h-5 text-white" />
+    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="w-full max-w-lg max-h-[90vh] flex flex-col bg-card border border-border/50 rounded-xl shadow-2xl">
+        <div className="flex items-center justify-between p-4 border-b border-border/50 flex-shrink-0">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
+              <BookOpen className="w-5 h-5 text-white" />
+            </div>
+            {title}
+          </h2>
+          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full h-8 w-8">
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+        <div className="overflow-y-auto p-4 sm:p-6 space-y-4 flex-1 min-h-0">
+          <div>
+            <Label className="text-sm font-medium">Subject *</Label>
+            <Select value={formData.subjectId} onValueChange={(v) => setFormData({ ...formData, subjectId: v })}>
+              <SelectTrigger className="mt-1.5 rounded-xl h-12">
+                <SelectValue placeholder="Select subject" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                {subjects.map(s => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          {title}
-        </DialogTitle>
-      </DialogHeader>
-      <div className="space-y-4 pt-4">
-        <div>
-          <Label className="text-sm font-medium">Subject *</Label>
-          <Select value={formData.subjectId} onValueChange={(v) => setFormData({ ...formData, subjectId: v })}>
-            <SelectTrigger className="mt-1.5 rounded-xl h-12">
-              <SelectValue placeholder="Select subject" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              {subjects.map(s => (
-                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div>
+            <Label className="text-sm font-medium">Exam Title *</Label>
+            <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="e.g., Midterm Exam" className="mt-1.5 rounded-xl h-12" />
+          </div>
+          <div>
+            <Label className="text-sm font-medium">Exam Date *</Label>
+            <Input type="date" value={formData.examDate} onChange={(e) => setFormData({ ...formData, examDate: e.target.value })} className="mt-1.5 rounded-xl h-12" />
+          </div>
+          <div>
+            <Label className="text-sm font-medium">Syllabus</Label>
+            <Input value={formData.syllabus} onChange={(e) => setFormData({ ...formData, syllabus: e.target.value })} placeholder="Topics to cover" className="mt-1.5 rounded-xl h-12" />
+          </div>
+          <div>
+            <Label className="text-sm font-medium">Preparation Status</Label>
+            <Select value={formData.preparationStatus} onValueChange={(v) => setFormData({ ...formData, preparationStatus: v as 'not_started' | 'in_progress' | 'completed' })}>
+              <SelectTrigger className="mt-1.5 rounded-xl h-12">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="not_started">Not Started</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-sm font-medium">Notes</Label>
+            <Input value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Additional notes" className="mt-1.5 rounded-xl h-12" />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <Button variant="outline" onClick={onClose} className="flex-1 rounded-xl h-12">
+              Cancel
+            </Button>
+            <Button onClick={onSubmit} className="flex-1 btn-gradient rounded-xl h-12">
+              {isEdit ? 'Update Exam' : 'Add Exam'}
+            </Button>
+          </div>
         </div>
-        <div>
-          <Label className="text-sm font-medium">Exam Title *</Label>
-          <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="e.g., Midterm Exam" className="mt-1.5 rounded-xl h-12" />
-        </div>
-        <div>
-          <Label className="text-sm font-medium">Exam Date *</Label>
-          <Input type="date" value={formData.examDate} onChange={(e) => setFormData({ ...formData, examDate: e.target.value })} className="mt-1.5 rounded-xl h-12" />
-        </div>
-        <div>
-          <Label className="text-sm font-medium">Syllabus</Label>
-          <Input value={formData.syllabus} onChange={(e) => setFormData({ ...formData, syllabus: e.target.value })} placeholder="Topics to cover" className="mt-1.5 rounded-xl h-12" />
-        </div>
-        <div>
-          <Label className="text-sm font-medium">Preparation Status</Label>
-          <Select value={formData.preparationStatus} onValueChange={(v) => setFormData({ ...formData, preparationStatus: v as 'not_started' | 'in_progress' | 'completed' })}>
-            <SelectTrigger className="mt-1.5 rounded-xl h-12">
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value="not_started">Not Started</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label className="text-sm font-medium">Notes</Label>
-          <Input value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Additional notes" className="mt-1.5 rounded-xl h-12" />
-        </div>
-        <Button onClick={onSubmit} className="w-full btn-gradient rounded-xl h-12">
-          {isEdit ? 'Update Exam' : 'Add Exam'}
-        </Button>
       </div>
-    </DialogContent>
+    </div>
   );
 }
 
@@ -1002,61 +1070,72 @@ interface SessionDialogProps {
   subjects: { id: string; name: string }[];
   onSubmit: () => void;
   title: string;
+  onClose: () => void;
   isEdit?: boolean;
 }
 
-function SessionDialog({ formData, setFormData, subjects, onSubmit, title, isEdit }: SessionDialogProps) {
+function SessionDialog({ formData, setFormData, subjects, onSubmit, title, onClose, isEdit }: SessionDialogProps) {
   return (
-    <DialogContent className="sm:max-w-lg card-modern border-0">
-      <DialogHeader>
-        <DialogTitle className="text-xl font-bold flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
-            <Timer className="w-5 h-5 text-white" />
-          </div>
-          {title}
-        </DialogTitle>
-      </DialogHeader>
-      <div className="space-y-4 pt-4">
-        <div>
-          <Label className="text-sm font-medium">Subject *</Label>
-          <Select value={formData.subjectId} onValueChange={(v) => setFormData({ ...formData, subjectId: v })}>
-            <SelectTrigger className="mt-1.5 rounded-xl h-12">
-              <SelectValue placeholder="Select subject" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              {subjects.map(s => (
-                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="w-full max-w-lg max-h-[90vh] flex flex-col bg-card border border-border/50 rounded-xl shadow-2xl">
+        <div className="flex items-center justify-between p-4 border-b border-border/50 flex-shrink-0">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+              <Timer className="w-5 h-5 text-white" />
+            </div>
+            {title}
+          </h2>
+          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full h-8 w-8">
+            <X className="w-4 h-4" />
+          </Button>
         </div>
-        <div>
-          <Label className="text-sm font-medium">Session Title *</Label>
-          <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="e.g., Study Chapter 5" className="mt-1.5 rounded-xl h-12" />
-        </div>
-        <div>
-          <Label className="text-sm font-medium">Date *</Label>
-          <Input type="date" value={formData.sessionDate} onChange={(e) => setFormData({ ...formData, sessionDate: e.target.value })} className="mt-1.5 rounded-xl h-12" />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="overflow-y-auto p-4 sm:p-6 space-y-4 flex-1 min-h-0">
           <div>
-            <Label className="text-sm font-medium">Start Time *</Label>
-            <Input type="time" value={formData.startTime} onChange={(e) => setFormData({ ...formData, startTime: e.target.value })} className="mt-1.5 rounded-xl h-12" />
+            <Label className="text-sm font-medium">Subject *</Label>
+            <Select value={formData.subjectId} onValueChange={(v) => setFormData({ ...formData, subjectId: v })}>
+              <SelectTrigger className="mt-1.5 rounded-xl h-12">
+                <SelectValue placeholder="Select subject" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                {subjects.map(s => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
-            <Label className="text-sm font-medium">End Time *</Label>
-            <Input type="time" value={formData.endTime} onChange={(e) => setFormData({ ...formData, endTime: e.target.value })} className="mt-1.5 rounded-xl h-12" />
+            <Label className="text-sm font-medium">Session Title *</Label>
+            <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="e.g., Study Chapter 5" className="mt-1.5 rounded-xl h-12" />
+          </div>
+          <div>
+            <Label className="text-sm font-medium">Date *</Label>
+            <Input type="date" value={formData.sessionDate} onChange={(e) => setFormData({ ...formData, sessionDate: e.target.value })} className="mt-1.5 rounded-xl h-12" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-sm font-medium">Start Time *</Label>
+              <Input type="time" value={formData.startTime} onChange={(e) => setFormData({ ...formData, startTime: e.target.value })} className="mt-1.5 rounded-xl h-12" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium">End Time *</Label>
+              <Input type="time" value={formData.endTime} onChange={(e) => setFormData({ ...formData, endTime: e.target.value })} className="mt-1.5 rounded-xl h-12" />
+            </div>
+          </div>
+          <div>
+            <Label className="text-sm font-medium">Notes</Label>
+            <Input value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Session notes" className="mt-1.5 rounded-xl h-12" />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <Button variant="outline" onClick={onClose} className="flex-1 rounded-xl h-12">
+              Cancel
+            </Button>
+            <Button onClick={onSubmit} className="flex-1 btn-gradient rounded-xl h-12">
+              {isEdit ? 'Update Session' : 'Add Session'}
+            </Button>
           </div>
         </div>
-        <div>
-          <Label className="text-sm font-medium">Notes</Label>
-          <Input value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Session notes" className="mt-1.5 rounded-xl h-12" />
-        </div>
-        <Button onClick={onSubmit} className="w-full btn-gradient rounded-xl h-12">
-          {isEdit ? 'Update Session' : 'Add Session'}
-        </Button>
       </div>
-    </DialogContent>
+    </div>
   );
 }
 

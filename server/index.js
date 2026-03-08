@@ -25,6 +25,11 @@ import focusRoutes from './routes/focus.js';
 import examRoutes from './routes/exams.js';
 import studySessionRoutes from './routes/studysessions.js';
 import importExportRoutes from './routes/importExport.js';
+import settingsRoutes from './routes/settings.js';
+import usersRoutes from './routes/users.js';
+import aiRoutes from './routes/ai.js';
+import syllabusScannerRoutes from './routes/syllabusScanner.js';
+import chatHistoryRoutes from './routes/chatHistory.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -51,6 +56,11 @@ app.use('/api/focus-sessions', focusRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/studysessions', studySessionRoutes);
 app.use('/api/import-export', importExportRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/syllabus-scanner', syllabusScannerRoutes);
+app.use('/api/chat-history', chatHistoryRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

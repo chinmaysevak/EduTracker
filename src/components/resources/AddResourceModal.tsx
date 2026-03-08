@@ -1,30 +1,32 @@
 import React, { useState } from 'react';
-import { X, FileText, Link, Youtube, FileIcon, Upload } from 'lucide-react';
+import { X, Link, Youtube, FileIcon, Upload, NotebookPen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStudentStore } from '@/context/StudentContext';
-import type { ResourceType } from '@/types';
+import type { ResourceType, Resource } from '@/types';
 import { toast } from 'sonner';
 
 interface AddResourceModalProps {
     onClose: () => void;
     initialType?: ResourceType;
     initialSubjectId?: string;
+    editResource?: Resource | null;
 }
 
-export default function AddResourceModal({ onClose, initialType = 'file', initialSubjectId = '' }: AddResourceModalProps) {
+export default function AddResourceModal({ onClose, initialType = 'file', initialSubjectId = '', editResource }: AddResourceModalProps) {
     const { subjects, resources } = useStudentStore();
+    const isEditMode = !!editResource;
 
-    const [type, setType] = useState<ResourceType>(initialType);
-    const [title, setTitle] = useState('');
-    const [subjectId, setSubjectId] = useState(initialSubjectId);
+    const [type, setType] = useState<ResourceType>(isEditMode ? editResource.type : initialType);
+    const [title, setTitle] = useState(isEditMode ? editResource.title : '');
+    const [subjectId, setSubjectId] = useState(isEditMode ? editResource.subjectId : initialSubjectId);
     const [tagInput, setTagInput] = useState('');
-    const [tags, setTags] = useState<string[]>([]);
+    const [tags, setTags] = useState<string[]>(isEditMode && editResource.tags ? editResource.tags : []);
 
     // Type specific states
     const [file, setFile] = useState<File | null>(null);
-    const [url, setUrl] = useState('');
-    const [youtubeUrl, setYoutubeUrl] = useState('');
-    const [content, setContent] = useState('');
+    const [url, setUrl] = useState(isEditMode && editResource.url ? editResource.url : '');
+    const [youtubeUrl, setYoutubeUrl] = useState(isEditMode && editResource.youtubeUrl ? editResource.youtubeUrl : '');
+    const [content, setContent] = useState(isEditMode && editResource.content ? editResource.content : '');
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -58,6 +60,31 @@ export default function AddResourceModal({ onClose, initialType = 'file', initia
         setIsSubmitting(true);
 
         try {
+            if (isEditMode && editResource) {
+                // Edit mode - update resource
+                const updateData: Partial<Resource> = {
+                    title: title.trim(),
+                    subjectId,
+                    type,
+                    tags: tags.length > 0 ? tags : undefined
+                };
+
+                if (type === 'link' && url) {
+                    updateData.url = url;
+                } else if (type === 'youtube' && youtubeUrl) {
+                    updateData.youtubeUrl = youtubeUrl;
+                    updateData.thumbnailUrl = getYoutubeThumbnail(youtubeUrl);
+                } else if (type === 'note' && content) {
+                    updateData.content = content;
+                }
+
+                await resources.updateResource(editResource.id, updateData);
+                toast.success('Resource updated successfully!');
+                onClose();
+                return;
+            }
+
+            // Add mode - create new resource
             const baseResource = {
                 title: title.trim(),
                 subjectId,
@@ -105,7 +132,7 @@ export default function AddResourceModal({ onClose, initialType = 'file', initia
             toast.success('Resource added successfully!');
             onClose();
         } catch (err: any) {
-            toast.error(err.message || 'Failed to add resource');
+            toast.error(err.message || (isEditMode ? 'Failed to update resource' : 'Failed to add resource'));
         } finally {
             setIsSubmitting(false);
         }
@@ -115,7 +142,7 @@ export default function AddResourceModal({ onClose, initialType = 'file', initia
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
             <div className="w-full max-w-lg bg-card border border-border/50 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 <div className="flex items-center justify-between p-4 border-b border-border/50">
-                    <h2 className="text-lg font-semibold">Add Resource</h2>
+                    <h2 className="text-lg font-semibold">{isEditMode ? 'Edit Resource' : 'Add Resource'}</h2>
                     <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full h-8 w-8">
                         <X className="w-4 h-4" />
                     </Button>
@@ -123,7 +150,7 @@ export default function AddResourceModal({ onClose, initialType = 'file', initia
 
                 <form onSubmit={handleSubmit} className="overflow-y-auto p-4 sm:p-6 space-y-6">
                     {/* Type Selection */}
-                    <div className="grid grid-cols-4 gap-2 bg-muted/50 p-1.5 rounded-lg">
+                    <div className={`grid grid-cols-4 gap-2 bg-muted/50 p-1.5 rounded-lg ${isEditMode ? 'opacity-50 pointer-events-none' : ''}`}>
                         {(['file', 'link', 'youtube', 'note'] as const).map(t => (
                             <button
                                 key={t}
@@ -134,10 +161,10 @@ export default function AddResourceModal({ onClose, initialType = 'file', initia
                                         : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
                                     }`}
                             >
-                                {t === 'file' && <FileIcon className="w-4 h-4 text-blue-500" />}
-                                {t === 'link' && <Link className="w-4 h-4 text-emerald-500" />}
+                                {t === 'file' && <FileIcon className="w-4 h-4 text-indigo-400" />}
+                                {t === 'link' && <Link className="w-4 h-4 text-green-400" />}
                                 {t === 'youtube' && <Youtube className="w-4 h-4 text-red-500" />}
-                                {t === 'note' && <FileText className="w-4 h-4 text-amber-500" />}
+                                {t === 'note' && <NotebookPen className="w-4 h-4 text-yellow-400" />}
                                 <span className="capitalize">{t}</span>
                             </button>
                         ))}
@@ -184,9 +211,11 @@ export default function AddResourceModal({ onClose, initialType = 'file', initia
 
                         {/* Type Specific Fields */}
                         <div className="pt-2 border-t border-border/10">
-                            {type === 'file' && (
+                        {type === 'file' && (
                                 <div>
-                                    <label className="block text-sm font-medium mb-1.5">Upload File <span className="text-destructive">*</span></label>
+                                    <label className="block text-sm font-medium mb-1.5">
+                                        Upload File {isEditMode ? '' : <span className="text-destructive">*</span>}
+                                    </label>
                                     <div className="relative">
                                         <input
                                             type="file"
@@ -196,13 +225,13 @@ export default function AddResourceModal({ onClose, initialType = 'file', initia
                                                 if (file && !title) setTitle(file.name.split('.').slice(0, -1).join('.'));
                                             }}
                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                            required
+                                            required={!isEditMode}
                                         />
                                         <div className="w-full border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-muted/30 hover:border-primary/30 transition-colors">
                                             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                                                 <Upload className="w-5 h-5 text-primary" />
                                             </div>
-                                            <span className="text-sm font-medium">{file ? file.name : 'Click or drag file to upload'}</span>
+                                            <span className="text-sm font-medium">{file ? file.name : isEditMode && editResource?.fileType ? `Current file type: ${editResource.fileType}` : 'Click or drag file to upload'}</span>
                                             <span className="text-xs text-muted-foreground mt-1">PDF, DOC, PPT, Images and Archives</span>
                                         </div>
                                     </div>
@@ -285,7 +314,7 @@ export default function AddResourceModal({ onClose, initialType = 'file', initia
                             Cancel
                         </Button>
                         <Button type="submit" className="flex-1" disabled={isSubmitting || subjects.subjects.length === 0}>
-                            {isSubmitting ? 'Saving...' : 'Add Resource'}
+                            {isSubmitting ? 'Saving...' : isEditMode ? 'Save Changes' : 'Add Resource'}
                         </Button>
                     </div>
                 </form>

@@ -43,36 +43,39 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - serve cached content when offline
+// Fetch event - SPA-friendly offline handling
 self.addEventListener('fetch', (event) => {
   const request = event.request;
-  const url = new URL(request.url);
 
-  // Skip non-GET requests
+  // Always let non-GET requests go to the network
   if (request.method !== 'GET') {
-    return fetch(request);
+    return;
   }
 
-  // Serve from cache if offline and resource is cached
-  event.respondWith(
-    caches.match(request).then((response) => {
-      if (response) {
-        return response;
-      }
+  // Treat navigation requests (page loads, address bar, history) specially.
+  // This makes the app behave correctly for routes like /dashboard, /settings, etc.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(async () => {
+        // If network fails, fall back to cached index.html for all routes
+        const cachedIndex = await caches.match('/index.html');
+        if (cachedIndex) return cachedIndex;
 
-      // If not in cache, try network
-      return fetch(request).catch(() => {
-        // If network fails, return offline page for navigation requests
-        if (url.pathname === '/' || url.pathname.endsWith('.html')) {
-          return caches.match('/index.html');
-        }
-        
-        // For other failed requests, return network error
+        // Last resort: plain offline text
         return new Response('Offline', {
           status: 503,
           statusText: 'Service Unavailable'
         });
-      });
+      })
+    );
+    return;
+  }
+
+  // For other GET requests (CSS, JS, images), use cache-first with network fallback
+  event.respondWith(
+    caches.match(request).then((cached) => {
+      if (cached) return cached;
+      return fetch(request).catch(() => cached || new Response('Offline', { status: 503 }));
     })
   );
 });

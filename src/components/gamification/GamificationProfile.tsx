@@ -12,7 +12,7 @@ export function GamificationProfile() {
     const levelProgress = Math.min(100, Math.max(0, ((profile.xp - prevLevelThreshold) / (currentLevelThreshold - prevLevelThreshold)) * 100));
 
     return (
-        <div className="space-y-6">
+        <div id="gamification-profile" className="space-y-6">
             {/* Header Stats */}
             <div className="flex items-center gap-4">
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center shadow-lg border-4 border-white/10">
@@ -72,8 +72,8 @@ export function GamificationProfile() {
                             <div
                                 key={badge.id}
                                 className={`p-3 rounded-xl border flex flex-col items-center text-center gap-2 transition-all ${isUnlocked
-                                        ? 'bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 border-violet-200 dark:border-violet-800'
-                                        : 'bg-muted/50 border-transparent opacity-60 grayscale'
+                                    ? 'bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 border-violet-200 dark:border-violet-800'
+                                    : 'bg-muted/50 border-transparent opacity-60 grayscale'
                                     }`}
                             >
                                 <div className={`p-2 rounded-full ${isUnlocked ? 'bg-violet-100 text-violet-600 dark:bg-violet-900/50 dark:text-violet-400' : 'bg-muted text-muted-foreground'}`}>

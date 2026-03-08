@@ -1,16 +1,17 @@
-import { Card, CardBody, CardHeader, Button } from '@heroui/react';
+import { Card, CardContent as CardBody, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Calendar, Clock, Target, Edit3, Save } from 'lucide-react';
 import { useSmartAcademicAssistant } from '@/hooks/useSmartAcademicAssistant';
 import { useState } from 'react';
 
 export function WeeklyPlanGenerator() {
-  const { 
-    weeklyPlan, 
-    generateWeeklyPlan, 
-    saveWeeklyPlan, 
-    savedPlans 
+  const {
+    weeklyPlan,
+    generateWeeklyPlan,
+    saveWeeklyPlan,
+    savedPlans
   } = useSmartAcademicAssistant();
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [editedPlan, setEditedPlan] = useState(weeklyPlan);
 
@@ -51,18 +52,18 @@ export function WeeklyPlanGenerator() {
             <h3 className="text-lg font-semibold">Weekly Study Plan</h3>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              size="sm" 
-              variant="ghost" 
+            <Button
+              size="sm"
+              variant="ghost"
               onClick={handleGeneratePlan}
               className="rounded-xl"
             >
               Generate Plan
             </Button>
             {weeklyPlan && !isEditing && (
-              <Button 
-                size="sm" 
-                variant="ghost" 
+              <Button
+                size="sm"
+                variant="ghost"
                 onClick={handleEditPlan}
                 className="rounded-xl"
               >
@@ -70,9 +71,9 @@ export function WeeklyPlanGenerator() {
               </Button>
             )}
             {isEditing && (
-              <Button 
-                size="sm" 
-                variant="ghost" 
+              <Button
+                size="sm"
+                variant="ghost"
                 onClick={handleSavePlan}
                 className="rounded-xl"
               >
@@ -87,7 +88,7 @@ export function WeeklyPlanGenerator() {
           <div className="text-center py-8 text-muted-foreground">
             <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p>No weekly plan generated yet</p>
-            <Button 
+            <Button
               onClick={handleGeneratePlan}
               className="mt-4 btn-gradient rounded-xl"
             >
@@ -120,7 +121,7 @@ export function WeeklyPlanGenerator() {
               </h4>
               <div className="flex flex-wrap gap-2">
                 {weeklyPlan.weeklyGoals.map((goal, index) => (
-                  <span 
+                  <span
                     key={index}
                     className="px-3 py-1 bg-violet-100 text-violet-800 rounded-full text-sm border border-violet-200"
                   >
@@ -140,7 +141,7 @@ export function WeeklyPlanGenerator() {
                 {Object.entries(weeklyPlan.dailyPlan).map(([date, plan], index) => {
                   const dayIndex = new Date(date).getDay();
                   const dayName = weekDays[dayIndex];
-                  
+
                   return (
                     <div key={date} className="p-4 border border-border rounded-lg">
                       <div className="flex items-center justify-between mb-3">
@@ -160,7 +161,7 @@ export function WeeklyPlanGenerator() {
                           </span>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <div>
                           <span className="text-sm font-medium">Subjects: </span>
@@ -168,7 +169,7 @@ export function WeeklyPlanGenerator() {
                             {plan.subjects.join(', ')}
                           </span>
                         </div>
-                        
+
                         {plan.tasks.length > 0 && (
                           <div>
                             <span className="text-sm font-medium">Tasks: </span>

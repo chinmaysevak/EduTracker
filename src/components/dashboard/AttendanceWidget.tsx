@@ -11,9 +11,6 @@ export function AttendanceWidget({ onNavigate }: { onNavigate: (module: ModuleTy
     const { subjects } = useSubjects();
     const overall = getOverallAttendance();
 
-    // predictive logic is embedded in the widget for the "Overall" view or we could use the hook
-    // Let's implement a simple "Overall Status" here
-
     const getStatusColor = (percentage: number) => {
         if (percentage >= 75) return "text-emerald-500";
         if (percentage >= 60) return "text-amber-500";
@@ -26,6 +23,12 @@ export function AttendanceWidget({ onNavigate }: { onNavigate: (module: ModuleTy
         return "bg-red-500";
     };
 
+    const getGlowClass = (percentage: number) => {
+        if (percentage >= 75) return "dark:status-glow-emerald";
+        if (percentage >= 60) return "dark:status-glow-amber";
+        return "dark:status-glow-red";
+    };
+
     // Find the subject most at risk (lowest attendance > 0)
     const riskSubject = subjects
         .map(s => {
@@ -36,10 +39,10 @@ export function AttendanceWidget({ onNavigate }: { onNavigate: (module: ModuleTy
         .sort((a, b) => a.stats.percentage - b.stats.percentage)[0];
 
     return (
-        <Card className="card-professional hover-lift">
+        <Card id="attendance-health-widget" className={`card-professional ${getGlowClass(overall.percentage)}`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Attendance Health</CardTitle>
-                <div className={`text-2xl font-bold ${getStatusColor(overall.percentage)}`}>
+                <CardTitle className="text-sm font-medium font-display">Attendance Health</CardTitle>
+                <div className={`text-2xl font-bold mono-data ${getStatusColor(overall.percentage)}`}>
                     {overall.percentage}%
                 </div>
             </CardHeader>
@@ -48,7 +51,7 @@ export function AttendanceWidget({ onNavigate }: { onNavigate: (module: ModuleTy
                     <div className="space-y-1">
                         <div className="flex justify-between text-xs text-muted-foreground">
                             <span>Overall Progress</span>
-                            <span>{overall.present}/{overall.total} Classes</span>
+                            <span className="mono-data">{overall.present}/{overall.total} Classes</span>
                         </div>
                         <Progress
                             value={overall.percentage}
@@ -58,7 +61,7 @@ export function AttendanceWidget({ onNavigate }: { onNavigate: (module: ModuleTy
                     </div>
 
                     {riskSubject ? (
-                        <div className="rounded-lg bg-red-50 dark:bg-red-900/10 p-3 border border-red-100 dark:border-red-900/20">
+                        <div className="rounded-lg bg-red-500/5 dark:bg-red-500/10 p-3 border border-red-500/10 dark:border-red-500/20 rim-light">
                             <div className="flex items-start gap-2">
                                 <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400 mt-0.5" />
                                 <div>
@@ -66,13 +69,13 @@ export function AttendanceWidget({ onNavigate }: { onNavigate: (module: ModuleTy
                                         Risk Alert: {riskSubject.name}
                                     </p>
                                     <p className="text-xs text-red-600/80 dark:text-red-400/80 mt-1">
-                                        Attendance is at {riskSubject.stats.percentage}%. You need to attend more classes.
+                                        Attendance is at <span className="mono-data font-semibold">{riskSubject.stats.percentage}%</span>. You need to attend more classes.
                                     </p>
                                 </div>
                             </div>
                         </div>
                     ) : overall.total > 0 ? (
-                        <div className="rounded-lg bg-emerald-50 dark:bg-emerald-900/10 p-3 border border-emerald-100 dark:border-emerald-900/20">
+                        <div className="rounded-lg bg-emerald-500/5 dark:bg-emerald-500/10 p-3 border border-emerald-500/10 dark:border-emerald-500/20 rim-light">
                             <div className="flex items-start gap-2">
                                 <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5" />
                                 <div>

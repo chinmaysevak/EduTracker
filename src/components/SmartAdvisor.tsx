@@ -1,11 +1,11 @@
-import { Card, CardBody, CardHeader } from '@heroui/react';
+import { Card, CardContent as CardBody, CardHeader } from '@/components/ui/card';
 import { Brain, AlertTriangle, TrendingUp, Clock } from 'lucide-react';
 import { useSmartAcademicAssistant } from '@/hooks/useSmartAcademicAssistant';
 
 export function SmartAdvisor() {
-  const { 
-    recommendations, 
-    performanceIndex, 
+  const {
+    recommendations,
+    performanceIndex,
     riskAssessment
   } = useSmartAcademicAssistant();
 
@@ -50,15 +50,19 @@ export function SmartAdvisor() {
         </CardHeader>
         <CardBody>
           {recommendations.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Brain className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No specific recommendations for today</p>
-              <p className="text-sm mt-2">Keep up the good work!</p>
+            <div className="text-center py-12 px-4 bg-muted/20 rounded-2xl border border-dashed border-border mt-2">
+              <div className="w-16 h-16 bg-violet-100 dark:bg-violet-900/40 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                <Brain className="w-8 h-8 text-violet-600 dark:text-violet-400" />
+              </div>
+              <h4 className="text-lg font-bold mb-2">Welcome to your AI Advisor</h4>
+              <p className="text-muted-foreground text-sm max-w-sm mx-auto mb-6">
+                I'll analyze your attendance, tasks, and syllabus progress to generate dynamic daily study plans. Add some classes or upcoming tasks to get started!
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
               {recommendations.map((rec, index) => (
-                <div 
+                <div
                   key={index}
                   className={`p-4 rounded-lg border ${getPriorityColor(rec.priority)}`}
                 >

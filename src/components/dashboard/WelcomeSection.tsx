@@ -15,9 +15,19 @@ export function WelcomeSection({ onNavigate }: { onNavigate: (module: ModuleType
 
     useEffect(() => {
         const hour = new Date().getHours();
-        if (hour < 12) setGreeting('Good Morning');
-        else if (hour < 18) setGreeting('Good Afternoon');
-        else setGreeting('Good Evening');
+        let newGreeting: string;
+
+        if (hour >= 5 && hour < 12) {
+            newGreeting = "Good Morning";
+        } else if (hour >= 12 && hour < 17) {
+            newGreeting = "Good Afternoon";
+        } else if (hour >= 17 && hour < 22) {
+            newGreeting = "Good Evening";
+        } else {
+            newGreeting = "Good Night";
+        }
+
+        setGreeting(newGreeting);
     }, []);
 
     // Next Class Logic
@@ -32,29 +42,27 @@ export function WelcomeSection({ onNavigate }: { onNavigate: (module: ModuleType
     // Stats
     const pendingTasksCount = getPendingTasks().length;
 
-
-
     return (
         <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">
+                    <h1 className="text-3xl font-bold tracking-tight font-display">
                         {greeting}, {profile.name.split(' ')[0]}! 👋
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        You're on a <span className="font-semibold text-primary">{profile.currentStreak} day streak</span>. Keep it up!
+                        You're on a <span className="font-semibold text-emerald-500 mono-data">{profile.currentStreak} day streak</span>. Keep it up!
                     </p>
                 </div>
                 <div className="text-right hidden md:block">
-                    <p className="text-sm font-medium text-muted-foreground">{format(new Date(), 'EEEE, MMMM do')}</p>
+                    <p className="text-sm font-medium text-muted-foreground mono-data">{format(new Date(), 'EEEE, MMMM do')}</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Next Class Card */}
-                <Card className="card-professional bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/20">
+                <Card className="card-professional dark:status-glow-blue">
                     <CardContent className="p-4 flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                        <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
                             <Calendar className="w-5 h-5" />
                         </div>
                         <div>
@@ -63,25 +71,23 @@ export function WelcomeSection({ onNavigate }: { onNavigate: (module: ModuleType
                                 {nextClass ? nextClass.subject : 'No more classes'}
                             </p>
                             {nextClass && (
-                                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                                    {nextClass.startTime} - {nextClass.endTime}
+                                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mono-data">
+                                    {nextClass.startTime} – {nextClass.endTime}
                                 </p>
                             )}
                         </div>
                     </CardContent>
                 </Card>
 
-
-
                 {/* Pending Tasks Card */}
-                <Card className="card-professional bg-amber-50/50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-900/20">
+                <Card className="card-professional dark:status-glow-amber">
                     <CardContent className="p-4 flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                        <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
                             <Clock className="w-5 h-5" />
                         </div>
                         <div>
                             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">One Task at a Time</p>
-                            <p className="font-bold">{pendingTasksCount} Pending</p>
+                            <p className="font-bold mono-data">{pendingTasksCount} Pending</p>
                             <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
                                 {pendingTasksCount > 0 ? 'Keep pushing!' : 'All caught up!'}
                             </p>
@@ -91,13 +97,13 @@ export function WelcomeSection({ onNavigate }: { onNavigate: (module: ModuleType
 
                 {/* Focus Mode Card (Action) */}
                 <Card
-                    className="card-professional bg-gradient-to-br from-emerald-500 to-teal-600 text-white border-none shadow-md hover:shadow-lg transition-all cursor-pointer group"
+                    className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white border-none shadow-md hover:shadow-lg transition-all cursor-pointer group dark:status-glow-emerald rounded-xl"
                     onClick={() => onNavigate('focus')}
                 >
                     <CardContent className="p-4 flex items-center justify-between h-full">
                         <div>
-                            <p className="text-xs text-emerald-100 font-medium uppercase tracking-wide">Ready?</p>
-                            <p className="font-bold text-lg">Start Focus</p>
+                            <p className="text-xs text-white/70 font-medium uppercase tracking-wide">Ready?</p>
+                            <p className="font-bold text-lg font-display">Start Focus</p>
                         </div>
                         <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <BookOpen className="w-5 h-5 text-white" />

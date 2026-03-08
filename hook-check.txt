@@ -1,0 +1,153 @@
+
+--- src\components\analytics\AttendanceTrendChart.tsx ---
+useMemo(() => { ...       const d = new Date()
+
+--- src\components\dashboard\DailyActionPanel.tsx ---
+useEffect(() => { ...             acc[subject.id] = calculateSubjectAttendance(subject.id)
+
+--- src\components\dashboard\WeeklyPerformanceWidget.tsx ---
+useMemo(() => { ...             const dayLogs = history.filter(log => isSameDay(new Date(log.date), day))
+
+--- src\components\dashboard\WelcomeSection.tsx ---
+useEffect(() => { ...         const hour = new Date().getHours()
+
+--- src\components\Layout\DashboardLayout.tsx ---
+useEffect(() => { ...         const timer = setInterval(() => setCurrentTime(new Date()), 60000)
+useEffect(() => { ...         const handleScroll = () => setIsScrolled(window.scrollY > 10)
+useEffect(() => { ...                 e.preventDefault()
+useMemo(() => { ...                 action: () => { navigate(item.path)
+useMemo(() => { ...             groups[item.group].push(item)
+
+--- src\components\Layout\ResponsiveWrapper.tsx ---
+useEffect(() => { ...             })
+useEffect(() => { ...         body.classList.remove('platform-ios', 'platform-android', 'platform-desktop')
+
+--- src\components\progress\SmallProgressChart.tsx ---
+useMemo(() => { ...             const p = syllabus.getSubjectProgress(subject.id)
+
+--- src\components\PWAInstallPrompt.tsx ---
+useEffect(() => { ...       e.preventDefault()
+
+--- src\components\resources\ResourceViewer.tsx ---
+useEffect(() => { ...             setIsLoading(true)
+
+--- src\components\ui\calendar.tsx ---
+useEffect(() => { ...     if (modifiers.focused) ref.current?.focus()
+
+--- src\components\ui\carousel.tsx ---
+useCallback((api: CarouselApi) => { ...     setCanScrollPrev(api.canScrollPrev())
+useCallback(() => { ...     api?.scrollPrev()
+useCallback(() => { ...     api?.scrollNext()
+useCallback( ...         event.preventDefault()
+useEffect(() => { ...     setApi(api)
+useEffect(() => { ...     onSelect(api)
+
+--- src\components\ui\chart.tsx ---
+useMemo(() => { ...     const itemConfig = getPayloadConfigFromPayload(config, item, key)
+
+--- src\components\ui\dialog.tsx ---
+useMemo(() => ({ ...     onOpenChange: onOpenChange ?? (() => { })
+useEffect(() => { ...         onOpenChange?.(false)
+
+--- src\components\ui\field.tsx ---
+useMemo(() => { ...     )
+
+--- src\components\ui\sidebar.tsx ---
+useCallback( ...         setOpenProp(openState)
+useCallback(() => { ...     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
+useEffect(() => { ...         (event.metaKey || event.ctrlKey)
+useMemo(() => { ... 
+
+--- src\components\ui\slider.tsx ---
+useMemo( ...       Array.isArray(value)
+
+--- src\context\AuthContext.tsx ---
+useEffect(() => { ...             const token = localStorage.getItem('edutracker-token')
+useCallback(async (name: string, email: string, password: string) => { ...         })
+useCallback(async (email: string, password: string) => { ...         })
+useCallback(() => { ...         localStorage.removeItem('edutracker-token')
+useCallback(async (name: string) => { ...         const data = await api.put<{ user: User }>('/auth/profile', { name })
+
+--- src\context\StudentContext.tsx ---
+useEffect(() => { ...     }, [userId])
+useEffect(() => { ...         )
+
+--- src\hooks\use-mobile.ts ---
+useEffect(() => { ...     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+
+--- src\hooks\useAmbientSounds.ts ---
+useCallback(() => { ...                     node.stop()
+useCallback((ctx: AudioContext, type: AmbientSound['type'], gainNode: GainNode) => { ...         const buffer = ctx.createBuffer(2, bufferSize, ctx.sampleRate)
+useCallback((soundId: string) => { ...         stopSound()
+useCallback((soundId: string) => { ...             stopSound()
+useCallback((newVolume: number) => { ...         setVolume(newVolume)
+useEffect(() => { ...             stopSound()
+
+--- src\hooks\useAnalyticsData.ts ---
+useMemo(() => { ...         .filter(day => day.subjects && day.subjects[subject.id] !== undefined)
+
+--- src\hooks\useData.ts ---
+useCallback(() => { ...     setIsLoading(true)
+useEffect(() => { ...     fetchData()
+useEffect(() => { ...       setData(defaultValueRef.current)
+useCallback( ...         return updater(prev)
+useCallback(() => { ...     fetchData()
+useEffect(() => { ...     api.get<UserProfile>('/profile')
+useEffect(() => { ...     if (!isAuthenticated) { setProfile(defaultProfile)
+useCallback((newProfile: UserProfile) => { ...     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+useCallback((date: string, updated: DailyAttendance) => { ...     api.post<{ id: string }>('/attendance', { date, subjects: updated.subjects, extraClasses: updated.extraClasses })
+useEffect(() => { ...     api.get<{ timetableData: Record<string, string[]>; customTimes: Record<string, { startTime: string; endTime: string }[]> }>('/timetable')
+useEffect(() => { ...     if (!isAuthenticated) { setTimetableData(emptyTimetable)
+useCallback((data: Record<string, string[]>, times: Record<string, { startTime: string; endTime: string }[]>) => { ...     api.put('/timetable', { timetableData: data, customTimes: times })
+useCallback(() => { refetchUnits()
+
+--- src\hooks\useFocusEngine.ts ---
+useEffect(() => { ...                 })
+useEffect(() => { ...             // Session finished naturally (not cancelled)
+
+--- src\hooks\useLocalStorage.ts ---
+useCallback((): T => { ...       const item = window.localStorage.getItem(scopedKey)
+useCallback((value: T | ((val: T) => T)) => { ...       setStoredValue(valueToStore)
+useEffect(() => { ...         setStoredValue(JSON.parse(event.newValue))
+useEffect(() => { ...     setStoredValue(readValue())
+useCallback(() => { ...     // We also clear base keys if they happen to exist (legacy cleanup)
+
+--- src\hooks\useSettings.ts ---
+useCallback(async () => { ...             setIsLoading(true)
+useCallback(async () => { ...             const data = await api.get<StorageInfo>('/settings/storage')
+useEffect(() => { ...         loadSettings()
+useCallback(async (name: string, email: string) => { ...             setIsSaving(true)
+useCallback(async (theme: 'dark' | 'light' | 'system') => { ...             await api.put('/settings/preferences', { theme })
+useCallback(async (attendanceGoal: number) => { ...             await api.put('/settings/preferences', { attendanceGoal })
+useCallback(async (key: 'attendanceReminder' | 'studyReminder' | 'assignmentReminder', value: boolean) => { ...             await api.put('/settings/preferences', { notifications })
+useCallback(async () => { ...             setIsSaving(true)
+
+--- src\hooks\useSmartAcademicAssistant.ts ---
+useEffect(() => { ...       setRecommendations(SmartAcademicEngine.generateDailyRecommendations(subjects, tasks, attendanceData))
+useCallback(() => { ...       setRecommendations(SmartAcademicEngine.generateDailyRecommendations(subjectsRef.current, tasksRef.current, attendanceRef.current))
+useCallback(() => { ...       setPerformanceIndex(SmartAcademicEngine.calculatePerformanceIndex(subjectsRef.current, tasksRef.current, attendanceRef.current))
+useCallback(() => { ...       setRiskAssessment(SmartAcademicEngine.assessRisk(subjectsRef.current, tasksRef.current, attendanceRef.current))
+useCallback(() => { ...       const plan = SmartAcademicEngine.generateWeeklyPlan(subjectsRef.current, tasksRef.current)
+useCallback(() => { ...       setProductivityMetrics(SmartAcademicEngine.calculateProductivityMetrics(subjectsRef.current, tasksRef.current, attendanceRef.current))
+useCallback((plan: WeeklyPlan) => { ...     setSavedPlans(prev => [...prev, plan])
+useCallback((weekOf: string) => { ...     const saved = savedPlans.find(p => p.weekOf === weekOf)
+useCallback(() => { ...       })
+
+--- src\hooks\useTheme.ts ---
+useEffect(() => { ...       root.classList.add('dark')
+useEffect(() => { ...     const mq = window.matchMedia('(prefers-color-scheme: dark)')
+useCallback((t: Theme) => { ...     setThemeState(t)
+useCallback(() => { ...       const currentResolved = resolveTheme(prev)
+
+--- src\pages\Resources.tsx ---
+useMemo(() => { ...             result = result.filter(r => r.subjectId === selectedSubjectId)
+
+--- src\sections\AttendanceTracker.tsx ---
+useEffect(() => { ...     const year = currentDate.getFullYear()
+useMemo(() => { ...       const stats = calculateSubjectAttendance(s.id)
+
+--- src\sections\FocusMode.tsx ---
+useEffect(() => { ...             setSelectedSubjectId(session.subjectId)
+
+--- src\sections\Settings.tsx ---
+useEffect(() => { ...     loadProfile()

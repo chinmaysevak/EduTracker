@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader } from '@heroui/react';
+import { Card, CardContent as CardBody, CardHeader } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Minus, Activity, Target, Award } from 'lucide-react';
 import { useSmartAcademicAssistant } from '@/hooks/useSmartAcademicAssistant';
 
@@ -61,7 +61,7 @@ export function ProductivityAnalytics() {
                 {productivityMetrics.weeklyTrend}
               </span>
             </div>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-3 rounded-lg border border-border">
                 <div className="text-2xl font-bold text-blue-600">
@@ -139,13 +139,13 @@ export function ProductivityAnalytics() {
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${productivityMetrics.attendanceRate}%` }}
                   />
                 </div>
               </div>
-              
+
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">Task Completion</span>
@@ -154,13 +154,13 @@ export function ProductivityAnalytics() {
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-green-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${productivityMetrics.taskCompletionRate}%` }}
                   />
                 </div>
               </div>
-              
+
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">Study Consistency</span>
@@ -169,7 +169,7 @@ export function ProductivityAnalytics() {
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-purple-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${productivityMetrics.consistency}%` }}
                   />
@@ -197,7 +197,7 @@ export function ProductivityAnalytics() {
                   Keep it going! Consistency is key to success.
                 </div>
               </div>
-              
+
               <div className="p-3 rounded-lg bg-green-50 border border-green-200">
                 <div className="flex items-center gap-2 mb-1">
                   <TrendingUp className="w-4 h-4 text-green-600" />

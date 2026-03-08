@@ -3,6 +3,7 @@
 // ============================================
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { defaultCustomTimes, getSubjectColor, generateTimetableWithTimes } from '@/config/timetable';
@@ -20,34 +21,83 @@ import type {
 
 // ============================================
 // Generic hook to fetch & cache API data
+// With isLoading, isError, and optimistic rollback
 // ============================================
 function useApiCollection<T>(endpoint: string, defaultValue: T[]) {
   const { isAuthenticated } = useAuth();
-  const [data, setData] = useState<T[]>(defaultValue);
-  const [loaded, setLoaded] = useState(false);
+  // Use a ref for defaultValue so it stays stable across renders and
+  // doesn't cause infinite re-renders in the reset useEffect below.
+  const defaultValueRef = useRef<T[]>(defaultValue);
+  const [data, setData] = useState<T[]>(defaultValueRef.current);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fetchedRef = useRef(false);
 
+  const fetchData = useCallback(() => {
+    if (!isAuthenticated) return;
+    setIsLoading(true);
+    setIsError(false);
+    setError(null);
+    api.get<T[]>(endpoint)
+      .then(res => { setData(res); })
+      .catch(err => {
+        console.error(`Failed to fetch ${endpoint}:`, err);
+        setIsError(true);
+        setError(err.message || `Failed to load data`);
+      })
+      .finally(() => setIsLoading(false));
+  }, [isAuthenticated, endpoint]);
+
+  // Initial fetch on mount
   useEffect(() => {
     if (!isAuthenticated || fetchedRef.current) return;
     fetchedRef.current = true;
-    api.get<T[]>(endpoint)
-      .then(res => { setData(res); setLoaded(true); })
-      .catch(err => { console.error(`Failed to fetch ${endpoint}:`, err); setLoaded(true); });
-  }, [isAuthenticated, endpoint]);
+    fetchData();
+  }, [isAuthenticated, fetchData]);
 
   // Reset on logout
   useEffect(() => {
-    if (!isAuthenticated) { setData(defaultValue); setLoaded(false); fetchedRef.current = false; }
-  }, [isAuthenticated, defaultValue]);
+    if (!isAuthenticated) {
+      setData(defaultValueRef.current);
+      setIsLoading(true);
+      setIsError(false);
+      setError(null);
+      fetchedRef.current = false;
+    }
+  }, [isAuthenticated]);
 
-  return { data, setData, loaded };
+  // Optimistic update with rollback: applies change immediately,
+  // sends API call, rolls back if it fails.
+  const optimisticUpdate = useCallback(
+    (updater: (prev: T[]) => T[], apiCall: () => Promise<unknown>) => {
+      let snapshot: T[] = [];
+      setData(prev => {
+        snapshot = prev; // save previous state for rollback
+        return updater(prev);
+      });
+      apiCall().catch(err => {
+        console.error(`API call failed, rolling back:`, err);
+        setData(snapshot); // rollback on failure
+      });
+    },
+    []
+  );
+
+  // Manual refetch
+  const refetch = useCallback(() => {
+    fetchedRef.current = false;
+    fetchData();
+  }, [fetchData]);
+
+  return { data, setData, isLoading, isError, error, optimisticUpdate, refetch };
 }
 
 // ============================================
 // Subjects Hook
 // ============================================
 export function useSubjects(_timetableData?: Record<string, string[]>, _userId?: string) {
-  const { data: subjects, setData: setSubjects } = useApiCollection<Subject>('/subjects', []);
+  const { data: subjects, setData: setSubjects, isLoading, isError, error, refetch } = useApiCollection<Subject>('/subjects', []);
 
   const addSubject = (name: string, difficulty: number = 3): string => {
     const tempId = `sub-${Date.now()}`;
@@ -75,18 +125,18 @@ export function useSubjects(_timetableData?: Record<string, string[]>, _userId?:
 
   const updateSubject = (id: string, updates: Partial<Subject>) => {
     setSubjects(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
-    api.put(`/subjects/${id}`, updates).catch(err => console.error('Failed to update subject:', err));
+    api.put(`/subjects/${id}`, updates).catch(err => { console.error('Failed to update subject:', err); toast.error('Failed to update subject'); });
   };
 
   const removeSubject = (id: string) => {
     setSubjects(prev => prev.filter(s => s.id !== id));
-    api.delete(`/subjects/${id}`).catch(err => console.error('Failed to delete subject:', err));
+    api.delete(`/subjects/${id}`).catch(err => { console.error('Failed to delete subject:', err); toast.error('Failed to delete subject'); });
   };
 
   const getSubjectById = (id: string) => subjects.find(s => s.id === id);
   const getSubjectByName = (name: string) => subjects.find(s => s.name === name);
 
-  return { subjects, addSubject, updateSubject, removeSubject, getSubjectById, getSubjectByName };
+  return { subjects, addSubject, updateSubject, removeSubject, getSubjectById, getSubjectByName, isLoading, isError, error, refetch };
 }
 
 // ============================================
@@ -114,7 +164,7 @@ export function useUserProfile(_userId?: string) {
     fetchedRef.current = true;
     api.get<UserProfile>('/profile')
       .then(res => setProfile(res))
-      .catch(err => console.error('Failed to fetch profile:', err));
+      .catch(err => { console.error('Failed to fetch profile:', err); toast.error('Failed to fetch profile'); });
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -122,11 +172,11 @@ export function useUserProfile(_userId?: string) {
   }, [isAuthenticated]);
 
   // Debounced save to server
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const syncProfile = useCallback((newProfile: UserProfile) => {
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
-      api.put('/profile', newProfile).catch(err => console.error('Failed to save profile:', err));
+      api.put('/profile', newProfile).catch(err => { console.error('Failed to save profile:', err); toast.error('Failed to save profile'); });
     }, 500);
   }, []);
 
@@ -178,16 +228,18 @@ export function useUserProfile(_userId?: string) {
     });
   };
 
-  return { profile, addXP, updateStreak, awardBadge, setProfile: (val: UserProfile | ((prev: UserProfile) => UserProfile)) => {
-    const resolve = (v: UserProfile | ((prev: UserProfile) => UserProfile)) => {
-      setProfile(prev => {
-        const next = typeof v === 'function' ? v(prev) : v;
-        syncProfile(next);
-        return next;
-      });
-    };
-    resolve(val);
-  }};
+  return {
+    profile, addXP, updateStreak, awardBadge, setProfile: (val: UserProfile | ((prev: UserProfile) => UserProfile)) => {
+      const resolve = (v: UserProfile | ((prev: UserProfile) => UserProfile)) => {
+        setProfile(prev => {
+          const next = typeof v === 'function' ? v(prev) : v;
+          syncProfile(next);
+          return next;
+        });
+      };
+      resolve(val);
+    }
+  };
 }
 
 // ============================================
@@ -240,14 +292,14 @@ export function useAcademicInsights() {
 // Attendance Hook
 // ============================================
 export function useAttendance(_userId?: string) {
-  const { data: attendanceData, setData: setAttendanceData } = useApiCollection<DailyAttendance>('/attendance', []);
+  const { data: attendanceData, setData: setAttendanceData, isLoading, isError, error, refetch } = useApiCollection<DailyAttendance>('/attendance', []);
 
   const syncAttendance = useCallback((date: string, updated: DailyAttendance) => {
-    api.post('/attendance', { date, subjects: updated.subjects, extraClasses: updated.extraClasses })
+    api.post<{ id: string }>('/attendance', { date, subjects: updated.subjects, extraClasses: updated.extraClasses })
       .then(saved => {
         setAttendanceData(prev => prev.map(a => a.date === date ? { ...a, id: saved.id } : a));
       })
-      .catch(err => console.error('Failed to sync attendance:', err));
+      .catch(err => { console.error('Failed to sync attendance:', err); toast.error('Failed to sync attendance'); });
   }, [setAttendanceData]);
 
   const markAttendance = (date: string, subjectId: string, status: AttendanceStatus) => {
@@ -423,7 +475,8 @@ export function useAttendance(_userId?: string) {
     addExtraClass,
     removeExtraClass,
     markExtraClassAttendance,
-    getExtraClasses
+    getExtraClasses,
+    isLoading, isError, error, refetch
   };
 }
 
@@ -447,7 +500,7 @@ export function useTimetable(_userId?: string) {
         if (res.timetableData && Object.keys(res.timetableData).length > 0) setTimetableData(res.timetableData);
         if (res.customTimes && Object.keys(res.customTimes).length > 0) setCustomTimes(res.customTimes);
       })
-      .catch(err => console.error('Failed to fetch timetable:', err));
+      .catch(err => { console.error('Failed to fetch timetable:', err); toast.error('Failed to fetch timetable'); });
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -456,7 +509,7 @@ export function useTimetable(_userId?: string) {
 
   const syncTimetable = useCallback((data: Record<string, string[]>, times: Record<string, { startTime: string; endTime: string }[]>) => {
     api.put('/timetable', { timetableData: data, customTimes: times })
-      .catch(err => console.error('Failed to sync timetable:', err));
+      .catch(err => { console.error('Failed to sync timetable:', err); toast.error('Failed to sync timetable'); });
   }, []);
 
   const fullTimetable = generateTimetableWithTimes(timetableData, customTimes);
@@ -512,13 +565,37 @@ export function useTimetable(_userId?: string) {
     }
 
     if (updates.startTime !== undefined || updates.endTime !== undefined) {
-      newTimes = { ...customTimes, [day]: customTimes[day]?.map((t, i) => i === index ? {
-        startTime: updates.startTime || t.startTime,
-        endTime: updates.endTime || t.endTime
-      } : t) || [] };
+      newTimes = {
+        ...customTimes, [day]: customTimes[day]?.map((t, i) => i === index ? {
+          startTime: updates.startTime || t.startTime,
+          endTime: updates.endTime || t.endTime
+        } : t) || []
+      };
       setCustomTimes(newTimes);
     }
 
+    syncTimetable(newData, newTimes);
+  };
+
+  const reorderClass = (day: string, oldIndex: number, newIndex: number) => {
+    if (oldIndex === newIndex) return;
+
+    const dayClasses = [...(timetableData[day] || [])];
+    const dayTimes = [...(customTimes[day] || [])];
+
+    // Reorder subjects
+    const [movedClass] = dayClasses.splice(oldIndex, 1);
+    dayClasses.splice(newIndex, 0, movedClass);
+
+    // Reorder times
+    const [movedTime] = dayTimes.splice(oldIndex, 1);
+    dayTimes.splice(newIndex, 0, movedTime);
+
+    const newData = { ...timetableData, [day]: dayClasses };
+    const newTimes = { ...customTimes, [day]: dayTimes };
+
+    setTimetableData(newData);
+    setCustomTimes(newTimes);
     syncTimetable(newData, newTimes);
   };
 
@@ -539,6 +616,7 @@ export function useTimetable(_userId?: string) {
     addClass,
     removeClass,
     updateClass,
+    reorderClass,
     resetTimetable
   };
 }
@@ -550,7 +628,7 @@ import { saveFile, deleteFile as deleteDbFile } from '@/lib/db';
 import type { Resource } from '@/types';
 
 export function useResources(_userId?: string) {
-  const { data: resources, setData: setResources } = useApiCollection<Resource>('/resources', []);
+  const { data: resources, setData: setResources, isLoading, isError, error, refetch } = useApiCollection<Resource>('/resources', []);
 
   const addResource = async (resource: Omit<Resource, 'id' | 'createdAt'>, file?: File) => {
     let fileId = undefined;
@@ -580,12 +658,12 @@ export function useResources(_userId?: string) {
       content: resource.content
     }).then(saved => {
       setResources(prev => prev.map(r => r.id === newResource.id ? { ...r, id: saved.id } : r));
-    }).catch(err => console.error('Failed to save resource:', err));
+    }).catch(err => { console.error('Failed to save resource:', err); toast.error('Failed to save resource'); });
   };
 
   const updateResource = (id: string, updates: Partial<Resource>) => {
     setResources(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r));
-    api.put(`/resources/${id}`, updates).catch(err => console.error('Failed to update resource:', err));
+    api.put(`/resources/${id}`, updates).catch(err => { console.error('Failed to update resource:', err); toast.error('Failed to update resource'); });
   };
 
   const deleteResource = async (id: string) => {
@@ -594,7 +672,7 @@ export function useResources(_userId?: string) {
       try { await deleteDbFile(resource.fileId); } catch (e) { console.error("Failed to delete file from DB", e); }
     }
     setResources(prev => prev.filter(r => r.id !== id));
-    api.delete(`/resources/${id}`).catch(err => console.error('Failed to delete resource:', err));
+    api.delete(`/resources/${id}`).catch(err => { console.error('Failed to delete resource:', err); toast.error('Failed to delete resource'); });
   };
 
   const toggleFavorite = (id: string) => {
@@ -602,7 +680,7 @@ export function useResources(_userId?: string) {
     if (resource) {
       const newFav = !resource.isFavorite;
       setResources(prev => prev.map(r => r.id === id ? { ...r, isFavorite: newFav } : r));
-      api.put(`/resources/${id}`, { isFavorite: newFav }).catch(err => console.error('Failed to toggle favorite:', err));
+      api.put(`/resources/${id}`, { isFavorite: newFav }).catch(err => { console.error('Failed to toggle favorite:', err); toast.error('Failed to toggle favorite'); });
     }
   };
 
@@ -616,7 +694,8 @@ export function useResources(_userId?: string) {
     updateResource,
     deleteResource,
     toggleFavorite,
-    getResourcesForSubject
+    getResourcesForSubject,
+    isLoading, isError, error, refetch
   };
 }
 
@@ -624,8 +703,8 @@ export function useResources(_userId?: string) {
 // Study Tasks Hook
 // ============================================
 export function useStudyTasks(_userId?: string) {
-  const { data: tasks, setData: setTasks } = useApiCollection<StudyTask>('/tasks', []);
-  const { updateStreak } = useUserProfile();
+  const { data: tasks, setData: setTasks, isLoading, isError, error, refetch } = useApiCollection<StudyTask>('/tasks', []);
+  const { updateStreak, addXP } = useUserProfile();
 
   const addTask = (task: Omit<StudyTask, 'id' | 'createdAt' | 'status'>) => {
     const newTask: StudyTask = {
@@ -640,29 +719,34 @@ export function useStudyTasks(_userId?: string) {
       ...task, status: 'pending', createdAt: newTask.createdAt
     }).then(saved => {
       setTasks(prev => prev.map(t => t.id === newTask.id ? { ...t, id: saved.id } : t));
-    }).catch(err => console.error('Failed to create task:', err));
+    }).catch(err => { console.error('Failed to create task:', err); toast.error('Failed to create task'); });
   };
 
   const updateTask = (id: string, updates: Partial<StudyTask>) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
-    api.put(`/tasks/${id}`, updates).catch(err => console.error('Failed to update task:', err));
+    api.put(`/tasks/${id}`, updates).catch(err => { console.error('Failed to update task:', err); toast.error('Failed to update task'); });
   };
 
   const deleteTask = (id: string) => {
     setTasks(prev => prev.filter(t => t.id !== id));
-    api.delete(`/tasks/${id}`).catch(err => console.error('Failed to delete task:', err));
+    api.delete(`/tasks/${id}`).catch(err => { console.error('Failed to delete task:', err); toast.error('Failed to delete task'); });
   };
 
   const toggleTaskStatus = (id: string) => {
     setTasks(prev => prev.map(t => {
       if (t.id === id) {
-        const newStatus = t.status === 'completed' ? 'pending' : 'completed';
-        if (newStatus === 'completed') updateStreak();
+        const newStatus: 'completed' | 'pending' = t.status === 'completed' ? 'pending' : 'completed';
+        if (newStatus === 'completed') {
+          updateStreak();
+          // Award XP based on task priority
+          const xpReward = t.priority === 'high' ? 50 : t.priority === 'medium' ? 30 : 15;
+          addXP(xpReward);
+        }
         const updates = {
           status: newStatus,
           completedAt: newStatus === 'completed' ? new Date().toISOString() : undefined
         };
-        api.put(`/tasks/${id}`, updates).catch(err => console.error('Failed to toggle task:', err));
+        api.put(`/tasks/${id}`, updates).catch(err => { console.error('Failed to toggle task:', err); toast.error('Failed to toggle task'); });
         return { ...t, ...updates };
       }
       return t;
@@ -689,7 +773,8 @@ export function useStudyTasks(_userId?: string) {
     getPendingTasks,
     getCompletedTasks,
     getOverdueTasks,
-    getTodaysTasks
+    getTodaysTasks,
+    isLoading, isError, error, refetch
   };
 }
 
@@ -699,8 +784,13 @@ export function useStudyTasks(_userId?: string) {
 import type { SyllabusUnit, SyllabusTopic } from '@/types';
 
 export function useSyllabus(_userId?: string) {
-  const { data: units, setData: setUnits } = useApiCollection<SyllabusUnit>('/syllabus/units', []);
-  const { data: topics, setData: setTopics } = useApiCollection<SyllabusTopic>('/syllabus/topics', []);
+  const { data: units, setData: setUnits, isLoading: unitsLoading, isError: unitsError, error: unitsErrorMsg, refetch: refetchUnits } = useApiCollection<SyllabusUnit>('/syllabus/units', []);
+  const { data: topics, setData: setTopics, isLoading: topicsLoading, isError: topicsError, error: topicsErrorMsg, refetch: refetchTopics } = useApiCollection<SyllabusTopic>('/syllabus/topics', []);
+
+  const isLoading = unitsLoading || topicsLoading;
+  const isError = unitsError || topicsError;
+  const error = unitsErrorMsg || topicsErrorMsg;
+  const refetch = useCallback(() => { refetchUnits(); refetchTopics(); }, [refetchUnits, refetchTopics]);
 
   // --- Units ---
   const addUnit = (subjectId: string, name: string) => {
@@ -717,18 +807,18 @@ export function useSyllabus(_userId?: string) {
 
     api.post<SyllabusUnit>('/syllabus/units', { subjectId, name, order: newUnit.order })
       .then(saved => { setUnits(prev => prev.map(u => u.id === newUnit.id ? { ...u, id: saved.id } : u)); })
-      .catch(err => console.error('Failed to create unit:', err));
+      .catch(err => { console.error('Failed to create unit:', err); toast.error('Failed to create unit'); });
   };
 
   const updateUnit = (id: string, updates: Partial<SyllabusUnit>) => {
     setUnits(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u));
-    api.put(`/syllabus/units/${id}`, updates).catch(err => console.error('Failed to update unit:', err));
+    api.put(`/syllabus/units/${id}`, updates).catch(err => { console.error('Failed to update unit:', err); toast.error('Failed to update unit'); });
   };
 
   const deleteUnit = (id: string) => {
     setUnits(prev => prev.filter(u => u.id !== id));
     setTopics(prev => prev.filter(t => t.unitId !== id));
-    api.delete(`/syllabus/units/${id}`).catch(err => console.error('Failed to delete unit:', err));
+    api.delete(`/syllabus/units/${id}`).catch(err => { console.error('Failed to delete unit:', err); toast.error('Failed to delete unit'); });
   };
 
   const toggleUnitTeacherCompletion = (id: string) => {
@@ -737,7 +827,7 @@ export function useSyllabus(_userId?: string) {
       const newState = !unit.teacherCompleted;
       setUnits(prev => prev.map(u => u.id === id ? { ...u, teacherCompleted: newState } : u));
       setTopics(prev => prev.map(t => t.unitId === id ? { ...t, teacherCompleted: newState } : t));
-      api.put(`/syllabus/units/${id}`, { teacherCompleted: newState }).catch(err => console.error('Failed to toggle unit:', err));
+      api.put(`/syllabus/units/${id}`, { teacherCompleted: newState }).catch(err => { console.error('Failed to toggle unit:', err); toast.error('Failed to toggle unit'); });
     }
   };
 
@@ -747,7 +837,7 @@ export function useSyllabus(_userId?: string) {
       const newState = !unit.studentCompleted;
       setUnits(prev => prev.map(u => u.id === id ? { ...u, studentCompleted: newState } : u));
       setTopics(prev => prev.map(t => t.unitId === id ? { ...t, studentCompleted: newState } : t));
-      api.put(`/syllabus/units/${id}`, { studentCompleted: newState }).catch(err => console.error('Failed to toggle unit:', err));
+      api.put(`/syllabus/units/${id}`, { studentCompleted: newState }).catch(err => { console.error('Failed to toggle unit:', err); toast.error('Failed to toggle unit'); });
     }
   };
 
@@ -766,17 +856,17 @@ export function useSyllabus(_userId?: string) {
 
     api.post<SyllabusTopic>('/syllabus/topics', { unitId, name, order: newTopic.order })
       .then(saved => { setTopics(prev => prev.map(t => t.id === newTopic.id ? { ...t, id: saved.id } : t)); })
-      .catch(err => console.error('Failed to create topic:', err));
+      .catch(err => { console.error('Failed to create topic:', err); toast.error('Failed to create topic'); });
   };
 
   const updateTopic = (id: string, updates: Partial<SyllabusTopic>) => {
     setTopics(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
-    api.put(`/syllabus/topics/${id}`, updates).catch(err => console.error('Failed to update topic:', err));
+    api.put(`/syllabus/topics/${id}`, updates).catch(err => { console.error('Failed to update topic:', err); toast.error('Failed to update topic'); });
   };
 
   const deleteTopic = (id: string) => {
     setTopics(prev => prev.filter(t => t.id !== id));
-    api.delete(`/syllabus/topics/${id}`).catch(err => console.error('Failed to delete topic:', err));
+    api.delete(`/syllabus/topics/${id}`).catch(err => { console.error('Failed to delete topic:', err); toast.error('Failed to delete topic'); });
   };
 
   const toggleTopicTeacherCompletion = (id: string) => {
@@ -784,7 +874,7 @@ export function useSyllabus(_userId?: string) {
     if (topic) {
       const newState = !topic.teacherCompleted;
       setTopics(prev => prev.map(t => t.id === id ? { ...t, teacherCompleted: newState } : t));
-      api.put(`/syllabus/topics/${id}`, { teacherCompleted: newState }).catch(err => console.error('Failed to toggle topic:', err));
+      api.put(`/syllabus/topics/${id}`, { teacherCompleted: newState }).catch(err => { console.error('Failed to toggle topic:', err); toast.error('Failed to toggle topic'); });
     }
   };
 
@@ -793,7 +883,7 @@ export function useSyllabus(_userId?: string) {
     if (topic) {
       const newState = !topic.studentCompleted;
       setTopics(prev => prev.map(t => t.id === id ? { ...t, studentCompleted: newState } : t));
-      api.put(`/syllabus/topics/${id}`, { studentCompleted: newState }).catch(err => console.error('Failed to toggle topic:', err));
+      api.put(`/syllabus/topics/${id}`, { studentCompleted: newState }).catch(err => { console.error('Failed to toggle topic:', err); toast.error('Failed to toggle topic'); });
     }
   };
 
@@ -866,7 +956,8 @@ export function useSyllabus(_userId?: string) {
     toggleTopicTeacherCompletion,
     toggleTopicStudentCompletion,
     getSubjectProgress,
-    getOverallProgress
+    getOverallProgress,
+    isLoading, isError, error, refetch
   };
 }
 
@@ -876,7 +967,7 @@ export function useSyllabus(_userId?: string) {
 const defaultNotifications: import('@/types').Notification[] = [];
 
 export function useNotifications(_userId?: string) {
-  const { data: notifications, setData: setNotifications } = useApiCollection<import('@/types').Notification>('/notifications', defaultNotifications);
+  const { data: notifications, setData: setNotifications, isLoading, isError, error, refetch } = useApiCollection<import('@/types').Notification>('/notifications', defaultNotifications);
 
   const addNotification = (notification: Omit<import('@/types').Notification, 'id' | 'createdAt' | 'read'>) => {
     const newNotification: import('@/types').Notification = {
@@ -892,27 +983,27 @@ export function useNotifications(_userId?: string) {
       type: notification.type, link: notification.link
     }).then(saved => {
       setNotifications(prev => prev.map(n => n.id === newNotification.id ? { ...n, id: saved.id } : n));
-    }).catch(err => console.error('Failed to create notification:', err));
+    }).catch(err => { console.error('Failed to create notification:', err); toast.error('Failed to create notification'); });
   };
 
   const markAsRead = (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-    api.put(`/notifications/${id}`, { read: true }).catch(err => console.error('Failed to mark read:', err));
+    api.put(`/notifications/${id}`, { read: true }).catch(err => { console.error('Failed to mark read:', err); toast.error('Failed to mark read'); });
   };
 
   const markAllAsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    api.put('/notifications/read-all/batch', {}).catch(err => console.error('Failed to mark all read:', err));
+    api.put('/notifications/read-all/batch', {}).catch(err => { console.error('Failed to mark all read:', err); toast.error('Failed to mark all read'); });
   };
 
   const deleteNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
-    api.delete(`/notifications/${id}`).catch(err => console.error('Failed to delete notification:', err));
+    api.delete(`/notifications/${id}`).catch(err => { console.error('Failed to delete notification:', err); toast.error('Failed to delete notification'); });
   };
 
   const clearAll = () => {
     // Delete each notification on server
-    notifications.forEach(n => api.delete(`/notifications/${n.id}`).catch(() => {}));
+    notifications.forEach(n => api.delete(`/notifications/${n.id}`).catch(() => { }));
     setNotifications([]);
   };
 
@@ -975,7 +1066,8 @@ export function useNotifications(_userId?: string) {
     markAllAsRead,
     deleteNotification,
     clearAll,
-    generateSmartNotifications
+    generateSmartNotifications,
+    isLoading, isError, error, refetch
   };
 }
 
@@ -983,7 +1075,7 @@ export function useNotifications(_userId?: string) {
 // Topic Tracking Hook (separate from Syllabus)
 // ============================================
 export function useTopics(_userId?: string) {
-  const { data: topics, setData: setTopics } = useApiCollection<Topic>('/topics', []);
+  const { data: topics, setData: setTopics, isLoading, isError, error, refetch } = useApiCollection<Topic>('/topics', []);
 
   const addTopic = (topic: Omit<Topic, 'id' | 'status'>) => {
     const newTopic: Topic = {
@@ -995,31 +1087,31 @@ export function useTopics(_userId?: string) {
 
     api.post<Topic>('/topics', { ...topic, status: 'pending' })
       .then(saved => { setTopics(prev => prev.map(t => t.id === newTopic.id ? { ...t, id: saved.id } : t)); })
-      .catch(err => console.error('Failed to create topic:', err));
+      .catch(err => { console.error('Failed to create topic:', err); toast.error('Failed to create topic'); });
   };
 
   const updateTopic = (id: string, updates: Partial<Topic>) => {
     setTopics(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
-    api.put(`/topics/${id}`, updates).catch(err => console.error('Failed to update topic:', err));
+    api.put(`/topics/${id}`, updates).catch(err => { console.error('Failed to update topic:', err); toast.error('Failed to update topic'); });
   };
 
   const deleteTopic = (id: string) => {
     setTopics(prev => prev.filter(t => t.id !== id));
-    api.delete(`/topics/${id}`).catch(err => console.error('Failed to delete topic:', err));
+    api.delete(`/topics/${id}`).catch(err => { console.error('Failed to delete topic:', err); toast.error('Failed to delete topic'); });
   };
 
   const getTopicsForSubject = (subjectId: string) => {
     return topics.filter(t => t.subjectId === subjectId);
   };
 
-  return { topics, addTopic, updateTopic, deleteTopic, getTopicsForSubject };
+  return { topics, addTopic, updateTopic, deleteTopic, getTopicsForSubject, isLoading, isError, error, refetch };
 }
 
 // ============================================
 // Focus History Hook
 // ============================================
 export function useFocusHistory(_userId?: string) {
-  const { data: history, setData: setHistory } = useApiCollection<FocusSessionLog>('/focus-sessions', []);
+  const { data: history, setData: setHistory, isLoading, isError, error, refetch } = useApiCollection<FocusSessionLog>('/focus-sessions', []);
 
   const logSession = (session: Omit<FocusSessionLog, 'id'>) => {
     const newLog: FocusSessionLog = {
@@ -1030,7 +1122,7 @@ export function useFocusHistory(_userId?: string) {
 
     api.post<FocusSessionLog>('/focus-sessions', session)
       .then(saved => { setHistory(prev => prev.map(h => h.id === newLog.id ? { ...h, id: saved.id } : h)); })
-      .catch(err => console.error('Failed to log focus session:', err));
+      .catch(err => { console.error('Failed to log focus session:', err); toast.error('Failed to log focus session'); });
   };
 
   const getHistoryForSubject = (subjectId: string) => {
@@ -1042,14 +1134,14 @@ export function useFocusHistory(_userId?: string) {
     return relevantLogs.reduce((acc, curr) => acc + curr.durationMinutes, 0);
   };
 
-  return { history, logSession, getHistoryForSubject, getTotalStudyTime };
+  return { history, logSession, getHistoryForSubject, getTotalStudyTime, isLoading, isError, error, refetch };
 }
 
 // ============================================
 // Exams Hook
 // ============================================
 export function useExams(_userId?: string) {
-  const { data: exams, setData: setExams } = useApiCollection<Exam>('/exams', []);
+  const { data: exams, setData: setExams, isLoading, isError, error, refetch } = useApiCollection<Exam>('/exams', []);
 
   const addExam = (exam: Omit<Exam, 'id' | 'createdAt'>) => {
     const newExam: Exam = {
@@ -1061,17 +1153,17 @@ export function useExams(_userId?: string) {
 
     api.post<Exam>('/exams', exam)
       .then(saved => { setExams(prev => prev.map(e => e.id === newExam.id ? { ...e, id: saved.id } : e)); })
-      .catch(err => console.error('Failed to create exam:', err));
+      .catch(err => { console.error('Failed to create exam:', err); toast.error('Failed to create exam'); });
   };
 
   const updateExam = (id: string, updates: Partial<Exam>) => {
     setExams(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
-    api.put(`/exams/${id}`, updates).catch(err => console.error('Failed to update exam:', err));
+    api.put(`/exams/${id}`, updates).catch(err => { console.error('Failed to update exam:', err); toast.error('Failed to update exam'); });
   };
 
   const deleteExam = (id: string) => {
     setExams(prev => prev.filter(e => e.id !== id));
-    api.delete(`/exams/${id}`).catch(err => console.error('Failed to delete exam:', err));
+    api.delete(`/exams/${id}`).catch(err => { console.error('Failed to delete exam:', err); toast.error('Failed to delete exam'); });
   };
 
   const getExamsForSubject = (subjectId: string) => {
@@ -1090,14 +1182,14 @@ export function useExams(_userId?: string) {
     return exams.filter(e => e.examDate < today && e.preparationStatus !== 'completed');
   };
 
-  return { exams, addExam, updateExam, deleteExam, getExamsForSubject, getUpcomingExams, getOverdueExams };
+  return { exams, addExam, updateExam, deleteExam, getExamsForSubject, getUpcomingExams, getOverdueExams, isLoading, isError, error, refetch };
 }
 
 // ============================================
 // Study Sessions Hook
 // ============================================
 export function useStudyPlannerSessions(_userId?: string) {
-  const { data: sessions, setData: setSessions } = useApiCollection<StudySession>('/studysessions', []);
+  const { data: sessions, setData: setSessions, isLoading, isError, error, refetch } = useApiCollection<StudySession>('/studysessions', []);
 
   const addSession = (session: Omit<StudySession, 'id' | 'createdAt'>) => {
     const newSession: StudySession = {
@@ -1109,17 +1201,17 @@ export function useStudyPlannerSessions(_userId?: string) {
 
     api.post<StudySession>('/studysessions', session)
       .then(saved => { setSessions(prev => prev.map(s => s.id === newSession.id ? { ...s, id: saved.id } : s)); })
-      .catch(err => console.error('Failed to create study session:', err));
+      .catch(err => { console.error('Failed to create study session:', err); toast.error('Failed to create study session'); });
   };
 
   const updateSession = (id: string, updates: Partial<StudySession>) => {
     setSessions(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
-    api.put(`/studysessions/${id}`, updates).catch(err => console.error('Failed to update study session:', err));
+    api.put(`/studysessions/${id}`, updates).catch(err => { console.error('Failed to update study session:', err); toast.error('Failed to update study session'); });
   };
 
   const deleteSession = (id: string) => {
     setSessions(prev => prev.filter(s => s.id !== id));
-    api.delete(`/studysessions/${id}`).catch(err => console.error('Failed to delete study session:', err));
+    api.delete(`/studysessions/${id}`).catch(err => { console.error('Failed to delete study session:', err); toast.error('Failed to delete study session'); });
   };
 
   const toggleSessionComplete = (id: string) => {
@@ -1127,7 +1219,7 @@ export function useStudyPlannerSessions(_userId?: string) {
     if (session) {
       const newCompleted = !session.completed;
       setSessions(prev => prev.map(s => s.id === id ? { ...s, completed: newCompleted } : s));
-      api.put(`/studysessions/${id}`, { completed: newCompleted }).catch(err => console.error('Failed to toggle session:', err));
+      api.put(`/studysessions/${id}`, { completed: newCompleted }).catch(err => { console.error('Failed to toggle session:', err); toast.error('Failed to toggle session'); });
     }
   };
 
@@ -1160,7 +1252,8 @@ export function useStudyPlannerSessions(_userId?: string) {
     getSessionsForDate,
     getSessionsForSubject,
     getTodaysSessions,
-    getUpcomingSessions
+    getUpcomingSessions,
+    isLoading, isError, error, refetch
   };
 }
 

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
     Brain,
     Flame,
@@ -25,7 +25,7 @@ export function SmartRecommendationWidget({ onNavigate }: WidgetProps) {
     if (!topSubject) return null;
 
     return (
-        <Card className="card-professional border-l-4 border-l-violet-500 bg-gradient-to-r from-violet-50/50 to-transparent dark:from-violet-900/10">
+        <Card className="card-professional dark:status-glow-violet">
             <CardContent className="p-5 flex items-start justify-between">
                 <div>
                     <div className="flex items-center gap-2 mb-2">
@@ -34,7 +34,7 @@ export function SmartRecommendationWidget({ onNavigate }: WidgetProps) {
                             Smart Recommendation
                         </span>
                     </div>
-                    <h3 className="text-lg font-bold mb-1">Study {topSubject.subject.name}</h3>
+                    <h3 className="text-lg font-bold mb-1 font-display">Study {topSubject.subject.name}</h3>
                     <p className="text-sm text-muted-foreground mb-3">
                         High priority due to {topSubject.subject.examDate ? 'upcoming exam' : 'low attendance/progress'}.
                     </p>
@@ -46,7 +46,7 @@ export function SmartRecommendationWidget({ onNavigate }: WidgetProps) {
                         Start Session <ArrowRight className="w-3 h-3 ml-1.5" />
                     </Button>
                 </div>
-                <div className="w-12 h-12 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-full bg-violet-500/10 dark:bg-violet-500/10 flex items-center justify-center shrink-0">
                     <Brain className="w-6 h-6 text-violet-600 dark:text-violet-400" />
                 </div>
             </CardContent>
@@ -62,7 +62,7 @@ export function StreakWidget() {
     const progress = (profile.xp / xpForNextLevel) * 100;
 
     return (
-        <Card className="card-professional bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10">
+        <Card className="card-professional dark:status-glow-amber">
             <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -71,13 +71,13 @@ export function StreakWidget() {
                                 <Flame className="w-6 h-6 text-white fill-white" />
                             </div>
                             <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5 border border-border">
-                                <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] font-bold text-white">
+                                <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] font-bold text-white mono-data">
                                     {profile.level}
                                 </div>
                             </div>
                         </div>
                         <div>
-                            <p className="font-bold text-lg">{profile.currentStreak} Day Streak</p>
+                            <p className="font-bold text-lg font-display"><span className="mono-data">{profile.currentStreak}</span> Day Streak</p>
                             <p className="text-xs text-muted-foreground">Keep it up, {profile.name}!</p>
                         </div>
                     </div>
@@ -85,8 +85,8 @@ export function StreakWidget() {
 
                 <div className="space-y-1.5">
                     <div className="flex justify-between text-xs font-medium">
-                        <span>Level {profile.level}</span>
-                        <span>{profile.xp} / {xpForNextLevel} XP</span>
+                        <span>Level <span className="mono-data">{profile.level}</span></span>
+                        <span className="mono-data">{profile.xp} / {xpForNextLevel} XP</span>
                     </div>
                     <Progress value={progress} className="h-2" indicatorClassName="bg-gradient-to-r from-orange-400 to-amber-500" />
                 </div>
@@ -124,23 +124,23 @@ export function ExamCountdownWidget({ onNavigate }: WidgetProps) {
     );
 
     return (
-        <Card className="card-professional">
+        <Card className="card-professional dark:status-glow-blue">
             <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2 font-display">
                     <Clock className="w-4 h-4 text-blue-500" />
                     Exam Countdown
                 </CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="text-center py-2">
-                    <div className="text-3xl font-bold text-foreground">
+                    <div className="text-3xl font-bold text-foreground mono-data">
                         {nearestExam.daysLeft} <span className="text-base font-normal text-muted-foreground">days</span>
                     </div>
-                    <p className="text-sm font-medium mt-1 text-blue-600 dark:text-blue-400">
+                    <p className="text-sm font-medium mt-1 text-blue-600 dark:text-blue-400 font-display">
                         {nearestExam.name}
                     </p>
                     <div className="mt-3 flex justify-center">
-                        <Badge variant="secondary" className="text-xs font-normal">
+                        <Badge variant="secondary" className="text-xs font-normal mono-data">
                             {new Date(nearestExam.examDate!).toLocaleDateString()}
                         </Badge>
                     </div>

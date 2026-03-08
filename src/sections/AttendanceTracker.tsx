@@ -36,6 +36,7 @@ import { toast } from 'sonner';
 import type { AttendanceStatus } from '@/types';
 import { AttendancePredictionModal } from '@/components/attendance/AttendancePredictionModal';
 import { SubjectManagerModal } from '@/components/subjects/SubjectManagerModal';
+import AddSubjectModal from '@/components/progress/AddSubjectModal';
 
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 function formatDateLocal(date: Date) {
@@ -53,7 +54,7 @@ export default function AttendanceTracker() {
   const { subjects, addSubject, removeSubject } = useSubjects();
   const { attendanceData, markAttendance, calculateSubjectAttendance, getOverallAttendance, getDayAttendance, getMonthlyStats, addExtraClass, removeExtraClass, markExtraClassAttendance, getExtraClasses } = useAttendance();
   const getSubjectName = (id: string) => subjects.find(s => s.id === id)?.name || id;
-  const { isSubjectScheduled } = useTimetable();
+  const { isSubjectScheduled, getTimetableForDay } = useTimetable();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string>(formatDateLocal(new Date()));
@@ -148,7 +149,26 @@ export default function AttendanceTracker() {
     const [year, month, day] = selectedDate.split('-').map(Number);
     const date = new Date(year, month - 1, day);
     const dayOfWeek = date.getDay();
-    return subjects.filter(s => isSubjectScheduled(s.name, dayOfWeek));
+
+    // Get timetable slots sorted by start time — this is the source of truth
+    const slots = getTimetableForDay(dayOfWeek)
+      .slice()
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+    // Deduplicate subject names while preserving timetable order
+    const seen = new Set<string>();
+    const orderedSubjects: typeof subjects = [];
+
+    for (const slot of slots) {
+      // Handle both cases: slot.subject might be an ID or a Name
+      const subject = subjects.find(s => s.id === slot.subject || s.name === slot.subject);
+      if (subject && !seen.has(subject.id)) {
+        seen.add(subject.id);
+        orderedSubjects.push(subject);
+      }
+    }
+
+    return orderedSubjects;
   };
 
   const overallStats = getOverallAttendance();
@@ -273,12 +293,12 @@ export default function AttendanceTracker() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="settings-bg space-y-3">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold gradient-text">Attendance Tracker</h2>
-          <p className="text-muted-foreground mt-1">Monitor your class attendance and performance</p>
+          <h2 className="text-2xl font-bold gradient-text">Attendance Tracker</h2>
+          <p className="text-muted-foreground text-sm">Monitor your class attendance and performance</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -290,52 +310,27 @@ export default function AttendanceTracker() {
             <Download className="w-4 h-4" />
             Export CSV
           </Button>
-          <Dialog open={isAddSubjectOpen} onOpenChange={setIsAddSubjectOpen}>
-            <DialogTrigger asChild>
-              <Button className="btn-gradient rounded-xl gap-2">
-                <Plus className="w-4 h-4" />
-                Add Subject
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md card-modern border-0">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-                    <BookOpen className="w-5 h-5 text-white" />
-                  </div>
-                  Add New Subject
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div>
-                  <Label className="text-sm font-medium">Subject Name</Label>
-                  <Input
-                    value={newSubjectName}
-                    onChange={(e) => setNewSubjectName(e.target.value)}
-                    placeholder="e.g., Data Structures"
-                    className="mt-1.5 rounded-xl h-12"
-                    onKeyDown={(e) => e.key === 'Enter' && handleAddSubject()}
-                  />
-                </div>
-                <Button onClick={handleAddSubject} className="w-full btn-gradient rounded-xl h-12">
-                  Add Subject
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button className="btn-gradient rounded-xl gap-2" onClick={() => setIsAddSubjectOpen(true)}>
+            <Plus className="w-4 h-4" />
+            Add Subject
+          </Button>
         </div>
       </div>
+
+      {isAddSubjectOpen && (
+        <AddSubjectModal onClose={() => setIsAddSubjectOpen(false)} />
+      )}
 
 
 
       {/* Stats Overview - Modern Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {/* ... existing stats cards ... */}
         <Card className="card-modern card-hover border-0">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center shadow-lg">
-                <Percent className="w-6 h-6 text-white" />
+          <CardContent className="p-3.5">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center shadow-md">
+                <Percent className="w-4 h-4 text-white" />
               </div>
               <div className={`px-3 py-1 rounded-full text-xs font-medium ${overallStats.percentage >= 75 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' :
                 overallStats.percentage >= 60 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' :
@@ -344,45 +339,45 @@ export default function AttendanceTracker() {
                 {overallStats.percentage >= 75 ? 'Excellent' : overallStats.percentage >= 60 ? 'Good' : 'At Risk'}
               </div>
             </div>
-            <p className="text-3xl font-bold">{overallStats.percentage}%</p>
-            <p className="text-sm text-muted-foreground mt-1">Overall Attendance</p>
-            <p className="text-xs text-muted-foreground mt-2">{overallStats.present}/{overallStats.total} classes</p>
+            <p className="text-2xl font-bold">{overallStats.percentage}%</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Overall Attendance</p>
+            <p className="text-[10px] text-muted-foreground mt-1">{overallStats.present}/{overallStats.total} classes</p>
           </CardContent>
         </Card>
 
         <Card className="card-modern card-hover border-0">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
-                <Check className="w-6 h-6 text-white" />
+          <CardContent className="p-3.5">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-md">
+                <Check className="w-4 h-4 text-white" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-emerald-600">{overallStats.present}</p>
-            <p className="text-sm text-muted-foreground mt-1">Classes Present</p>
+            <p className="text-2xl font-bold text-emerald-600">{overallStats.present}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Classes Present</p>
           </CardContent>
         </Card>
 
         <Card className="card-modern card-hover border-0">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-400 to-red-500 flex items-center justify-center shadow-lg">
-                <X className="w-6 h-6 text-white" />
+          <CardContent className="p-3.5">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-400 to-red-500 flex items-center justify-center shadow-md">
+                <X className="w-4 h-4 text-white" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-rose-500">{overallStats.total - overallStats.present}</p>
-            <p className="text-sm text-muted-foreground mt-1">Classes Absent</p>
+            <p className="text-2xl font-bold text-rose-500">{overallStats.total - overallStats.present}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Classes Absent</p>
           </CardContent>
         </Card>
 
         <Card className="card-modern card-hover border-0">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
-                <BookOpen className="w-6 h-6 text-white" />
+          <CardContent className="p-3.5">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-md">
+                <BookOpen className="w-4 h-4 text-white" />
               </div>
             </div>
-            <p className="text-3xl font-bold">{subjects.length}</p>
-            <p className="text-sm text-muted-foreground mt-1">Total Subjects</p>
+            <p className="text-2xl font-bold">{subjects.length}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Total Subjects</p>
           </CardContent>
         </Card>
       </div>
@@ -390,13 +385,13 @@ export default function AttendanceTracker() {
 
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Calendar - Modern Design */}
         <Card className="lg:col-span-2 card-modern border-0">
-          <CardHeader className="pb-4">
+          <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
                   <CalendarIcon className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -405,11 +400,11 @@ export default function AttendanceTracker() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" onClick={goToPreviousMonth} className="h-10 w-10 rounded-xl">
+                <Button variant="outline" size="icon" onClick={goToPreviousMonth} className="h-8 w-8 rounded-xl">
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={goToToday} className="h-10 rounded-xl">Today</Button>
-                <Button variant="outline" size="icon" onClick={goToNextMonth} className="h-10 w-10 rounded-xl">
+                <Button variant="outline" size="sm" onClick={goToToday} className="h-8 rounded-xl">Today</Button>
+                <Button variant="outline" size="icon" onClick={goToNextMonth} className="h-8 w-8 rounded-xl">
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
@@ -438,7 +433,7 @@ export default function AttendanceTracker() {
                     key={index}
                     onClick={() => setSelectedDate(dateStr)}
                     className={`
-                      min-h-[80px] p-2 rounded-2xl border-2 transition-all duration-300 text-left relative
+                      min-h-[52px] p-1 rounded-xl border-2 transition-all duration-300 text-left relative
                       ${isCurrentMonth(date) ? 'bg-card' : 'bg-muted/30'}
                       ${isSelected ? 'border-violet-500 bg-violet-50/50 dark:bg-violet-900/20 shadow-lg shadow-violet-500/20' : 'border-transparent hover:border-border'}
                       ${isToday(date) && !isSelected ? 'ring-2 ring-violet-500/30' : ''}
@@ -476,7 +471,7 @@ export default function AttendanceTracker() {
               })}
             </div>
 
-            <div className="flex items-center gap-6 mt-6 text-sm">
+            <div className="flex items-center gap-6 mt-4 text-sm">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-emerald-500" />
                 <span className="text-muted-foreground">Present</span>
@@ -495,9 +490,9 @@ export default function AttendanceTracker() {
 
         {/* Daily Attendance Panel - Modern */}
         <Card className="card-modern border-0">
-          <CardHeader className="pb-4">
+          <CardHeader className="pb-2">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
                 <CalendarCheck className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -682,10 +677,10 @@ export default function AttendanceTracker() {
 
       {/* Advanced Subject Table - Modern */}
       <Card className="card-modern border-0">
-        <CardHeader className="pb-6">
+        <CardHeader className="pb-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -746,9 +741,9 @@ export default function AttendanceTracker() {
           {/* Table Body */}
           <div className="space-y-2 mt-4">
             {filteredAndSortedSubjects.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="w-10 h-10 text-muted-foreground" />
+              <div className="text-center py-8">
+                <div className="w-14 h-14 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <BookOpen className="w-7 h-7 text-muted-foreground" />
                 </div>
                 <p className="text-lg font-semibold text-muted-foreground">No subjects found</p>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -759,11 +754,11 @@ export default function AttendanceTracker() {
               filteredAndSortedSubjects.map((subject) => (
                 <div
                   key={subject.id}
-                  className="group flex flex-col sm:grid sm:grid-cols-12 gap-3 sm:gap-4 p-4 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-all duration-300"
+                  className="group flex flex-col sm:grid sm:grid-cols-12 gap-2 sm:gap-3 p-3 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-all duration-300"
                 >
                   <div className="sm:col-span-4 flex items-center gap-3">
                     <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm"
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-xs"
                       style={{ backgroundColor: subject.color || '#6b7280' }}
                     >
                       {subject.name.charAt(0)}
@@ -829,7 +824,7 @@ export default function AttendanceTracker() {
 
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${subject.stats.percentage >= 75 ? 'bg-emerald-500' :
-                            subject.stats.percentage >= 60 ? 'bg-amber-500' : 'bg-rose-500'
+                          subject.stats.percentage >= 60 ? 'bg-amber-500' : 'bg-rose-500'
                           }`}
                         style={{ width: `${subject.stats.percentage}%` }}
                       />

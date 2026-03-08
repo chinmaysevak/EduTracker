@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Search, Filter, BookOpen } from 'lucide-react';
+import { Plus, Search, Filter, BookOpen, Star, Clock, FolderOpen, FileUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStudentStore } from '@/context/StudentContext';
 import ResourceCard from '@/components/resources/ResourceCard';
@@ -13,6 +13,7 @@ export default function Resources() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [editingResource, setEditingResource] = useState<Resource | null>(null);
     const [activeResource, setActiveResource] = useState<Resource | null>(null);
 
     // Filters and sorting
@@ -45,17 +46,20 @@ export default function Resources() {
         }
     };
 
-    const handleEdit = (/* resource: Resource */) => {
-        // Currently editing is not fully spec'd out, but we could open the modal with pre-filled data
-        alert('Edit functionality coming soon.');
+    const handleEdit = (resource: Resource) => {
+        setEditingResource(resource);
+    };
+
+    const handleEditClose = () => {
+        setEditingResource(null);
     };
 
     return (
-        <div className="h-full flex flex-col pt-16 md:pt-0 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+        <div className="h-full flex flex-col max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
             {/* Header section */}
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2 tracking-tight">Resources Library</h1>
-                <p className="text-muted-foreground mb-6">Store, organize, and access all your study materials in one place.</p>
+            <div className="mb-4">
+                <h1 className="text-2xl font-bold mb-1 tracking-tight">Resources Library</h1>
+                <p className="text-muted-foreground text-sm mb-3">Store, organize, and access all your study materials in one place.</p>
 
                 <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
                     <div className="relative w-full max-w-md">
@@ -69,16 +73,16 @@ export default function Resources() {
                         />
                     </div>
                     <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto gap-2 rounded-xl">
-                        <Plus className="w-4 h-4" />
+                        <FileUp className="w-4 h-4" />
                         Add Resource
                     </Button>
                 </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-8 pb-8 flex-1">
+            <div className="flex flex-col lg:flex-row gap-4 pb-6 flex-1">
                 {/* Sidebar / Subject Filter */}
-                <div className="w-full lg:w-64 flex-shrink-0 space-y-6">
-                    <div className="bg-card border border-border/50 rounded-xl p-4 sticky top-6">
+                <div className="w-full lg:w-56 flex-shrink-0 space-y-4">
+                    <div className="bg-card border border-border/50 rounded-xl p-4 sticky top-[90px]">
                         <h3 className="font-semibold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider text-muted-foreground">
                             <Filter className="w-4 h-4" /> Filter by Subject
                         </h3>
@@ -110,10 +114,10 @@ export default function Resources() {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="flex-1 space-y-10 min-w-0">
+                <div className="flex-1 space-y-6 min-w-0">
 
                     {resources.resources.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-border/50 rounded-2xl bg-card">
+                        <div className="flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-border/50 rounded-2xl bg-card">
                             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
                                 <BookOpen className="w-8 h-8" />
                             </div>
@@ -126,7 +130,7 @@ export default function Resources() {
                             </Button>
                         </div>
                     ) : filteredResources.length === 0 ? (
-                        <div className="text-center p-12 bg-card border border-border/50 rounded-2xl">
+                        <div className="text-center p-8 bg-card border border-border/50 rounded-2xl">
                             <p className="text-muted-foreground">No resources found matching your search.</p>
                             <Button variant="link" onClick={() => { setSearchQuery(''); setSelectedSubjectId(null); }}>
                                 Clear filters
@@ -138,8 +142,8 @@ export default function Resources() {
                             {favorites.length > 0 && (
                                 <section>
                                     <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                        <span className="flex items-center justify-center w-6 h-6 rounded bg-amber-500/10 text-amber-500">
-                                            ★
+                                        <span className="flex items-center justify-center w-6 h-6 rounded bg-yellow-500/10 text-yellow-400">
+                                            <Star className="w-4 h-4" />
                                         </span>
                                         Favorites
                                     </h2>
@@ -163,8 +167,8 @@ export default function Resources() {
                             {!searchQuery && !selectedSubjectId && recent.length > 0 && (
                                 <section>
                                     <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                        <span className="flex items-center justify-center w-6 h-6 rounded bg-blue-500/10 text-blue-500">
-                                            ⏱
+                                        <span className="flex items-center justify-center w-6 h-6 rounded bg-cyan-500/10 text-cyan-400">
+                                            <Clock className="w-4 h-4" />
                                         </span>
                                         Recently Added
                                     </h2>
@@ -187,8 +191,22 @@ export default function Resources() {
                             {/* All Resources Grid */}
                             <section>
                                 <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                                    <h2 className="text-lg font-bold">
-                                        {selectedSubjectId ? 'Subject Resources' : 'All Resources'}
+                                    <h2 className="text-lg font-bold flex items-center gap-2">
+                                        {selectedSubjectId ? (
+                                            <>
+                                                <span className="flex items-center justify-center w-6 h-6 rounded bg-purple-500/10 text-purple-400">
+                                                    <FolderOpen className="w-4 h-4" />
+                                                </span>
+                                                Subject Resources
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="flex items-center justify-center w-6 h-6 rounded bg-purple-500/10 text-purple-400">
+                                                    <FolderOpen className="w-4 h-4" />
+                                                </span>
+                                                All Resources
+                                            </>
+                                        )}
                                         <span className="ml-2 text-sm font-normal text-muted-foreground">({filteredResources.length})</span>
                                     </h2>
                                 </div>
@@ -216,6 +234,13 @@ export default function Resources() {
                 <AddResourceModal
                     onClose={() => setIsAddModalOpen(false)}
                     initialSubjectId={selectedSubjectId || ''}
+                />
+            )}
+
+            {editingResource && (
+                <AddResourceModal
+                    onClose={handleEditClose}
+                    editResource={editingResource}
                 />
             )}
 

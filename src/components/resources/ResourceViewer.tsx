@@ -36,12 +36,21 @@ export default function ResourceViewer({ resource, onClose }: ResourceViewerProp
 
     if (!resource) return null;
 
-    // Extract YouTube ID for embed
-    let youtubeEmbedId = '';
+    // Extract YouTube ID or Playlist ID for embed
+    let youtubeEmbedUrl = '';
     if (resource.type === 'youtube' && resource.youtubeUrl) {
-        const match = resource.youtubeUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&]{11})/);
-        if (match && match[1]) {
-            youtubeEmbedId = match[1];
+        const videoMatch = resource.youtubeUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]{11})/);
+        const listMatch = resource.youtubeUrl.match(/[&?]list=([^&?]+)/);
+
+        const videoId = videoMatch ? videoMatch[1] : '';
+        const listId = listMatch ? listMatch[1] : '';
+
+        if (videoId || listId) {
+            const base = videoId || 'videoseries';
+            const params = new URLSearchParams();
+            if (listId) params.set('list', listId);
+            params.set('autoplay', '1');
+            youtubeEmbedUrl = `https://www.youtube.com/embed/${base}?${params.toString()}`;
         }
     }
 
@@ -110,9 +119,9 @@ export default function ResourceViewer({ resource, onClose }: ResourceViewerProp
                     {!isLoading && !error && (
                         <div className="h-full w-full rounded-xl overflow-hidden shadow-inner bg-background border border-border/30">
 
-                            {resource.type === 'youtube' && youtubeEmbedId ? (
+                            {resource.type === 'youtube' && youtubeEmbedUrl ? (
                                 <iframe
-                                    src={`https://www.youtube.com/embed/${youtubeEmbedId}?autoplay=1`}
+                                    src={youtubeEmbedUrl}
                                     title={resource.title}
                                     className="w-full h-full min-h-[60vh] border-0"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

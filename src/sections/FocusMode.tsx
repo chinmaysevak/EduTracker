@@ -71,9 +71,9 @@ export default function FocusMode({ onExit }: FocusModeProps) {
     const currentSubjectName = subjects.find(s => s.id === session.subjectId)?.name || 'Focus Session';
 
     return (
-        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col items-center justify-center p-4 animate-in fade-in duration-300">
             {/* Top Bar */}
-            <div className="absolute top-6 left-6 right-6 flex justify-between items-center max-w-2xl mx-auto w-full">
+            <div className="absolute top-4 left-4 right-4 flex justify-between items-center max-w-2xl mx-auto w-full">
                 <div className="flex items-center gap-2 text-muted-foreground">
                     <div className={`w-2 h-2 rounded-full animate-pulse ${session.mode === 'break' ? 'bg-blue-500' : 'bg-emerald-500'}`} />
                     <span className="text-sm font-medium">
@@ -96,7 +96,7 @@ export default function FocusMode({ onExit }: FocusModeProps) {
                 )}
 
                 <CardHeader className="text-center pb-2">
-                    <CardTitle className="text-3xl font-bold tracking-tight">
+                    <CardTitle className="text-2xl font-bold tracking-tight">
                         {session.isActive
                             ? (session.mode === 'break' ? 'Take a Break' : 'Deep Focus')
                             : 'Ready to Focus?'}
@@ -108,10 +108,10 @@ export default function FocusMode({ onExit }: FocusModeProps) {
                     </CardDescription>
                 </CardHeader>
 
-                <CardContent className="space-y-8 pt-6">
+                <CardContent className="space-y-6 pt-4">
                     {/* Timer Display */}
                     <div className="flex flex-col items-center justify-center">
-                        <div className={`text-7xl font-mono font-bold tracking-tighter tabular-nums transition-colors ${session.isActive ? 'text-primary' : 'text-muted-foreground'
+                        <div className={`text-6xl font-mono font-bold tracking-tighter tabular-nums transition-colors ${session.isActive ? 'text-primary' : 'text-muted-foreground'
                             }`}>
                             {formatTime(timeLeft)}
                         </div>
@@ -124,8 +124,8 @@ export default function FocusMode({ onExit }: FocusModeProps) {
 
                     {/* Controls */}
                     {!session.isActive ? (
-                        <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-300">
-                            <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-300">
+                            <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-2">
                                     <label className="text-xs font-medium text-muted-foreground ml-1">Subject</label>
                                     <Select value={selectedSubjectId} onValueChange={setSelectedSubjectId}>
@@ -176,7 +176,7 @@ export default function FocusMode({ onExit }: FocusModeProps) {
                                 </div>
                             </div>
 
-                            <Button className="w-full h-12 text-lg gap-2" onClick={handleStart}>
+                            <Button className="w-full h-10 text-base gap-2" onClick={handleStart}>
                                 <Play className="w-5 h-5 fill-current" />
                                 Start Blocking
                             </Button>
@@ -186,7 +186,7 @@ export default function FocusMode({ onExit }: FocusModeProps) {
                             {session.mode === 'study' ? (
                                 <>
                                     {!session.isPaused ? (
-                                        <Button variant="outline" size="lg" className="h-12 gap-2" onClick={pauseSession}>
+                                        <Button variant="outline" size="lg" className="h-10 gap-2" onClick={pauseSession}>
                                             <Pause className="w-5 h-5 fill-current" />
                                             Pause
                                         </Button>
@@ -197,7 +197,7 @@ export default function FocusMode({ onExit }: FocusModeProps) {
                                         </Button>
                                     )}
 
-                                    <Button variant="destructive" size="lg" className="h-12 gap-2" onClick={handleStop}>
+                                    <Button variant="destructive" size="lg" className="h-10 gap-2" onClick={handleStop}>
                                         <Square className="w-5 h-5 fill-current" />
                                         Give Up
                                     </Button>
@@ -216,7 +216,7 @@ export default function FocusMode({ onExit }: FocusModeProps) {
             </Card>
 
             {/* Ambient Sounds Control */}
-            <div className="mt-6 w-full max-w-sm">
+            <div className="mt-4 w-full max-w-sm">
                 <Card className="border shadow-lg">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">
@@ -244,8 +244,8 @@ export default function FocusMode({ onExit }: FocusModeProps) {
                                     key={sound.id}
                                     onClick={() => toggleSound(sound.id)}
                                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${currentSoundId === sound.id && isSoundPlaying
-                                            ? 'bg-primary text-primary-foreground shadow-md scale-105'
-                                            : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                                        ? 'bg-primary text-primary-foreground shadow-md scale-105'
+                                        : 'bg-muted hover:bg-muted/80 text-muted-foreground'
                                         }`}
                                 >
                                     <span>{sound.icon}</span>
@@ -258,7 +258,7 @@ export default function FocusMode({ onExit }: FocusModeProps) {
             </div>
 
             {/* Motivational Quote */}
-            <div className="mt-4 text-center max-w-md text-muted-foreground text-sm animate-in fade-in delay-500 duration-700">
+            <div className="mt-3 text-center max-w-md text-muted-foreground text-sm animate-in fade-in delay-500 duration-700">
                 <p>"The successful warrior is the average man, with laser-like focus." — Bruce Lee</p>
             </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { useSubjects } from '@/hooks/useData';
 import { useAttendance } from '@/hooks/useData';
@@ -40,12 +40,39 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     const notifications = useNotifications(userId);
     const profile = useUserProfile(userId);
 
-    // Cross-module synchronization effects
-    // e.g. When a task is completed, update XP
+    // Guard to prevent infinite loops: generate smart notifications only once per session
+    const hasGeneratedNotifs = useRef(false);
+
+    // Reset the flag when user changes (login/logout)
     useEffect(() => {
-        // This could be where centralized logic lives
-        // For now, we just expose the hooks
+        hasGeneratedNotifs.current = false;
     }, [userId]);
+
+    // Cross-module synchronization effects
+    // Automatically generate smart notifications for overdue tasks & attendance (once per session)
+    useEffect(() => {
+        if (!userId || hasGeneratedNotifs.current) return;
+        if (tasks.isLoading || subjects.isLoading || attendance.isLoading) return;
+
+        hasGeneratedNotifs.current = true;
+
+        // Generate smart notifications based on current data
+        const newNotifs = notifications.generateSmartNotifications(
+            tasks.tasks,
+            attendance.attendanceData,
+            subjects.subjects
+        );
+
+        // Add them if they don't already exist today to prevent spam
+        newNotifs.forEach(notif => {
+            const alreadyExists = notifications.notifications.some(
+                n => n.title === notif.title && n.createdAt.startsWith(new Date().toISOString().split('T')[0])
+            );
+            if (!alreadyExists) {
+                notifications.addNotification(notif);
+            }
+        });
+    }, [userId, tasks.isLoading, subjects.isLoading, attendance.isLoading]);
 
     const value = {
         subjects,
