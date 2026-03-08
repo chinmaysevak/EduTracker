@@ -217,23 +217,36 @@ export function AiChatAdvisor() {
             </div>
 
             {/* Chat Area */}
-            <CardContent className="p-0 flex flex-col flex-1 relative bg-background/50">
+            <CardContent className="p-0 flex flex-col flex-1 relative bg-background/50 overflow-hidden">
                 {/* Mobile History Toggle (Visible only on small screens) */}
-                <div className="md:hidden p-3 border-b border-border flex gap-2 overflow-x-auto">
-                    <Button size="sm" variant="outline" onClick={() => createNewSession()} className="rounded-full flex-shrink-0">
-                        <Plus className="w-3 h-3 mr-1" /> New
-                    </Button>
-                    {sessions.map(s => (
-                        <Button
-                            key={s.id}
-                            size="sm"
-                            variant={activeSessionId === s.id ? 'default' : 'secondary'}
-                            onClick={() => setActiveSessionId(s.id)}
-                            className="rounded-full flex-shrink-0 max-w-[150px] truncate block"
-                        >
-                            {s.title}
+                <div className="md:hidden p-3 border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10 flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                            <MessageSquare className="w-3 h-3" /> Chat History
+                        </span>
+                        <Button size="sm" onClick={() => createNewSession()} className="h-8 rounded-lg btn-gradient px-3 text-xs">
+                            <Plus className="w-3 h-3 mr-1" /> New Chat
                         </Button>
-                    ))}
+                    </div>
+
+                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                        {sessions.length === 0 ? (
+                            <span className="text-[10px] text-muted-foreground italic">No recent chats</span>
+                        ) : (
+                            sessions.map(s => (
+                                <Button
+                                    key={s.id}
+                                    size="sm"
+                                    variant={activeSessionId === s.id ? 'default' : 'secondary'}
+                                    onClick={() => setActiveSessionId(s.id)}
+                                    className={`rounded-lg h-8 flex-shrink-0 max-w-[120px] transition-all text-xs ${activeSessionId === s.id ? 'shadow-sm ring-1 ring-primary/20' : ''
+                                        }`}
+                                >
+                                    <span className="truncate">{s.title}</span>
+                                </Button>
+                            ))
+                        )}
+                    </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 scrollbar-modern">
@@ -264,15 +277,15 @@ export function AiChatAdvisor() {
                             {currentMessages.map((msg, i) => (
                                 <div
                                     key={i}
-                                    className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                    className={`flex gap-2 md:gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                     {msg.role === 'ai' && (
-                                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
-                                            <Bot className="w-4 h-4 text-white" />
+                                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0 mt-1">
+                                            <Bot className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
                                         </div>
                                     )}
                                     <div
-                                        className={`max-w-[80%] min-w-0 rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === 'user'
+                                        className={`max-w-[85%] md:max-w-[80%] min-w-0 rounded-2xl px-3 py-2 md:px-4 md:py-3 text-[13px] md:text-sm leading-relaxed ${msg.role === 'user'
                                             ? 'bg-primary text-primary-foreground rounded-br-md whitespace-pre-wrap'
                                             : 'bg-muted rounded-bl-md prose prose-sm dark:prose-invert max-w-none'
                                             }`}
@@ -288,20 +301,20 @@ export function AiChatAdvisor() {
                                         )}
                                     </div>
                                     {msg.role === 'user' && (
-                                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center flex-shrink-0">
-                                            <User className="w-4 h-4 text-white" />
+                                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center flex-shrink-0 mt-1">
+                                            <User className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
                                         </div>
                                     )}
                                 </div>
                             ))}
                             {isLoading && (
-                                <div className="flex gap-3 justify-start">
-                                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
-                                        <Bot className="w-4 h-4 text-white" />
+                                <div className="flex gap-2 md:gap-3 justify-start">
+                                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                                        <Bot className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
                                     </div>
-                                    <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
-                                        <Loader2 className="w-4 h-4 animate-spin text-violet-500" />
-                                        <span className="text-sm text-muted-foreground">Thinking...</span>
+                                    <div className="bg-muted rounded-2xl rounded-bl-md px-3 py-2 md:px-4 md:py-3 flex items-center gap-2">
+                                        <Loader2 className="w-3.5 h-3.5 md:w-4 md:h-4 animate-spin text-violet-500" />
+                                        <span className="text-xs md:text-sm text-muted-foreground font-medium">Thinking...</span>
                                     </div>
                                 </div>
                             )}
@@ -311,28 +324,28 @@ export function AiChatAdvisor() {
                 </div>
 
                 {/* Input Area */}
-                <div className="border-t border-border p-4 bg-card/50">
-                    <form onSubmit={handleSubmit} className="flex gap-2">
+                <div className="border-t border-border p-3 md:p-4 bg-card/80 backdrop-blur-sm">
+                    <form onSubmit={handleSubmit} className="flex gap-1.5 md:gap-2">
                         <Input
                             ref={inputRef}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            placeholder="Ask your AI advisor anything..."
-                            className="flex-1 h-11 rounded-xl"
+                            placeholder="Ask me anything..."
+                            className="flex-1 h-10 md:h-11 rounded-xl bg-background/50 border-border/50 transition-all focus:ring-1 focus:ring-primary/20 min-w-0"
                             disabled={isLoading}
                             autoFocus
                         />
                         <Button
                             type="submit"
                             size="icon"
-                            className="h-11 w-11 rounded-xl btn-gradient"
+                            className="h-10 w-10 md:h-11 md:w-11 rounded-xl btn-gradient flex-shrink-0 shadow-lg shadow-violet-500/10"
                             disabled={isLoading || !input.trim()}
                         >
-                            <Send className="w-4 h-4" />
+                            <Send className="w-3.5 h-3.5 md:w-4 md:h-4" />
                         </Button>
                     </form>
-                    <p className="text-[10px] text-muted-foreground text-center mt-2">
-                        Powered by Google Gemini · Responses are based on your academic data
+                    <p className="text-[9px] md:text-[10px] text-muted-foreground text-center mt-2 opacity-70">
+                        Powered by Google Gemini · Responses based on your data
                     </p>
                 </div>
             </CardContent>

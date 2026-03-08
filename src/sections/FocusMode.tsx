@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Play, Pause, Square, Minimize2, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, Square, Volume2, VolumeX, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSubjects } from '@/hooks/useData';
 import { useFocusEngine } from '@/hooks/useFocusEngine';
@@ -80,9 +80,8 @@ export default function FocusMode({ onExit }: FocusModeProps) {
                         {session.mode === 'break' ? 'Break Time' : 'Focus Mode Active'}
                     </span>
                 </div>
-                <Button variant="ghost" size="sm" onClick={onExit} className="gap-2 hover:bg-destructive/10 hover:text-destructive">
-                    <Minimize2 className="w-4 h-4" />
-                    Exit
+                <Button variant="ghost" size="icon" onClick={onExit} className="rounded-full hover:bg-destructive/10 hover:text-destructive">
+                    <X className="w-5 h-5" />
                 </Button>
             </div>
 
