@@ -35,8 +35,12 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:4173',
+  "https://grand-tiramisu-04f08b.netlify.app"];
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:4173'],
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));
