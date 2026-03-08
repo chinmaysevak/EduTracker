@@ -15,17 +15,20 @@ import App from './App.tsx'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { AuthProvider } from '@/context/AuthContext'
 import { StudentProvider } from '@/context/StudentContext'
+import { PwaProvider } from '@/context/PwaContext'
 import { ResponsiveWrapper } from '@/components/Layout/ResponsiveWrapper'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
       <AuthProvider>
-        <StudentProvider>
-          <ResponsiveWrapper>
-            <App />
-          </ResponsiveWrapper>
-        </StudentProvider>
+        <PwaProvider>
+          <StudentProvider>
+            <ResponsiveWrapper>
+              <App />
+            </ResponsiveWrapper>
+          </StudentProvider>
+        </PwaProvider>
       </AuthProvider>
       <Toaster position="bottom-right" richColors />
     </ErrorBoundary>

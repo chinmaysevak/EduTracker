@@ -266,7 +266,12 @@ export default function DashboardLayout() {
                         <button onClick={() => navigate('/dashboard')} type="button" className="flex items-center gap-3 w-fit max-w-full shrink-0">
                             <div className="relative flex-shrink-0 group/logo">
                                 <div className="absolute inset-0 bg-blue-500/20 blur-lg rounded-full opacity-0 group-hover/logo:opacity-100 transition-opacity duration-500" />
-                                <img src="/logo.png" alt="EduTrack" className="w-10 h-10 relative z-10 object-contain drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]" />
+                                <img
+                                    src={`${import.meta.env.BASE_URL}logo.png`}
+                                    onError={(e) => { e.currentTarget.src = `${import.meta.env.BASE_URL}logo.svg` }}
+                                    alt="EduTrack"
+                                    className="w-10 h-10 relative z-10 object-contain drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]"
+                                />
                                 <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-background flex items-center justify-center z-20">
                                     <div className="w-1.5 h-1.5 bg-white rounded-full" />
                                 </div>
@@ -332,7 +337,12 @@ export default function DashboardLayout() {
             <div className={`lg:hidden fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${isScrolled ? 'glass shadow-lg' : 'bg-background'}`}>
                 <div className="flex items-center justify-between px-4 py-2.5">
                     <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2">
-                        <img src="/logo.png" alt="EduTrack" className="w-8 h-8 object-contain drop-shadow-[0_0_5px_rgba(59,130,246,0.2)]" />
+                        <img
+                            src={`${import.meta.env.BASE_URL}logo.png`}
+                            onError={(e) => { e.currentTarget.src = `${import.meta.env.BASE_URL}logo.svg` }}
+                            alt="EduTrack"
+                            className="w-8 h-8 object-contain drop-shadow-[0_0_5px_rgba(59,130,246,0.2)]"
+                        />
                         <h1 className="font-semibold text-base">EduTrack</h1>
                     </button>
                     <div className="flex items-center gap-1">

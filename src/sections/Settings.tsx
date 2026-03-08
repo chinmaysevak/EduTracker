@@ -21,7 +21,8 @@ import {
   Lock,
   Shield,
   X,
-  Check
+  Check,
+  Smartphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +38,7 @@ import { useTheme, ACCENT_PRESETS } from '@/hooks/useTheme';
 import { EduNotifications } from '@/lib/notifications';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { usePwa } from '@/context/PwaContext';
 
 interface UserProfile {
   id: string;
@@ -797,7 +799,10 @@ export default function Settings() {
         </CardContent>
       </Card>
 
-      {/* SECTION 10: Danger Zone */}
+      {/* SECTION 10: App Settings (PWA) */}
+      <AppInstallationSection />
+
+      {/* SECTION 11: Danger Zone */}
       <Card className="border-red-200">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-red-600">
@@ -1233,5 +1238,31 @@ function DeleteAccountDialog({ open, onOpenChange, email, onDeleted }: { open: b
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function AppInstallationSection() {
+  const { isInstallable, installApp } = usePwa();
+
+  if (!isInstallable) return null;
+
+  return (
+    <Card className="border-primary/20 bg-primary/5">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2">
+          <Smartphone className="h-5 w-5 text-primary" />
+          Install EduTrack App
+        </CardTitle>
+        <CardDescription>
+          Install EduTrack on your device for a better experience, offline access, and faster loading.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button onClick={installApp} className="w-full sm:w-auto">
+          <Download className="h-4 w-4 mr-2" />
+          Install Now
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

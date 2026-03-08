@@ -189,7 +189,8 @@ export default function LoginPage() {
             <div className="w-16 h-16 relative group">
               <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full group-hover:bg-blue-500/30 transition-all duration-500" />
               <img
-                src="/logo.png"
+                src={`${import.meta.env.BASE_URL}logo.png`}
+                onError={(e) => { e.currentTarget.src = `${import.meta.env.BASE_URL}logo.svg` }}
                 alt="EduTrack Logo"
                 className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]"
               />

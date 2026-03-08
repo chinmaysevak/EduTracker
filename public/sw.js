@@ -1,29 +1,30 @@
 // ============================================
-// Service Worker for EduTracker0 PWA
+// Service Worker for EduTrack PWA
 // ============================================
 
-const CACHE_NAME = 'edutracker0-v1';
-const STATIC_CACHE = 'static-v1';
-const DYNAMIC_CACHE = 'dynamic-v1';
+const CACHE_NAME = 'edutrack-v2';
+const STATIC_CACHE = 'static-v2';
+const DYNAMIC_CACHE = 'dynamic-v2';
 
 // Assets to cache for offline functionality
 const STATIC_ASSETS = [
   '/',
-  '/index.html',
-  '/manifest.json',
-  '/favicon.svg',
-  '/logo.svg',
-  // Add your static assets here
+  './index.html',
+  './manifest.json',
+  './favicon.svg',
+  './logo.svg',
+  './logo.png'
 ];
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+      // Use no-cache to ensure we get the latest assets during installation
+      return cache.addAll(STATIC_ASSETS.map(url => new Request(url, { cache: 'no-cache' })));
     })
   );
-  
+
   // Skip waiting for activation
   self.skipWaiting();
 });
@@ -95,11 +96,11 @@ async function syncData() {
     const attendance = localStorage.getItem('edu-tracker-attendance-v2');
     const materials = localStorage.getItem('edu-tracker-materials');
     const tasks = localStorage.getItem('edu-tracker-tasks');
-    
+
     // Here you can implement cloud sync
     // For now, just log that sync was attempted
     console.log('Background sync completed');
-    
+
   } catch (error) {
     console.error('Background sync failed:', error);
   }
@@ -109,7 +110,7 @@ async function syncData() {
 self.addEventListener('push', (event) => {
   const options = {
     body: event.data.text(),
-    icon: '/logo.svg',
+    icon: '/logo.png',
     badge: '/favicon.svg',
     vibrate: [100, 50, 100],
     data: {
@@ -118,7 +119,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('EduTracker0 Update', options)
+    self.registration.showNotification('EduTrack Update', options)
   );
 });
 

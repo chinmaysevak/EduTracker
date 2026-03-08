@@ -11,7 +11,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['favicon.svg', 'logo.svg', 'logo.png'],
       manifest: {
         name: 'EduTrack - Smart Study Companion',
         short_name: 'EduTrack',

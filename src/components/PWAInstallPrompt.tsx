@@ -1,89 +1,49 @@
-import { useState, useEffect } from 'react';
 import type { ReactElement } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, Download, Smartphone } from 'lucide-react';
+import { Download, Smartphone } from 'lucide-react';
+import { usePwa } from '@/context/PwaContext';
 
-interface PWAInstallPromptProps {
-  onClose?: () => void;
-}
+export default function PWAInstallPrompt(): ReactElement | null {
+  const { isInstallable, installApp, hidePrompt } = usePwa();
 
-export default function PWAInstallPrompt({ onClose }: PWAInstallPromptProps): ReactElement | null {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isInstallable, setIsInstallable] = useState(false);
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setIsInstallable(true);
-    };
-
-    const handleAppInstalled = () => {
-      setIsInstallable(false);
-      setDeferredPrompt(null);
-      if (onClose) {
-        onClose();
-      }
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
-  }, [onClose]);
-
+  // We only show the prompt if it's installable AND hasn't been hidden for this session
+  // Or if it's being shown manually (but manual show is usually for buttons)
   if (!isInstallable) {
     return null;
   }
 
   return (
     <div
-      className="fixed z-50 p-4 bg-background border border-border rounded-lg shadow-lg max-w-sm mx-4 lg:mx-0 lg:right-4 right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:bottom-4"
+      className="fixed z-50 p-4 bg-background/80 backdrop-blur-xl border border-border rounded-2xl shadow-2xl max-w-sm mx-4 lg:mx-0 lg:right-6 right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:bottom-6 animate-in slide-in-from-bottom-5 duration-500"
     >
       <div className="flex items-center gap-3">
-        <Smartphone className="w-5 h-5 text-muted-foreground" />
-        <div className="flex-1">
-          <p className="text-sm font-medium">Install EduTracker0</p>
-          <p className="text-xs text-muted-foreground">
-            Get the full experience with offline access and push notifications
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <Smartphone className="w-5 h-5 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold truncate">Install EduTrack</p>
+          <p className="text-xs text-muted-foreground line-clamp-2">
+            Add to home screen for offline access and better performance.
           </p>
         </div>
-        <Button
-          onClick={async () => {
-            if (deferredPrompt) {
-              deferredPrompt.prompt();
-              const { outcome } = await deferredPrompt.userChoice;
-              if (outcome === 'accepted') {
-                setIsInstallable(false);
-                setDeferredPrompt(null);
-                if (onClose) {
-                  onClose();
-                }
-              }
-            }
-          }}
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Install
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            setIsInstallable(false);
-            setDeferredPrompt(null);
-            if (onClose) {
-              onClose();
-            }
-          }}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <X className="w-4 h-4" />
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button
+            size="sm"
+            onClick={installApp}
+            className="h-8 px-3 text-xs bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-sm"
+          >
+            <Download className="w-3.5 h-3.5 mr-1.5" />
+            Install
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={hidePrompt}
+            className="h-8 px-3 text-xs text-muted-foreground hover:text-foreground rounded-lg"
+          >
+            Later
+          </Button>
+        </div>
       </div>
     </div>
   );
