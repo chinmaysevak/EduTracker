@@ -6,7 +6,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: './',
+  base: '/',
   plugins: [
     react(),
     VitePWA({
@@ -16,12 +16,20 @@ export default defineConfig({
         name: 'EduTrack - Smart Study Companion',
         short_name: 'EduTrack',
         description: 'Your personal smart study companion for tracking attendance, tasks, and materials.',
-        theme_color: '#ffffff',
+        theme_color: '#3b82f6',
+        background_color: '#0a0a0f',
         icons: [
           {
-            src: 'icon.svg',
-            sizes: '192x192 512x512',
-            type: 'image/svg+xml'
+            src: 'logo.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'logo.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       }
