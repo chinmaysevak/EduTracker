@@ -28,7 +28,7 @@ export default function SmartAdvisorPage() {
         onValueChange={setActiveTab}
         className="w-full"
       >
-        <TabsList className="flex w-full max-w-sm mx-auto justify-center h-12 p-1.5 bg-muted/40 backdrop-blur-md rounded-2xl md:w-[520px]">
+        <TabsList className="flex w-full max-w-md mx-auto justify-center h-12 p-1.5 bg-muted/40 backdrop-blur-md rounded-2xl md:w-[520px]">
           <TabsTrigger value="ai-chat" className="flex-1 min-w-0 gap-2 rounded-xl transition-all duration-300">
             <Sparkles className="w-4 h-4" />
             <span className="hidden sm:inline">AI Chat</span>
