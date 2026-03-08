@@ -28,20 +28,20 @@ export default function SmartAdvisorPage() {
         onValueChange={setActiveTab}
         className="w-full"
       >
-        <TabsList className="flex w-full h-11 p-1 bg-muted/50 rounded-2xl md:w-[520px]">
-          <TabsTrigger value="ai-chat" className="flex-1 gap-2 rounded-xl">
+        <TabsList className="flex w-full justify-center h-11 p-1 bg-muted/50 rounded-2xl md:w-[520px] mx-auto">
+          <TabsTrigger value="ai-chat" className="flex-1 min-w-0 gap-2 rounded-xl">
             <Sparkles className="w-4 h-4" />
             <span className="hidden sm:inline">AI Chat</span>
           </TabsTrigger>
-          <TabsTrigger value="advisor" className="flex-1 gap-2 rounded-xl">
+          <TabsTrigger value="advisor" className="flex-1 min-w-0 gap-2 rounded-xl">
             <Brain className="w-4 h-4" />
             <span className="hidden sm:inline">Insights</span>
           </TabsTrigger>
-          <TabsTrigger value="planner" className="flex-1 gap-2 rounded-xl">
+          <TabsTrigger value="planner" className="flex-1 min-w-0 gap-2 rounded-xl">
             <Calendar className="w-4 h-4" />
             <span className="hidden sm:inline">Planner</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex-1 gap-2 rounded-xl">
+          <TabsTrigger value="analytics" className="flex-1 min-w-0 gap-2 rounded-xl">
             <BarChart3 className="w-4 h-4" />
             <span className="hidden sm:inline">Productivity</span>
           </TabsTrigger>
