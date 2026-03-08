@@ -123,7 +123,7 @@ router.post('/chat', authMiddleware, async (req, res) => {
         res.json({ reply: response });
     } catch (error) {
         console.error('Gemini AI Error:', error.message);
-        res.status(500).json({ error: 'AI service temporarily unavailable. Please try again.' });
+        res.status(500).json({ error: `AI Error: ${error.message}` });
     }
 });
 
