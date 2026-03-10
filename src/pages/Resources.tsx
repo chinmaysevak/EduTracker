@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Plus, Search, Filter, BookOpen, Star, Clock, FolderOpen, FileUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStudentStore } from '@/context/StudentContext';
@@ -15,6 +15,7 @@ export default function Resources() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingResource, setEditingResource] = useState<Resource | null>(null);
     const [activeResource, setActiveResource] = useState<Resource | null>(null);
+    const resourceSectionRef = useRef<HTMLDivElement | null>(null);
 
     // Filters and sorting
     const filteredResources = useMemo(() => {
@@ -88,7 +89,12 @@ export default function Resources() {
                         </h3>
                         <div className="space-y-1">
                             <button
-                                onClick={() => setSelectedSubjectId(null)}
+                                onClick={() => {
+                                    setSelectedSubjectId(null);
+                                    setTimeout(() => {
+                                        resourceSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }, 0);
+                                }}
                                 className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${selectedSubjectId === null
                                     ? 'bg-primary/10 text-primary font-medium'
                                     : 'text-muted-foreground hover:bg-muted font-medium'
@@ -99,7 +105,12 @@ export default function Resources() {
                             {subjects.subjects.map(subject => (
                                 <button
                                     key={subject.id}
-                                    onClick={() => setSelectedSubjectId(subject.id)}
+                                    onClick={() => {
+                                        setSelectedSubjectId(subject.id);
+                                        setTimeout(() => {
+                                            resourceSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                        }, 0);
+                                    }}
                                     className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${selectedSubjectId === subject.id
                                         ? 'bg-primary/10 text-primary font-medium'
                                         : 'text-muted-foreground hover:bg-muted font-medium'
@@ -189,7 +200,7 @@ export default function Resources() {
                             )}
 
                             {/* All Resources Grid */}
-                            <section>
+                            <section ref={resourceSectionRef}>
                                 <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                                     <h2 className="text-lg font-bold flex items-center gap-2">
                                         {selectedSubjectId ? (

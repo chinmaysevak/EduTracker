@@ -2,7 +2,7 @@
 // Attendance Tracker - Modern Design
 // ============================================
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -77,6 +77,8 @@ export default function AttendanceTracker() {
   const [extraClassEndTime, setExtraClassEndTime] = useState('');
 
   const extraClasses = getExtraClasses(selectedDate);
+  const dayPanelRef = useRef<HTMLDivElement | null>(null);
+  const [showExtraLectures, setShowExtraLectures] = useState(false);
 
   useEffect(() => {
     const year = currentDate.getFullYear();
@@ -431,7 +433,12 @@ export default function AttendanceTracker() {
                 return (
                   <button
                     key={index}
-                    onClick={() => setSelectedDate(dateStr)}
+                    onClick={() => {
+                      setSelectedDate(dateStr);
+                      setTimeout(() => {
+                        dayPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }, 0);
+                    }}
                     className={`
                       min-h-[52px] p-1 rounded-xl border-2 transition-all duration-300 text-left relative
                       ${isCurrentMonth(date) ? 'bg-card' : 'bg-muted/30'}
@@ -489,9 +496,10 @@ export default function AttendanceTracker() {
         </Card>
 
         {/* Daily Attendance Panel - Modern */}
-        <Card className="card-modern border-0">
+        <Card ref={dayPanelRef} className="card-modern border-0">
           <CardHeader className="pb-2">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
                 <CalendarCheck className="w-5 h-5 text-white" />
               </div>
@@ -507,6 +515,15 @@ export default function AttendanceTracker() {
                   {selectedDayScheduled.length > 0 ? `${selectedDayScheduled.length} classes scheduled` : 'No classes scheduled'}
                 </p>
               </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 rounded-xl text-xs"
+                onClick={() => setShowExtraLectures(prev => !prev)}
+              >
+                {showExtraLectures ? 'Hide Extra Lectures' : 'Show Extra Lectures'}
+              </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -642,7 +659,7 @@ export default function AttendanceTracker() {
               </div>
             )}
 
-            {selectedDayAllSubjects.filter(s => !selectedDayScheduled.find(ss => ss.id === s.id)).length > 0 && (
+            {showExtraLectures && selectedDayAllSubjects.filter(s => !selectedDayScheduled.find(ss => ss.id === s.id)).length > 0 && (
               <div className="space-y-3 pt-4 border-t border-border">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Other Subjects</p>
                 {selectedDayAllSubjects

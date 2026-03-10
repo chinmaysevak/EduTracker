@@ -8,7 +8,7 @@ import type { ModuleType } from '@/types';
 
 export function WelcomeSection({ onNavigate }: { onNavigate: (module: ModuleType) => void }) {
     const { profile } = useUserProfile();
-    const { getTodayClasses } = useTimetable();
+    const { getTodayClasses, getWeekSchedule } = useTimetable();
     const { getPendingTasks } = useStudyTasks();
 
     const [greeting, setGreeting] = useState('');
@@ -30,14 +30,38 @@ export function WelcomeSection({ onNavigate }: { onNavigate: (module: ModuleType
         setGreeting(newGreeting);
     }, []);
 
-    // Next Class Logic
+    // Next Class Logic - search across today and upcoming days
     const todayClasses = getTodayClasses();
     const now = new Date();
-    const currentTimeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const todayIndex = now.getDay();
 
-    const nextClass = todayClasses
-        .sort((a, b) => a.startTime.localeCompare(b.startTime))
-        .find(c => c.startTime > currentTimeStr);
+    const findNextClass = () => {
+        const week = getWeekSchedule();
+        let best: { subject: string; start: Date; end: Date } | null = null;
+
+        week.forEach(({ dayIndex, classes }) => {
+            classes.forEach(slot => {
+                const dayOffset = (dayIndex - todayIndex + 7) % 7;
+                const candidateDate = new Date(now);
+                candidateDate.setDate(now.getDate() + dayOffset);
+
+                const [sh, sm] = slot.startTime.split(':').map(Number);
+                const [eh, em] = slot.endTime.split(':').map(Number);
+
+                const start = new Date(candidateDate.getFullYear(), candidateDate.getMonth(), candidateDate.getDate(), sh || 0, sm || 0);
+                const end = new Date(candidateDate.getFullYear(), candidateDate.getMonth(), candidateDate.getDate(), eh || 0, em || 0);
+
+                if (start <= now) return;
+                if (!best || start < best.start) {
+                    best = { subject: slot.subject, start, end };
+                }
+            });
+        });
+
+        return best;
+    };
+
+    const nextClass = findNextClass();
 
     // Stats
     const pendingTasksCount = getPendingTasks().length;
@@ -68,11 +92,11 @@ export function WelcomeSection({ onNavigate }: { onNavigate: (module: ModuleType
                         <div>
                             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Next Class</p>
                             <p className="font-bold truncate">
-                                {nextClass ? nextClass.subject : 'No more classes'}
+                                {nextClass ? nextClass.subject : 'No upcoming classes scheduled'}
                             </p>
                             {nextClass && (
                                 <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mono-data">
-                                    {nextClass.startTime} – {nextClass.endTime}
+                                    {nextClass.start.toTimeString().slice(0, 5)} – {nextClass.end.toTimeString().slice(0, 5)}
                                 </p>
                             )}
                         </div>

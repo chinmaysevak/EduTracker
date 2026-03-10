@@ -75,8 +75,14 @@ export default function Dashboard() {
   return (
     <div className="settings-bg space-y-5">
       <WelcomeSection onNavigate={(path) => navigate(`/${path}`)} />
-      <TimetableWidget />
-      <BackupReminderWidget />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 w-full">
+        <div className="lg:col-span-2">
+          <TimetableWidget />
+        </div>
+        <div className="lg:col-span-1">
+          <ExamCountdownWidget onNavigate={(path) => navigate(`/${path}`)} />
+        </div>
+      </div>
 
       {/* ══ Asymmetric Hero: Attendance Health (dominant) + Right Column ══ */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full">
@@ -90,7 +96,6 @@ export default function Dashboard() {
         <div className="lg:col-span-4 space-y-4">
           <ResumeSessionCard onNavigate={(path) => navigate(`/${path}`)} />
           <StreakWidget />
-          <ExamCountdownWidget onNavigate={(path) => navigate(`/${path}`)} />
         </div>
       </div>
 
@@ -102,7 +107,7 @@ export default function Dashboard() {
           subtitle={overdueTasksCount > 0 ? `${overdueTasksCount} overdue` : 'All on track'}
           glowColor={overdueTasksCount > 0 ? 'amber' : undefined}
           icon={<ClipboardList className="w-4 h-4 text-amber-500" />}
-          onClick={() => navigate('/planner')}
+          onClick={() => navigate('/planner?filter=pending')}
         />
 
         <GlassyDataCard

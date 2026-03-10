@@ -44,6 +44,7 @@ export function AiChatAdvisor() {
     const currentMessages = activeSession?.messages || [];
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -162,10 +163,16 @@ export function AiChatAdvisor() {
     };
 
     return (
-        <Card className="card-modern border-0 overflow-hidden flex flex-col md:flex-row" style={{ height: 'calc(100vh - 280px)', minHeight: '600px' }}>
+        <Card className="card-modern border-0 overflow-hidden flex flex-col md:flex-row relative" style={{ height: 'calc(100vh - 280px)', minHeight: '600px' }}>
 
-            {/* Sidebar for History */}
-            <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-border bg-card/50 flex flex-col hidden md:flex">
+            {/* Sidebar for History (collapsible) */}
+            <div
+                className={`
+                    fixed inset-y-0 left-0 z-30 w-72 bg-card/95 border-r border-border shadow-2xl transform transition-transform duration-200 ease-out
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                    md:static md:translate-x-0 md:w-64 md:flex md:flex-col
+                `}
+            >
                 <div className="p-4 border-b border-border">
                     <Button
                         onClick={() => createNewSession()}
@@ -203,7 +210,9 @@ export function AiChatAdvisor() {
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            deleteSession(session.id);
+                                            if (window.confirm('Delete this chat permanently?')) {
+                                                deleteSession(session.id);
+                                            }
                                         }}
                                         className={`absolute right-2 p-1.5 rounded-md hover:bg-destructive hover:text-white bg-background/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity ${activeSessionId === session.id ? 'opacity-100' : ''}`}
                                     >
@@ -218,35 +227,25 @@ export function AiChatAdvisor() {
 
             {/* Chat Area */}
             <CardContent className="p-0 flex flex-col flex-1 relative bg-background/50 overflow-hidden">
-                {/* Mobile History Toggle (Visible only on small screens) */}
-                <div className="md:hidden p-3 border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10 flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                            <MessageSquare className="w-3 h-3" /> Chat History
-                        </span>
-                        <Button size="sm" onClick={() => createNewSession()} className="h-8 rounded-lg btn-gradient px-3 text-xs">
-                            <Plus className="w-3 h-3 mr-1" /> New Chat
+                {/* Top bar with sidebar toggle and new chat */}
+                <div className="p-3 border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-lg md:hidden"
+                            aria-label="Toggle chat history"
+                            onClick={() => setIsSidebarOpen(prev => !prev)}
+                        >
+                            <MessageSquare className="w-4 h-4" />
                         </Button>
+                        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                            <Sparkles className="w-3 h-3" /> EduTracker AI
+                        </span>
                     </div>
-
-                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                        {sessions.length === 0 ? (
-                            <span className="text-[10px] text-muted-foreground italic">No recent chats</span>
-                        ) : (
-                            sessions.map(s => (
-                                <Button
-                                    key={s.id}
-                                    size="sm"
-                                    variant={activeSessionId === s.id ? 'default' : 'secondary'}
-                                    onClick={() => setActiveSessionId(s.id)}
-                                    className={`rounded-lg h-8 flex-shrink-0 max-w-[120px] transition-all text-xs ${activeSessionId === s.id ? 'shadow-sm ring-1 ring-primary/20' : ''
-                                        }`}
-                                >
-                                    <span className="truncate">{s.title}</span>
-                                </Button>
-                            ))
-                        )}
-                    </div>
+                    <Button size="sm" onClick={() => createNewSession()} className="h-8 rounded-lg btn-gradient px-3 text-xs">
+                        <Plus className="w-3 h-3 mr-1" /> New Chat
+                    </Button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 scrollbar-modern">

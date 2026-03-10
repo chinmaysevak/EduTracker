@@ -75,7 +75,6 @@ export default function FocusMode({ onExit }: FocusModeProps) {
             {/* Top Bar */}
             <div className="absolute top-4 left-4 right-4 flex justify-between items-center max-w-2xl mx-auto w-full">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                    <div className={`w-2 h-2 rounded-full animate-pulse ${session.mode === 'break' ? 'bg-blue-500' : 'bg-emerald-500'}`} />
                     <span className="text-sm font-medium">
                         {session.mode === 'break' ? 'Break Time' : 'Focus Mode Active'}
                     </span>
