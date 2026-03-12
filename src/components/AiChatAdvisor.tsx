@@ -13,7 +13,7 @@ import ReactMarkdown from 'react-markdown';
 import { useSmartAcademicAssistant } from '@/hooks/useSmartAcademicAssistant';
 import { useChatHistory } from '@/hooks/useChatHistory';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Plus, MessageSquare, Trash2 } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 export interface ChatMessage {
@@ -165,6 +165,14 @@ export function AiChatAdvisor() {
     return (
         <Card className="card-modern border-0 overflow-hidden flex flex-col md:flex-row relative" style={{ height: 'calc(100vh - 280px)', minHeight: '600px' }}>
 
+            {/* Mobile overlay behind sidebar */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 z-20 bg-background/60 backdrop-blur-sm md:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar for History (collapsible) */}
             <div
                 className={`
@@ -173,6 +181,23 @@ export function AiChatAdvisor() {
                     md:static md:translate-x-0 md:w-64 md:flex md:flex-col
                 `}
             >
+                <div className="p-4 border-b border-border flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            Chat History
+                        </span>
+                    </div>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-lg md:hidden"
+                        aria-label="Close chat history"
+                        onClick={() => setIsSidebarOpen(false)}
+                    >
+                        <X className="w-4 h-4" />
+                    </Button>
+                </div>
                 <div className="p-4 border-b border-border">
                     <Button
                         onClick={() => createNewSession()}
