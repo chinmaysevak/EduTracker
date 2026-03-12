@@ -126,8 +126,8 @@ export function AiChatAdvisor() {
         if (!targetSessionId) return; // Safety: bail if session creation failed
 
         await addMessage(targetSessionId, userMessage);
-        setInput('');
         setIsLoading(true);
+        setInput('');
 
         try {
             const response = await api.post<{ reply: string }>('/ai/chat', {
@@ -168,7 +168,7 @@ export function AiChatAdvisor() {
             {/* Mobile overlay behind sidebar */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 z-20 bg-background/60 backdrop-blur-sm md:hidden"
+                    className="fixed inset-0 z-[60] bg-background/60 backdrop-blur-sm md:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}
@@ -176,7 +176,7 @@ export function AiChatAdvisor() {
             {/* Sidebar for History (collapsible) */}
             <div
                 className={`
-                    fixed inset-y-0 left-0 z-30 w-72 bg-card/95 border-r border-border shadow-2xl transform transition-transform duration-200 ease-out
+                    fixed inset-y-0 left-0 z-[70] w-72 bg-card/95 border-r border-border shadow-2xl transform transition-transform duration-200 ease-out
                     ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     md:static md:translate-x-0 md:w-64 md:flex md:flex-col
                 `}

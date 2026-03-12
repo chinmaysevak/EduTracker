@@ -75,7 +75,7 @@ export function AttendancePredictionModal({ isOpen, onClose }: AttendancePredict
                             const simulatedVal = simulation[subject.id] || 0;
 
                             return (
-                                <div key={subject.id} className="p-4 rounded-xl border bg-card/50 hover:bg-card transition-colors">
+                                <div key={subject.id} className="p-4 rounded-xl border bg-muted/50 hover:bg-muted transition-colors">
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="flex items-center gap-2">
                                             <div
