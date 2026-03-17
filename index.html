@@ -14,6 +14,22 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="EduTrack" />
 
+  <!-- Open Graph / Social Meta Tags -->
+  <meta property="og:title" content="EduTrack — Smart Student Dashboard" />
+  <meta property="og:description" content="Track attendance, plan study sessions, and monitor your academic progress. All in one beautiful dashboard." />
+  <meta property="og:image" content="https://edutrack.app/og-image.png" />
+  <meta property="og:url" content="https://edutrack.app" />
+  <meta property="og:type" content="website" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="EduTrack — Smart Student Dashboard" />
+  <meta name="twitter:description" content="Your personal smart study companion." />
+  <meta name="twitter:image" content="https://edutrack.app/og-image.png" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://edutrack.app" />
+
   <!-- PWA Manifest -->
   <link rel="manifest" href="./manifest.json" />
 
@@ -28,8 +44,9 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
 
-  <!-- Font Awesome 6 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
 
   <!-- PWA Icons -->
   <link rel="apple-touch-startup-image" href="./logo.png" />
@@ -66,11 +83,21 @@
 
 <body>
   <div id="root">
-    <div style="color: white; padding: 20px; font-family: sans-serif;">
-      <h1>Initializing App...</h1>
-      <p>If this message stays, the app failed to load.</p>
+    <div id="app-shell" style="min-height: 100vh; background: #0a0a0f; display: flex; align-items: center; justify-content: center; font-family: 'Inter', system-ui, sans-serif;">
+      <div style="text-align: center;">
+        <div style="width: 56px; height: 56px; margin: 0 auto 20px; border: 3px solid rgba(59,130,246,0.15); border-top-color: #3b82f6; border-radius: 50%; animation: shell-spin 0.8s linear infinite;"></div>
+        <div style="color: #e2e8f0; font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">EduTrack</div>
+        <div style="color: #64748b; font-size: 13px; margin-top: 6px;">Loading your dashboard...</div>
+        <noscript>
+          <div style="color: #f87171; margin-top: 20px; font-size: 14px;">JavaScript is required. Please enable it in your browser settings.</div>
+        </noscript>
+      </div>
     </div>
   </div>
+  <style>
+    @keyframes shell-spin { to { transform: rotate(360deg); } }
+    #app-shell:only-child { display: flex; }
+  </style>
   <script type="module" src="/src/main.tsx"></script>
 
   <!-- PWA Install Prompt -->
