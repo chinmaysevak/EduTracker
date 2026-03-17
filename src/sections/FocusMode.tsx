@@ -124,10 +124,10 @@ export default function FocusMode({ onExit }: FocusModeProps) {
                     {!session.isActive ? (
                         <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-300">
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-2">
+                                <div className="space-y-2 min-w-0">
                                     <label className="text-xs font-medium text-muted-foreground ml-1">Subject</label>
                                     <Select value={selectedSubjectId} onValueChange={setSelectedSubjectId}>
-                                        <SelectTrigger>
+                                    <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Select..." />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -139,13 +139,13 @@ export default function FocusMode({ onExit }: FocusModeProps) {
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-2 min-w-0">
                                     <label className="text-xs font-medium text-muted-foreground ml-1">Study</label>
                                     <Select
                                         value={selectedDuration.toString()}
                                         onValueChange={(v) => setSelectedDuration(Number(v))}
                                     >
-                                        <SelectTrigger>
+                                        <SelectTrigger className="w-full">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -156,13 +156,13 @@ export default function FocusMode({ onExit }: FocusModeProps) {
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div className="space-y-2 col-span-2">
+                                <div className="space-y-2 col-span-2 min-w-0">
                                     <label className="text-xs font-medium text-muted-foreground ml-1">Break</label>
                                     <Select
                                         value={selectedBreakDuration.toString()}
                                         onValueChange={(v) => setSelectedBreakDuration(Number(v))}
                                     >
-                                        <SelectTrigger>
+                                        <SelectTrigger className="w-full">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>

@@ -54,8 +54,6 @@ import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import { useNotifications, useResources, useStudyTasks, useSubjects } from '@/hooks/useData';
-import { startTutorial } from '@/lib/tutorial';
-
 // Navigation items - Now mapped to URLs
 const navItems = [
     { id: 'dashboard', path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -109,13 +107,6 @@ export default function DashboardLayout() {
         const handleScroll = () => setIsScrolled(window.scrollY > 10);
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    // Start tutorial if first time
-    useEffect(() => {
-        // slight delay to let the dashboard render
-        const timer = setTimeout(() => startTutorial(false), 800);
-        return () => clearTimeout(timer);
     }, []);
 
     // Keyboard shortcut for search
@@ -309,15 +300,6 @@ export default function DashboardLayout() {
                     </nav>
 
                     <div className="border-t border-border/50 p-3 space-y-2 flex flex-col items-stretch min-w-[16rem]">
-                        <Button
-                            variant="ghost"
-                            className="flex items-center h-10 rounded-xl text-violet-500 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-950/30 w-full justify-start gap-3 px-3"
-                            onClick={() => startTutorial(true)}
-                            title="Take a Tour"
-                        >
-                            <Brain className="w-4 h-4 flex-shrink-0" />
-                            <span className="text-sm whitespace-nowrap">Take a Tour</span>
-                        </Button>
                         <Button
                             variant="ghost"
                             className="flex items-center h-10 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 w-full justify-start gap-3 px-3"
