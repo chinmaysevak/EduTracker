@@ -296,26 +296,30 @@ export default function AttendanceTracker() {
 
   return (
     <div className="settings-bg space-y-3">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold gradient-text">Attendance Tracker</h2>
-          <p className="text-muted-foreground text-sm">Monitor your class attendance and performance</p>
-        </div>
+      {/* Hero Header */}
+      <div className="section-hero mesh-gradient">
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold gradient-text-vibrant font-display">Attendance Tracker</h2>
+            <p className="text-muted-foreground text-sm mt-1">Stay consistent, stay ahead — every class counts! 📚</p>
+          </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="outline" className="rounded-xl gap-2 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800" onClick={() => setIsPredictionOpen(true)}>
-            <TrendingUp className="w-4 h-4" />
-            Forecast
-          </Button>
-          <Button variant="outline" className="rounded-xl gap-2" onClick={handleExportCSV}>
-            <Download className="w-4 h-4" />
-            Export CSV
-          </Button>
-          <Button className="btn-gradient rounded-xl gap-2" onClick={() => setIsAddSubjectOpen(true)}>
-            <Plus className="w-4 h-4" />
-            Add Subject
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="rounded-xl gap-2 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800 hover:shadow-lg hover:shadow-violet-500/10 transition-all" onClick={() => setIsPredictionOpen(true)}>
+              <TrendingUp className="w-4 h-4" />
+              Forecast
+            </Button>
+            <Button variant="outline" className="rounded-xl gap-2 hover:shadow-lg transition-all" onClick={handleExportCSV}>
+              <Download className="w-4 h-4" />
+              Export CSV
+            </Button>
+            <Button className="btn-gradient btn-glow rounded-xl gap-2" onClick={() => setIsAddSubjectOpen(true)}>
+              <Plus className="w-4 h-4" />
+              Add Subject
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -323,66 +327,6 @@ export default function AttendanceTracker() {
         <AddSubjectModal onClose={() => setIsAddSubjectOpen(false)} />
       )}
 
-
-
-      {/* Stats Overview - Modern Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {/* ... existing stats cards ... */}
-        <Card className="card-modern card-hover border-0">
-          <CardContent className="p-3.5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center shadow-md">
-                <Percent className="w-4 h-4 text-white" />
-              </div>
-              <div className={`px-3 py-1 rounded-full text-xs font-medium ${overallStats.percentage >= 75 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' :
-                overallStats.percentage >= 60 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' :
-                  'bg-rose-100 text-rose-700 dark:bg-rose-900/30'
-                }`}>
-                {overallStats.percentage >= 75 ? 'Excellent' : overallStats.percentage >= 60 ? 'Good' : 'At Risk'}
-              </div>
-            </div>
-            <p className="text-2xl font-bold">{overallStats.percentage}%</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Overall Attendance</p>
-            <p className="text-[10px] text-muted-foreground mt-1">{overallStats.present}/{overallStats.total} classes</p>
-          </CardContent>
-        </Card>
-
-        <Card className="card-modern card-hover border-0">
-          <CardContent className="p-3.5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-md">
-                <Check className="w-4 h-4 text-white" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-emerald-600">{overallStats.present}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Classes Present</p>
-          </CardContent>
-        </Card>
-
-        <Card className="card-modern card-hover border-0">
-          <CardContent className="p-3.5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-400 to-red-500 flex items-center justify-center shadow-md">
-                <X className="w-4 h-4 text-white" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-rose-500">{overallStats.total - overallStats.present}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Classes Absent</p>
-          </CardContent>
-        </Card>
-
-        <Card className="card-modern card-hover border-0">
-          <CardContent className="p-3.5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-md">
-                <BookOpen className="w-4 h-4 text-white" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold">{subjects.length}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Total Subjects</p>
-          </CardContent>
-        </Card>
-      </div>
 
 
 
@@ -692,7 +636,67 @@ export default function AttendanceTracker() {
         </Card>
       </div>
 
-      {/* Advanced Subject Table - Modern */}
+      {/* Stats Overview - Modern Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {/* ... existing stats cards ... */}
+        <Card className="card-modern card-hover border-0">
+          <CardContent className="p-3.5">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center shadow-md">
+                <Percent className="w-4 h-4 text-white" />
+              </div>
+              <div className={`px-3 py-1 rounded-full text-xs font-medium ${overallStats.percentage >= 75 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' :
+                overallStats.percentage >= 60 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' :
+                  'bg-rose-100 text-rose-700 dark:bg-rose-900/30'
+                }`}>
+                {overallStats.percentage >= 75 ? 'Excellent' : overallStats.percentage >= 60 ? 'Good' : 'At Risk'}
+              </div>
+            </div>
+            <p className="text-2xl font-bold">{overallStats.percentage}%</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Overall Attendance</p>
+            <p className="text-[10px] text-muted-foreground mt-1">{overallStats.present}/{overallStats.total} classes</p>
+          </CardContent>
+        </Card>
+
+        <Card className="card-modern card-hover border-0">
+          <CardContent className="p-3.5">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-md">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-emerald-600">{overallStats.present}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Classes Present</p>
+          </CardContent>
+        </Card>
+
+        <Card className="card-modern card-hover border-0">
+          <CardContent className="p-3.5">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-400 to-red-500 flex items-center justify-center shadow-md">
+                <X className="w-4 h-4 text-white" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-rose-500">{overallStats.total - overallStats.present}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Classes Absent</p>
+          </CardContent>
+        </Card>
+
+        <Card className="card-modern card-hover border-0">
+          <CardContent className="p-3.5">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-md">
+                <BookOpen className="w-4 h-4 text-white" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold">{subjects.length}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Total Subjects</p>
+          </CardContent>
+        </Card>
+      </div>
+
+
+      {/* Advanced Subject Table - Modern */}
       <Card className="card-modern border-0">
         <CardHeader className="pb-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

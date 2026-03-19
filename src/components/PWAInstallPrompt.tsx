@@ -1,14 +1,14 @@
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone } from 'lucide-react';
 import { usePwa } from '@/context/PwaContext';
 
 export default function PWAInstallPrompt(): ReactElement | null {
-  const { isInstallable, installApp, hidePrompt } = usePwa();
+  const { isInstallable, installApp } = usePwa();
+  const [isHidden, setIsHidden] = useState(false);
 
   // We only show the prompt if it's installable AND hasn't been hidden for this session
-  // Or if it's being shown manually (but manual show is usually for buttons)
-  if (!isInstallable) {
+  if (!isInstallable || isHidden) {
     return null;
   }
 
@@ -38,7 +38,7 @@ export default function PWAInstallPrompt(): ReactElement | null {
           <Button
             variant="ghost"
             size="sm"
-            onClick={hidePrompt}
+            onClick={() => setIsHidden(true)}
             className="h-8 px-3 text-xs text-muted-foreground hover:text-foreground rounded-lg"
           >
             Later

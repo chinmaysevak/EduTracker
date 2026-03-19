@@ -16,10 +16,12 @@ import {
     LogOut,
     MoreHorizontal,
     Zap,
-    Brain
+    Download,
+    BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
+import { usePwa } from '@/context/PwaContext';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import {
     CommandDialog,
@@ -60,8 +62,8 @@ const navItems = [
     { id: 'attendance', path: '/attendance', label: 'Attendance', icon: CalendarCheck },
     { id: 'planner', path: '/planner', label: 'Planner', icon: ClipboardList },
     { id: 'resources', path: '/resources', label: 'Resources', icon: BookOpen },
+    { id: 'advisor', path: '/advisor', label: 'Productivity', icon: BarChart3 },
     { id: 'progress', path: '/progress', label: 'Progress', icon: TrendingUp },
-    { id: 'advisor', path: '/advisor', label: 'AI Advisor', icon: Brain }, // ADDED AI ADVISOR
     { id: 'settings', path: '/settings', label: 'Settings', icon: SettingsIcon },
 ];
 
@@ -121,9 +123,10 @@ export default function DashboardLayout() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
+    const { isInstallable, installApp } = usePwa();
     const { subjects } = useSubjects();
     const { getPendingTasks, getOverdueTasks } = useStudyTasks();
-    const { notifications, unreadCount, markAllAsRead, markAsRead, deleteNotification } = useNotifications();
+    const { notifications, unreadCount, markAllAsRead, markAsRead, deleteNotification, clearAll } = useNotifications();
     const { resources } = useResources();
 
     // Find active item by current URL path
@@ -300,6 +303,17 @@ export default function DashboardLayout() {
                     </nav>
 
                     <div className="border-t border-border/50 p-3 space-y-2 flex flex-col items-stretch min-w-[16rem]">
+                        {isInstallable && (
+                            <Button
+                                variant="ghost"
+                                className="flex items-center h-10 rounded-xl text-primary hover:text-primary hover:bg-primary/10 w-full justify-start gap-3 px-3"
+                                onClick={installApp}
+                                title="Install App"
+                            >
+                                <Download className="w-4 h-4 flex-shrink-0" />
+                                <span className="text-sm whitespace-nowrap">Install App</span>
+                            </Button>
+                        )}
                         <Button
                             variant="ghost"
                             className="flex items-center h-10 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 w-full justify-start gap-3 px-3"
@@ -345,11 +359,18 @@ export default function DashboardLayout() {
                             <DropdownMenuContent align="end" className="w-72 p-0 rounded-2xl glass-card">
                                 <div className="p-3 border-b border-border/50 flex items-center justify-between">
                                     <span className="font-semibold text-sm">Notifications</span>
-                                    {unreadCount > 0 && (
-                                        <Button variant="ghost" size="sm" className="h-6 text-xs touch-compact" onClick={markAllAsRead}>
-                                            Mark all read
-                                        </Button>
-                                    )}
+                                    <div className="flex items-center gap-1">
+                                        {unreadCount > 0 && (
+                                            <Button variant="ghost" size="sm" className="h-6 text-xs touch-compact" onClick={markAllAsRead}>
+                                                Mark all read
+                                            </Button>
+                                        )}
+                                        {notifications.length > 0 && (
+                                            <Button variant="ghost" size="sm" className="h-6 text-xs touch-compact text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30" onClick={clearAll}>
+                                                Clear all
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="max-h-[250px] overflow-y-auto">
                                     {notifications.length === 0 ? (
@@ -445,6 +466,12 @@ export default function DashboardLayout() {
                             );
                         })}
                         <div className="border-t border-border/50 pt-2 mt-2">
+                            {isInstallable && (
+                                <button onClick={installApp} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-primary hover:bg-primary/10 transition-all font-medium">
+                                    <Download className="w-5 h-5" />
+                                    <span className="text-sm">Install App</span>
+                                </button>
+                            )}
                             <button onClick={toggleTheme} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-foreground hover:bg-muted transition-all">
                                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                                 <span className="text-sm">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
@@ -501,7 +528,10 @@ export default function DashboardLayout() {
                                             <span className="font-semibold">Notifications</span>
                                             <p className="text-xs text-muted-foreground">{unreadCount > 0 ? `${unreadCount} unread` : 'No new notifications'}</p>
                                         </div>
-                                        {unreadCount > 0 && <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={markAllAsRead}>Mark all read</Button>}
+                                        <div className="flex items-center gap-1">
+                                            {unreadCount > 0 && <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={markAllAsRead}>Mark all read</Button>}
+                                            {notifications.length > 0 && <Button variant="ghost" size="sm" className="h-7 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30" onClick={clearAll}>Clear all</Button>}
+                                        </div>
                                     </div>
                                     <div className="max-h-[300px] overflow-y-auto">
                                         {notifications.length === 0 ? (

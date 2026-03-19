@@ -1,6 +1,6 @@
 // ============================================
-// GlassyDataCard — Fluid Responsive Card
-// GPU-accelerated, adaptive blur, container query
+// GlassyDataCard — Premium Animated Card
+// GPU-accelerated, animated gradient border, shine sweep
 // ============================================
 
 import { motion } from 'framer-motion';
@@ -24,6 +24,14 @@ const glowMap: Record<string, string> = {
     violet: 'dark:status-glow-violet',
 };
 
+const iconBgMap: Record<string, string> = {
+    emerald: 'from-emerald-500/15 to-teal-500/15',
+    blue: 'from-blue-500/15 to-indigo-500/15',
+    amber: 'from-amber-500/15 to-orange-500/15',
+    red: 'from-rose-500/15 to-red-500/15',
+    violet: 'from-violet-500/15 to-purple-500/15',
+};
+
 export function GlassyDataCard({
     title,
     value,
@@ -34,19 +42,20 @@ export function GlassyDataCard({
     children,
 }: GlassyDataCardProps) {
     const glowClass = glowColor ? glowMap[glowColor] || '' : '';
+    const iconBg = glowColor ? iconBgMap[glowColor] || '' : 'from-primary/15 to-primary/10';
 
     return (
         <motion.div
             whileHover={{ y: -3 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className={`@container relative rounded-xl cursor-pointer ${glowClass}`}
+            className={`@container relative rounded-xl cursor-pointer ${glowClass} gradient-border-animated`}
             style={{ willChange: 'transform' }}
             onClick={onClick}
         >
-            {/* Card surface — adaptive blur via CSS */}
+            {/* Card surface with shine sweep */}
             <div
                 className="
-          relative rounded-xl p-4
+          relative rounded-xl p-4 card-shine
           bg-white dark:bg-white/[0.04]
           border border-border
           dark:border-transparent
@@ -60,7 +69,11 @@ export function GlassyDataCard({
             >
                 {/* Header: icon + title */}
                 <div className="flex items-center gap-2 mb-2">
-                    {icon && <div className="flex-shrink-0 opacity-80">{icon}</div>}
+                    {icon && (
+                        <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${iconBg} flex items-center justify-center flex-shrink-0`}>
+                            {icon}
+                        </div>
+                    )}
                     <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">
                         {title}
                     </span>

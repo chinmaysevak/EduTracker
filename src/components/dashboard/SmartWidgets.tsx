@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
 import {
     Brain,
@@ -114,37 +114,26 @@ export function ExamCountdownWidget({ onNavigate }: WidgetProps) {
     const nearestExam = upcomingExams[0];
 
     if (!nearestExam) return (
-        <Card className="card-professional flex flex-col justify-center items-center text-center p-5 text-muted-foreground">
-            <Clock className="w-8 h-8 mb-2 opacity-20" />
-            <p className="text-sm">No upcoming exams set.</p>
-            <Button variant="link" className="text-xs h-auto p-0 mt-1" onClick={() => onNavigate('settings')}>
-                Add Exam Dates
+        <Card className="card-professional flex flex-col justify-center items-center text-center p-4 text-muted-foreground">
+            <Clock className="w-5 h-5 mb-1 opacity-20" />
+            <p className="text-xs">No upcoming exams</p>
+            <Button variant="link" className="text-xs h-auto p-0 mt-0.5" onClick={() => onNavigate('settings')}>
+                Add Dates
             </Button>
         </Card>
     );
 
     return (
         <Card className="card-professional dark:status-glow-blue">
-            <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2 font-display">
+            <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
                     <Clock className="w-4 h-4 text-blue-500" />
-                    Exam Countdown
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="text-center py-2">
-                    <div className="text-3xl font-bold text-foreground mono-data">
-                        {nearestExam.daysLeft} <span className="text-base font-normal text-muted-foreground">days</span>
-                    </div>
-                    <p className="text-sm font-medium mt-1 text-blue-600 dark:text-blue-400 font-display">
-                        {nearestExam.name}
-                    </p>
-                    <div className="mt-3 flex justify-center">
-                        <Badge variant="secondary" className="text-xs font-normal mono-data">
-                            {new Date(nearestExam.examDate!).toLocaleDateString()}
-                        </Badge>
-                    </div>
+                    <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Exam Countdown</span>
                 </div>
+                <div className="text-2xl font-bold text-foreground mono-data">
+                    {nearestExam.daysLeft} <span className="text-sm font-normal text-muted-foreground">days</span>
+                </div>
+                <p className="text-xs font-medium text-muted-foreground mt-1 truncate">{nearestExam.name}</p>
             </CardContent>
         </Card>
     );

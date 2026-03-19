@@ -1,14 +1,15 @@
 // ============================================
-// Dashboard — Glassy Engineering Console Layout
-// Asymmetric grid prioritizing Attendance Health
+// Dashboard — Premium Animated Redesign
 // ============================================
 
 import {
-  BookOpen,
   CalendarCheck,
   ClipboardList,
+  BookOpen,
   ArrowUpRight,
-  Target
+  Target,
+  Zap,
+  Sparkles
 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,13 +30,28 @@ import {
 import { WelcomeSection } from '@/components/dashboard/WelcomeSection';
 import { TimetableWidget } from '@/components/dashboard/TimetableWidget';
 import { ResumeSessionCard } from '@/components/dashboard/ResumeSessionCard';
-import { WeeklyPerformanceWidget } from '@/components/dashboard/WeeklyPerformanceWidget';
-import { BackupReminderWidget } from '@/components/dashboard/BackupReminderWidget';
-import { StudyHeatmapWidget } from '@/components/dashboard/StudyHeatmapWidget';
-import { AttendanceTrendWidget } from '@/components/dashboard/AttendanceTrendWidget';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { EduNotifications } from '@/lib/notifications';
+
+/** Tiny SVG ring chart for subject attendance */
+function MiniRing({ percentage, color, size = 36 }: { percentage: number; color: string; size?: number }) {
+  const r = (size - 5) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (percentage / 100) * circ;
+  return (
+    <svg width={size} height={size} className="flex-shrink-0 -rotate-90 ring-glow">
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth={3.5} className="text-muted/30" />
+      <circle
+        cx={size / 2} cy={size / 2} r={r} fill="none"
+        stroke={color} strokeWidth={3.5}
+        strokeDasharray={circ} strokeDashoffset={offset}
+        strokeLinecap="round"
+        className="transition-all duration-700"
+      />
+    </svg>
+  );
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -61,7 +77,6 @@ export default function Dashboard() {
     }));
     EduNotifications.scheduleSessionReminders(sessions, 15);
 
-    // Attendance alerts for at-risk subjects
     subjects.forEach(s => {
       const stats = calculateSubjectAttendance(s.id);
       if (stats.total >= 5 && stats.percentage < 65) {
@@ -75,32 +90,9 @@ export default function Dashboard() {
   return (
     <div className="settings-bg space-y-5">
       <WelcomeSection onNavigate={(path) => navigate(`/${path}`)} />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 w-full">
-        <div className="lg:col-span-2">
-          <TimetableWidget />
-        </div>
-        <div className="lg:col-span-1">
-          <ExamCountdownWidget onNavigate={(path) => navigate(`/${path}`)} />
-        </div>
-      </div>
 
-      {/* ══ Asymmetric Hero: Attendance Health (dominant) + Right Column ══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full">
-        {/* Left — Primary Focus: Attendance Health + Performance */}
-        <div className="lg:col-span-8 space-y-5">
-          <AttendanceWidget onNavigate={(path) => navigate(`/${path}`)} />
-          <WeeklyPerformanceWidget />
-        </div>
-
-        {/* Right — Secondary: Status Widgets */}
-        <div className="lg:col-span-4 space-y-4">
-          <ResumeSessionCard onNavigate={(path) => navigate(`/${path}`)} />
-          <StreakWidget />
-        </div>
-      </div>
-
-      {/* ══ Stats Row — GlassyDataCards ══ */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 w-full items-start">
+      {/* ── Stats Row ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full items-stretch">
         <GlassyDataCard
           title="Pending Tasks"
           value={pendingTasksCount}
@@ -109,6 +101,8 @@ export default function Dashboard() {
           icon={<ClipboardList className="w-4 h-4 text-amber-500" />}
           onClick={() => navigate('/planner?filter=pending')}
         />
+
+        <ExamCountdownWidget onNavigate={(path) => navigate(`/${path}`)} />
 
         <GlassyDataCard
           title="Overall Progress"
@@ -131,79 +125,98 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* ══ Advanced Data Insights ══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 w-full">
-        <AttendanceTrendWidget />
-        <StudyHeatmapWidget />
+      {/* ── Timetable (full width) ── */}
+      <TimetableWidget />
+
+      {/* ── Attendance + Resume/Streak ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full">
+        <div className="lg:col-span-8 space-y-5">
+          <AttendanceWidget onNavigate={(path) => navigate(`/${path}`)} />
+        </div>
+        <div className="lg:col-span-4 space-y-5">
+          <ResumeSessionCard onNavigate={(path) => navigate(`/${path}`)} />
+          <StreakWidget />
+        </div>
       </div>
 
-      {/* ══ Bottom Section: Quick Actions + Subjects ══ */}
+      {/* ── Quick Actions + Subjects (Premium redesign) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full">
-        {/* Quick Actions — Compact */}
-        <Card className="lg:col-span-4 card-professional">
+        {/* Quick Actions — Circular icon buttons with gradient glow */}
+        <Card className="lg:col-span-4 card-professional card-shine">
           <CardHeader className="pb-2">
-            <h3 className="font-semibold font-display">Quick Actions</h3>
+            <h3 className="font-semibold font-display flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              Quick Actions
+            </h3>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="h-auto py-2 flex flex-col items-center gap-1 rounded-xl" onClick={() => navigate('/attendance')}>
-                <CalendarCheck className="w-4 h-4" />
-                <span className="text-xs">Attendance</span>
+            <div className="flex items-center justify-around py-2">
+              {[
+                { icon: CalendarCheck, label: 'Attendance', path: '/attendance', color: 'text-blue-500', bg: 'from-blue-500/15 to-indigo-500/15', glow: 'group-hover:shadow-blue-500/20' },
+                { icon: ClipboardList, label: 'Add Task', path: '/planner', color: 'text-amber-500', bg: 'from-amber-500/15 to-orange-500/15', glow: 'group-hover:shadow-amber-500/20' },
+                { icon: Target, label: 'Progress', path: '/progress', color: 'text-emerald-500', bg: 'from-emerald-500/15 to-teal-500/15', glow: 'group-hover:shadow-emerald-500/20' },
+                { icon: BookOpen, label: 'Materials', path: '/resources', color: 'text-purple-500', bg: 'from-purple-500/15 to-violet-500/15', glow: 'group-hover:shadow-purple-500/20' },
+              ].map(item => (
+                <button
+                  key={item.label}
+                  onClick={() => navigate(item.path)}
+                  className={`flex flex-col items-center gap-1.5 group`}
+                >
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br ${item.bg} ${item.color} group-hover:scale-110 group-hover:shadow-lg ${item.glow} transition-all duration-300`}>
+                    <item.icon className="w-5 h-5" />
+                  </div>
+                  <span className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">{item.label}</span>
+                </button>
+              ))}
+            </div>
+            <div className="mt-3">
+              <Button className="w-full btn-gradient btn-glow h-11 rounded-xl gap-2 text-sm font-bold" onClick={() => navigate('/focus')}>
+                <Zap className="w-4 h-4" />
+                Start Focus Session
               </Button>
-              <Button variant="outline" className="h-auto py-2 flex flex-col items-center gap-1 rounded-xl" onClick={() => navigate('/planner')}>
-                <ClipboardList className="w-4 h-4" />
-                <span className="text-xs">Add Task</span>
-              </Button>
-              <Button variant="outline" className="h-auto py-2 flex flex-col items-center gap-1 rounded-xl" onClick={() => navigate('/progress')}>
-                <Target className="w-4 h-4" />
-                <span className="text-xs">Progress</span>
-              </Button>
-              <Button variant="outline" className="h-auto py-2 flex flex-col items-center gap-1 rounded-xl" onClick={() => navigate('/resources')}>
-                <BookOpen className="w-4 h-4" />
-                <span className="text-xs">Materials</span>
-              </Button>
-              <div className="col-span-2 mt-1.5">
-                <Button className="w-full btn-gradient h-9 rounded-xl" onClick={() => navigate('/focus')}>
-                  <span className="text-xs font-semibold">Start Focus Session</span>
-                </Button>
-              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Subjects — Wider */}
-        <Card className="lg:col-span-8 card-professional">
+        {/* Subjects — With mini ring charts and enhanced styling */}
+        <Card className="lg:col-span-8 card-professional card-shine">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold font-display">Your Subjects</h3>
-              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/attendance')}>
-                View All <ArrowUpRight className="w-3 h-3 ml-1" />
+              <h3 className="font-semibold font-display flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-primary" />
+                Your Subjects
+              </h3>
+              <Button variant="ghost" size="sm" className="h-7 text-xs group" onClick={() => navigate('/attendance')}>
+                View All <ArrowUpRight className="w-3 h-3 ml-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </Button>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {subjects.slice(0, 5).map(subject => {
                 const stats = calculateSubjectAttendance(subject.id);
+                const color = stats.percentage >= 75
+                  ? '#10b981'
+                  : stats.percentage >= 60
+                    ? '#f59e0b'
+                    : '#ef4444';
                 return (
                   <div
                     key={subject.id}
-                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
+                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-muted/50 transition-all cursor-pointer group"
                     onClick={() => navigate('/attendance')}
                   >
-                    <div
-                      className="w-2 h-8 rounded-full"
-                      style={{ backgroundColor: subject.color || '#666' }}
-                    />
+                    <MiniRing percentage={stats.percentage} color={subject.color || '#666'} />
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{subject.name}</p>
+                      <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">{subject.name}</p>
                       <p className="text-xs text-muted-foreground mono-data">{stats.present}/{stats.total} classes</p>
                     </div>
-                    <span className={`text-sm font-semibold mono-data ${stats.percentage >= 75 ? 'text-emerald-600 dark:text-emerald-400' :
-                      stats.percentage >= 60 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'
-                      }`}>
-                      {stats.percentage}%
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-bold mono-data`} style={{ color }}>
+                        {stats.percentage}%
+                      </span>
+                      <ArrowUpRight className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
                   </div>
                 );
               })}

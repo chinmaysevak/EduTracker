@@ -407,15 +407,6 @@ export default function StudyPlanner() {
         )}
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
-        <StatCard icon={<ClipboardList className="w-6 h-6 text-white" />} value={stats.total} label="Total Tasks" color="from-violet-400 to-purple-500" />
-        <StatCard icon={<Clock className="w-6 h-6 text-white" />} value={stats.pending} label="Pending" color="from-amber-400 to-orange-500" />
-        <StatCard icon={<CheckCircle2 className="w-6 h-6 text-white" />} value={stats.completed} label="Completed" color="from-emerald-400 to-teal-500" />
-        <StatCard icon={<AlertTriangle className="w-6 h-6 text-white" />} value={stats.overdue} label="Overdue" color="from-rose-400 to-red-500" />
-        <StatCard icon={<BookOpen className="w-6 h-6 text-white" />} value={stats.upcomingExams} label="Upcoming Exams" color="from-blue-400 to-indigo-500" />
-        <StatCard icon={<Timer className="w-6 h-6 text-white" />} value={stats.upcomingSessions} label="Study Sessions" color="from-cyan-400 to-blue-500" />
-      </div>
 
       {/* Main Content */}
       <Tabs defaultValue="tasks" className="w-full">
@@ -489,7 +480,7 @@ export default function StudyPlanner() {
                 <TaskCard
                   key={task.id}
                   task={task}
-                  onToggle={() => toggleTaskStatus(task.id)}
+                  onToggle={() => handleToggleWithConfetti(task.id)}
                   onEdit={() => openEditTask(task)}
                   onDelete={() => setTaskToDelete(task)}
                   getStatus={getTaskStatus}
@@ -513,7 +504,7 @@ export default function StudyPlanner() {
                   <TaskCard
                     key={task.id}
                     task={task}
-                    onToggle={() => toggleTaskStatus(task.id)}
+                    onToggle={() => handleToggleWithConfetti(task.id)}
                     onEdit={() => openEditTask(task)}
                     onDelete={() => setTaskToDelete(task)}
                     getStatus={getTaskStatus}
@@ -712,7 +703,16 @@ export default function StudyPlanner() {
         </TabsContent>
       </Tabs>
 
-      {/* Edit Task Dialog */}
+      {/* Stats Overview */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+        <StatCard icon={<ClipboardList className="w-6 h-6 text-white" />} value={stats.total} label="Total Tasks" color="from-violet-400 to-purple-500" />
+        <StatCard icon={<Clock className="w-6 h-6 text-white" />} value={stats.pending} label="Pending" color="from-amber-400 to-orange-500" />
+        <StatCard icon={<CheckCircle2 className="w-6 h-6 text-white" />} value={stats.completed} label="Completed" color="from-emerald-400 to-teal-500" />
+        <StatCard icon={<AlertTriangle className="w-6 h-6 text-white" />} value={stats.overdue} label="Overdue" color="from-rose-400 to-red-500" />
+        <StatCard icon={<BookOpen className="w-6 h-6 text-white" />} value={stats.upcomingExams} label="Upcoming Exams" color="from-blue-400 to-indigo-500" />
+        <StatCard icon={<Timer className="w-6 h-6 text-white" />} value={stats.upcomingSessions} label="Study Sessions" color="from-cyan-400 to-blue-500" />
+      </div>
+      {/* Edit Task Dialog */}
       {editingTask && (
         <TaskDialog
           formData={taskFormData}

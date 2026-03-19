@@ -1,0 +1,1 @@
+mongodb://chinmaysevak60_db_user:edutrack9869@ac-cyguqgt-shard-00-01.yyfwvv9.mongodb.net:27017,ac-cyguqgt-shard-00-02.yyfwvv9.mongodb.net:27017,ac-cyguqgt-shard-00-00.yyfwvv9.mongodb.net:27017/edutracker?authSource=admin&replicaSet=atlas-sossvo-shard-0&ssl=true

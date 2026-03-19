@@ -1,0 +1,13 @@
+﻿src/components/Layout/DashboardLayout.tsx
+src/components/PWAInstallPrompt.tsx
+src/components/dashboard/WelcomeSection.tsx
+src/components/progress/ProgressSummary.tsx
+src/components/ui/GlassyDataCard.tsx
+src/index.css
+src/sections/AttendanceTracker.tsx
+src/sections/Dashboard.tsx
+src/sections/FocusMode.tsx
+src/sections/ProgressTracker.tsx
+src/sections/Settings.tsx
+src/sections/SmartAdvisor.tsx
+src/sections/StudyPlanner.tsx

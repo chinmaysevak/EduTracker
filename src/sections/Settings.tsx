@@ -29,12 +29,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { GamificationProfile } from '@/components/gamification/GamificationProfile';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import api from '@/lib/api';
-import { useTheme, ACCENT_PRESETS } from '@/hooks/useTheme';
+import { useTheme, ACCENT_PRESETS, VISUAL_THEMES } from '@/hooks/useTheme';
 import { EduNotifications } from '@/lib/notifications';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
@@ -76,7 +75,7 @@ interface StorageInfo {
 export default function Settings() {
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const { theme: _theme, setTheme, accentHue, setAccentHue } = useTheme();
+  const { theme: _theme, setTheme, accentHue, setAccentHue, visualTheme, setVisualTheme } = useTheme();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -376,19 +375,6 @@ export default function Settings() {
         </p>
       </div>
 
-      {/* SECTION 0: Gamification / XP Profile */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
-            Academic Progress & Achievements
-          </CardTitle>
-          <CardDescription>Your XP, level, streaks, and badges</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <GamificationProfile />
-        </CardContent>
-      </Card>
 
       {/* SECTION 1: Profile Section */}
       <Card>
@@ -503,62 +489,22 @@ export default function Settings() {
         </CardContent>
       </Card>
 
-      {/* SECTION 2: Appearance */}
+      {/* SECTION 6: Security */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
-            {profile.theme === 'dark' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-            Appearance
+            <Lock className="h-5 w-5" />
+            Security
           </CardTitle>
           <CardDescription>
-            Customize how the app looks
+            Manage your password and account security
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Label>Theme</Label>
-            <Select value={_theme} onValueChange={handleThemeChange}>
-              <SelectTrigger className="w-full md:w-64">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="light">
-                  <div className="flex items-center gap-2">
-                    <Sun className="h-4 w-4" />
-                    Light
-                  </div>
-                </SelectItem>
-                <SelectItem value="dark">
-                  <div className="flex items-center gap-2">
-                    <Moon className="h-4 w-4" />
-                    Dark
-                  </div>
-                </SelectItem>
-                <SelectItem value="system">
-                  <div className="flex items-center gap-2">
-                    <Sun className="h-4 w-4" />
-                    <Moon className="h-4 w-4" />
-                    System
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2 mt-4">
-            <Label>Accent Color</Label>
-            <div className="flex flex-wrap gap-2">
-              {ACCENT_PRESETS.map((preset) => (
-                <button
-                  key={preset.name}
-                  onClick={() => setAccentHue(preset.hue)}
-                  className={`w-9 h-9 rounded-full border-2 transition-all hover:scale-110 ${accentHue === preset.hue ? 'border-foreground scale-110 ring-2 ring-offset-2 ring-offset-background ring-current' : 'border-transparent'
-                    }`}
-                  style={{ backgroundColor: preset.color }}
-                  title={preset.name}
-                />
-              ))}
-            </div>
-          </div>
+        <CardContent className="space-y-4">
+          <Button onClick={() => setIsChangePasswordOpen(true)} variant="outline">
+            <Lock className="h-4 w-4 mr-2" />
+            Change Password
+          </Button>
         </CardContent>
       </Card>
 
@@ -665,51 +611,108 @@ export default function Settings() {
         </CardContent>
       </Card>
 
-      {/* SECTION 5: Storage Info */}
+      {/* SECTION 2: Appearance */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            Storage Information
+            {profile.theme === 'dark' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            Appearance
           </CardTitle>
           <CardDescription>
-            Your data statistics from the cloud
+            Customize how the app looks
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="p-4 rounded-xl bg-muted/50">
-              <p className="text-2xl font-bold">{storageInfo.subjects}</p>
-              <p className="text-sm text-muted-foreground">Subjects</p>
+          <div className="space-y-2">
+            <Label>Theme</Label>
+            <Select value={_theme} onValueChange={handleThemeChange}>
+              <SelectTrigger className="w-full md:w-64">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">
+                  <div className="flex items-center gap-2">
+                    <Sun className="h-4 w-4" />
+                    Light
+                  </div>
+                </SelectItem>
+                <SelectItem value="dark">
+                  <div className="flex items-center gap-2">
+                    <Moon className="h-4 w-4" />
+                    Dark
+                  </div>
+                </SelectItem>
+                <SelectItem value="system">
+                  <div className="flex items-center gap-2">
+                    <Sun className="h-4 w-4" />
+                    <Moon className="h-4 w-4" />
+                    System
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2 mt-4">
+            <Label>Accent Color</Label>
+            <div className="flex flex-wrap gap-2">
+              {ACCENT_PRESETS.map((preset) => (
+                <button
+                  key={preset.name}
+                  onClick={() => setAccentHue(preset.hue)}
+                  className={`w-9 h-9 rounded-full border-2 transition-all hover:scale-110 ${accentHue === preset.hue ? 'border-foreground scale-110 ring-2 ring-offset-2 ring-offset-background ring-current' : 'border-transparent'
+                    }`}
+                  style={{ backgroundColor: preset.color }}
+                  title={preset.name}
+                />
+              ))}
             </div>
-            <div className="p-4 rounded-xl bg-muted/50">
-              <p className="text-2xl font-bold">{storageInfo.attendance}</p>
-              <p className="text-sm text-muted-foreground">Attendance Records</p>
+            
+            <div className="flex flex-col gap-3 mt-6 p-5 border rounded-2xl bg-muted/20">
+              <Label className="text-sm font-semibold">Custom Theme Color</Label>
+              <p className="text-xs text-muted-foreground mb-1">Slide to build your own custom application theme</p>
+              <div className="flex items-center gap-4">
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="360" 
+                  value={accentHue} 
+                  onChange={(e) => setAccentHue(Number(e.target.value))}
+                  className="w-full h-3 rounded-xl appearance-none cursor-pointer border border-border"
+                  style={{ 
+                    background: `linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)` 
+                  }}
+                />
+                <div 
+                  className="w-8 h-8 rounded-full border shadow-sm shrink-0 transition-colors duration-200" 
+                  style={{ backgroundColor: `hsl(${accentHue}, 70%, 55%)` }}
+                />
+              </div>
             </div>
-            <div className="p-4 rounded-xl bg-muted/50">
-              <p className="text-2xl font-bold">{storageInfo.materials}</p>
-              <p className="text-sm text-muted-foreground">Materials</p>
+
+            <div className="flex flex-col gap-3 mt-6 p-4 border rounded-2xl bg-muted/20">
+              <Label className="text-sm font-semibold">Visual Style</Label>
+              <p className="text-xs text-muted-foreground">Choose a complete visual theme (only applies in dark mode)</p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+                {VISUAL_THEMES.map((vt) => (
+                  <button
+                    key={vt.id}
+                    onClick={() => setVisualTheme(vt.id)}
+                    className={`flex flex-col items-start gap-1 p-2 rounded-lg border-2 transition-all hover:scale-[1.03] text-left ${
+                      visualTheme === vt.id
+                        ? 'border-primary ring-1 ring-primary/30 bg-primary/5'
+                        : 'border-border hover:border-muted-foreground/30'
+                    }`}
+                  >
+                    <div
+                      className="w-full h-5 rounded border border-border/50"
+                      style={{ backgroundColor: vt.preview }}
+                    />
+                    <span className="text-[11px] font-medium leading-tight truncate w-full">{vt.name}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* SECTION 6: Security */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2">
-            <Lock className="h-5 w-5" />
-            Security
-          </CardTitle>
-          <CardDescription>
-            Manage your password and account security
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button onClick={() => setIsChangePasswordOpen(true)} variant="outline">
-            <Lock className="h-4 w-4 mr-2" />
-            Change Password
-          </Button>
         </CardContent>
       </Card>
 
@@ -734,6 +737,35 @@ export default function Settings() {
             <div className="flex justify-between">
               <span className="text-muted-foreground">Last Login</span>
               <span>{profile.lastLogin ? new Date(profile.lastLogin).toLocaleDateString() : 'N/A'}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* SECTION 5: Storage Info */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5" />
+            Storage Information
+          </CardTitle>
+          <CardDescription>
+            Your data statistics from the cloud
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="p-4 rounded-xl bg-muted/50">
+              <p className="text-2xl font-bold">{storageInfo.subjects}</p>
+              <p className="text-sm text-muted-foreground">Subjects</p>
+            </div>
+            <div className="p-4 rounded-xl bg-muted/50">
+              <p className="text-2xl font-bold">{storageInfo.attendance}</p>
+              <p className="text-sm text-muted-foreground">Attendance Records</p>
+            </div>
+            <div className="p-4 rounded-xl bg-muted/50">
+              <p className="text-2xl font-bold">{storageInfo.materials}</p>
+              <p className="text-sm text-muted-foreground">Materials</p>
             </div>
           </div>
         </CardContent>

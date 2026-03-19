@@ -1,0 +1,607 @@
+
+> my-app@0.0.0 lint
+> eslint .
+
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\AiChatAdvisor.tsx
+   44:11  warning  The 'currentMessages' logical expression could make the dependencies of useEffect Hook (at line 63) change on every render. To fix this, wrap the initialization of 'currentMessages' in its own useMemo() Hook  react-hooks/exhaustive-deps
+  147:25  error    Unexpected any. Specify a different type                                                                                                                                                                         @typescript-eslint/no-explicit-any
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\HydrationGuard.tsx
+  10:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\HydrationGuard.tsx:10:5
+   8 |
+   9 |   useEffect(() => {
+> 10 |     setHydrated(true);
+     |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  11 |   }, []);
+  12 |
+  13 |   useEffect(() => {  react-hooks/set-state-in-effect
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\Layout\ResponsiveWrapper.tsx
+  24:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\SyllabusScanner.tsx
+  44:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  64:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\WeeklyPlanGenerator.tsx
+   12:5   error  'savedPlans' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  141:74  error  'index' is defined but never used                @typescript-eslint/no-unused-vars
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\analytics\ReadinessScorecard.tsx
+  5:17  error  'TrendingUp' is defined but never used   @typescript-eslint/no-unused-vars
+  5:29  error  'AlertCircle' is defined but never used  @typescript-eslint/no-unused-vars
+  5:42  error  'CheckCircle' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\analytics\StudyHeatmap.tsx
+  19:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\AttendanceTrendWidget.tsx
+   9:11  warning  The 'today' object construction makes the dependencies of useMemo Hook (at line 43) change on every render. Move it inside the useMemo callback. Alternatively, wrap the initialization of 'today' in its own useMemo() Hook  react-hooks/exhaustive-deps
+  48:11  error    'maxPct' is assigned a value but never used                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\BackupReminderWidget.tsx
+  19:23  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\BackupReminderWidget.tsx:19:23
+  17 |
+  18 |     const daysSinceExport = lastExportDate
+> 19 |         ? Math.floor((Date.now() - new Date(lastExportDate).getTime()) / (1000 * 60 * 60 * 24))
+     |                       ^^^^^^^^^^ Cannot call impure function
+  20 |         : null;
+  21 |
+  22 |     // Show if never exported or more than 7 days ago  react-hooks/purity
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\DailyActionPanel.tsx
+   2:29  error    'CardHeader' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+   2:41  error    'CardTitle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  29:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\DailyActionPanel.tsx:29:9
+  27 |
+  28 |         const plan = generateDailyActionPlan(subjects, tasks, attendanceStats, topics);
+> 29 |         setRecommendations(plan);
+     |         ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  30 |     }, [subjects, tasks, attendanceData, topics]);
+  31 |
+  32 |     if (recommendations.length === 0) return null;                                                  react-hooks/set-state-in-effect
+  30:8   warning  React Hook useEffect has a missing dependency: 'calculateSubjectAttendance'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/exhaustive-deps
+  65:34  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\DailyActionPanel.tsx:65:34
+  63 |                         <div>
+  64 |                             <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/20 text-xs font-medium backdrop-blur-sm mb-3">
+> 65 |                                 <TopIcon className="w-3 h-3" />
+     |                                  ^^^^^^^ This component is created during render
+  66 |                                 {topRec.type.toUpperCase()}
+  67 |                             </div>
+  68 |                             <h3 className="text-xl font-bold mb-2 leading-tight">{topRec.title}</h3>
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\DailyActionPanel.tsx:47:21
+  45 |     };
+  46 |
+> 47 |     const TopIcon = getIcon(topRec.type);
+     |                     ^^^^^^^^^^^^^^^^^^^^ The component is created during render here
+  48 |
+  49 |     return (
+  50 |         <div className="space-y-4">  react-hooks/static-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\FocusLauncherWidget.tsx
+  10:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\StudyHeatmapWidget.tsx
+  12:11  warning  The 'today' object construction makes the dependencies of useMemo Hook (at line 44) change on every render. Move it inside the useMemo callback. Alternatively, wrap the initialization of 'today' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\TimetableWidget.tsx
+   14:10  error  'arrayMove' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+   21:10  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  151:18  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\TimetableWidget.tsx:151:18
+  149 |
+  150 |             {todayClasses.length === 0 ? (
+> 151 |                 <EmptyState />
+      |                  ^^^^^^^^^^ This component is created during render
+  152 |             ) : (
+  153 |                 <CardContent className="p-0">
+  154 |                     <div className="flex overflow-x-auto p-4 gap-4 pb-6 custom-scrollbar">
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\TimetableWidget.tsx:109:24
+  107 |     };
+  108 |
+> 109 |     const EmptyState = () => (
+      |                        ^^^^^^^
+> 110 |         <CardContent className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center min-h-[120px]">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 111 |             <Clock className="w-8 h-8 opacity-20 mb-2" />
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 112 |             <p>No classes scheduled for {isToday ? 'today' : currentDayName}. {isToday && 'Enjoy your time!'}</p>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 113 |         </CardContent>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 114 |     );
+      | ^^^^^^ The component is created during render here
+  115 |
+  116 |     return (
+  117 |         <Card className="card-modern border-none shadow-md overflow-hidden bg-background">  react-hooks/static-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\WeeklyPerformanceWidget.tsx
+   4:72  error  'subWeeks' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  27:18  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This dependency may be mutated later, which could cause the value to change unexpectedly.
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\WeeklyPerformanceWidget.tsx:27:18
+  25 |             };
+  26 |         });
+> 27 |     }, [history, daysOfWeek]);
+     |                  ^^^^^^^^^^ This dependency may be modified later
+  28 |
+  29 |     const maxMinutes = Math.max(...weeklyStats.map(d => d.minutes), 60); // Min 1 hour scale
+  30 |  react-hooks/preserve-manual-memoization
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\WelcomeSection.tsx
+  31:37  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\WelcomeSection.tsx:31:37
+  29 |     useEffect(() => {
+  30 |         const hour = new Date().getHours();
+> 31 |         if (hour >= 5 && hour < 12) setGreeting("Good Morning");
+     |                                     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  32 |         else if (hour >= 12 && hour < 17) setGreeting("Good Afternoon");
+  33 |         else if (hour >= 17 && hour < 22) setGreeting("Good Evening");
+  34 |         else setGreeting("Good Night");  react-hooks/set-state-in-effect
+  40:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\dashboard\WelcomeSection.tsx:40:9
+  38 |     useEffect(() => {
+  39 |         const randomStart = Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length);
+> 40 |         setQuote(MOTIVATIONAL_QUOTES[randomStart]);
+     |         ^^^^^^^^ Avoid calling setState() directly within an effect
+  41 |         const interval = setInterval(() => {
+  42 |             setQuote(prev => {
+  43 |                 const idx = MOTIVATIONAL_QUOTES.indexOf(prev);                                                    react-hooks/set-state-in-effect
+  72:8   warning  React Hook useCallback has a missing dependency: 'now'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/exhaustive-deps
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\progress\AddSubjectModal.tsx
+  28:18  error  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\progress\ProgressSummary.tsx
+  40:11  error  'completionRate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\progress\SmallProgressChart.tsx
+  3:69  error  'Legend' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\resources\AddResourceModal.tsx
+  134:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\resources\ResourceViewer.tsx
+  35:8  warning  React Hook React.useEffect has a missing dependency: 'fileObjectUrl'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\subjects\SubjectManagerModal.tsx
+    3:74  error  'DialogFooter' is defined but never used  @typescript-eslint/no-unused-vars
+   23:15  error  'Subject' is defined but never used       @typescript-eslint/no-unused-vars
+   23:24  error  'Topic' is defined but never used         @typescript-eslint/no-unused-vars
+  171:68  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\ui\Confetti.tsx
+  33:10  error  Fast refresh only works when a file only exports components. Move your component(s) to a separate file  react-refresh/only-export-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\ui\badge.tsx
+  46:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\ui\button-group.tsx
+  82:3  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\ui\button.tsx
+  62:18  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\ui\form.tsx
+  159:3  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\ui\navigation-menu.tsx
+  167:3  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\ui\sidebar.tsx
+  611:26  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\ui\sidebar.tsx:611:26
+  609 |   // Random width between 50 to 90%.
+  610 |   const width = React.useMemo(() => {
+> 611 |     return `${Math.floor(Math.random() * 40) + 50}%`
+      |                          ^^^^^^^^^^^^^ Cannot call impure function
+  612 |   }, [])
+  613 |
+  614 |   return (  react-hooks/purity
+  725:3   error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-refresh/only-export-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\components\ui\toggle.tsx
+  45:18  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\config\gamification.ts
+  6:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\context\AuthContext.tsx
+  164:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\context\PwaContext.tsx
+   4:21  error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  15:58  error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  20:47  error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  80:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\context\StudentContext.tsx
+  75:8   warning  React Hook useEffect has missing dependencies: 'attendance.attendanceData', 'notifications', 'subjects.subjects', and 'tasks.tasks'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  95:17  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                           react-refresh/only-export-components
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useChatHistory.ts
+  27:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  28:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  56:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  62:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  81:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useData.ts
+    31:41  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useData.ts:31:41
+  29 |   // doesn't cause infinite re-renders in the reset useEffect below.
+  30 |   const defaultValueRef = useRef<T[]>(defaultValue);
+> 31 |   const [data, setData] = useState<T[]>(defaultValueRef.current);
+     |                                         ^^^^^^^^^^^^^^^^^^^^^^^ Passing a ref to a function may read its value during render
+  32 |   const [isLoading, setIsLoading] = useState(true);
+  33 |   const [isError, setIsError] = useState(false);
+  34 |   const [error, setError] = useState<string | null>(null);                                                                                                                                                                                                                                                                                                       react-hooks/refs
+    99:29  error    '_timetableData' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+    99:72  error    '_userId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   147:32  error    '_userId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   171:29  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useData.ts:171:29
+  169 |
+  170 |   useEffect(() => {
+> 171 |     if (!isAuthenticated) { setProfile(defaultProfile); fetchedRef.current = false; }
+      |                             ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  172 |   }, [isAuthenticated]);
+  173 |
+  174 |   // Debounced save to server                                                                                                                                                               react-hooks/set-state-in-effect
+   172:6   warning  React Hook useEffect has a missing dependency: 'defaultProfile'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+   294:31  error    '_userId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   320:30  error    '_' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+   439:46  error    '_' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+   486:30  error    '_userId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   507:29  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useData.ts:507:29
+  505 |
+  506 |   useEffect(() => {
+> 507 |     if (!isAuthenticated) { setTimetableData(emptyTimetable); setCustomTimes(defaultCustomTimes); fetchedRef.current = false; }
+      |                             ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  508 |   }, [isAuthenticated]);
+  509 |
+  510 |   const syncTimetable = useCallback((data: Record<string, string[]>, times: Record<string, { startTime: string; endTime: string }[]>) => {  react-hooks/set-state-in-effect
+   508:6   warning  React Hook useEffect has a missing dependency: 'emptyTimetable'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+   630:30  error    '_userId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   705:31  error    '_userId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   786:29  error    '_userId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   969:34  error    '_userId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  1077:27  error    '_userId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  1113:33  error    '_userId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  1143:26  error    '_userId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  1191:41  error    '_userId' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useFocusEngine.ts
+  74:13  error    Error: Cannot access variable before it is declared
+
+`finishSession` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useFocusEngine.ts:74:13
+  72 |             // Session finished naturally (not cancelled)
+  73 |             // Only trigger if we haven't reset it yet (startTime check is a proxy)
+> 74 |             finishSession();
+     |             ^^^^^^^^^^^^^ `finishSession` accessed before it is declared
+  75 |         }
+  76 |     }, [session.elapsed, session.duration]);
+  77 |
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useFocusEngine.ts:138:5
+  136 |     };
+  137 |
+> 138 |     const finishSession = () => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 139 |         if (session.mode === 'study') {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 140 |             const mins = Math.floor(session.duration / 60);
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 182 |         }
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 183 |     };
+      | ^^^^^^^ `finishSession` is declared here
+  184 |
+  185 |     return {
+  186 |         session,  react-hooks/immutability
+  76:8   warning  React Hook useEffect has missing dependencies: 'finishSession' and 'session.startTime'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/exhaustive-deps
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useImportExport.ts
+   6:33  error  '_userId' is defined but never used                                                                                  @typescript-eslint/no-unused-vars
+  10:41  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  50:13  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  51:33  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  84:25  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  93:96  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  95:25  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  98:16  error  'e' is defined but never used                                                                                        @typescript-eslint/no-unused-vars
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useLocalStorage.ts
+  34:53  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useLocalStorage.ts:34:53
+  32 |   }, [scopedKey]);
+  33 |
+> 34 |   const [storedValue, setStoredValue] = useState<T>(readValue);
+     |                                                     ^^^^^^^^^ Passing a ref to a function may read its value during render
+  35 |
+  36 |   // Update localStorage when state changes
+  37 |   const setValue = useCallback((value: T | ((val: T) => T)) => {  react-hooks/refs
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\usePlannerEngine.ts
+   6:5  error  '_startHour' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   7:5  error  '_endHour' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  22:5  error  '_timetable' is defined but never used           @typescript-eslint/no-unused-vars
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useSettings.ts
+  72:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useSmartAcademicAssistant.ts
+  26:3  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useSmartAcademicAssistant.ts:26:3
+  24 |   const attendanceRef = useRef(attendanceData);
+  25 |
+> 26 |   subjectsRef.current = subjects;
+     |   ^^^^^^^^^^^^^^^^^^^ Cannot update ref during render
+  27 |   tasksRef.current = tasks;
+  28 |   attendanceRef.current = attendanceData;
+  29 |                                                       react-hooks/refs
+  27:3  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useSmartAcademicAssistant.ts:27:3
+  25 |
+  26 |   subjectsRef.current = subjects;
+> 27 |   tasksRef.current = tasks;
+     |   ^^^^^^^^^^^^^^^^ Cannot update ref during render
+  28 |   attendanceRef.current = attendanceData;
+  29 |
+  30 |   // Compute all analytics when data changes (single effect, no circular deps)                           react-hooks/refs
+  28:3  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\hooks\useSmartAcademicAssistant.ts:28:3
+  26 |   subjectsRef.current = subjects;
+  27 |   tasksRef.current = tasks;
+> 28 |   attendanceRef.current = attendanceData;
+     |   ^^^^^^^^^^^^^^^^^^^^^ Cannot update ref during render
+  29 |
+  30 |   // Compute all analytics when data changes (single effect, no circular deps)
+  31 |   useEffect(() => {  react-hooks/refs
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\lib\intelligence.ts
+  10:5  error  'DailyAttendance' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\sections\AttendanceTracker.tsx
+   30:10  error    'Label' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   31:10  error    'Dialog' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+   31:18  error    'DialogContent' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+   31:33  error    'DialogHeader' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   31:47  error    'DialogTitle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+   31:60  error    'DialogTrigger' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  100:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\sections\AttendanceTracker.tsx:100:5
+   98 |     }
+   99 |
+> 100 |     setCalendarDays(days);
+      |     ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  101 |   }, [currentDate]);
+  102 |
+  103 |   // ... rest of functions ..                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/set-state-in-effect
+  119:9   error    'handleAddSubject' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  178:45  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `calculateSubjectAttendance`, but the source dependencies were [subjects, attendanceData, searchQuery, filterStatus, sortField, sortOrder]. Inferred different dependency than source.
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\sections\AttendanceTracker.tsx:178:45
+  176 |   const overallStats = getOverallAttendance();
+  177 |
+> 178 |   const filteredAndSortedSubjects = useMemo(() => {
+      |                                             ^^^^^^^
+> 179 |     let data = subjects.map(s => {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 180 |       const stats = calculateSubjectAttendance(s.id);
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 221 |     return data;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 222 |   }, [subjects, attendanceData, searchQuery, filterStatus, sortField, sortOrder]);
+      | ^^^^ Could not preserve existing manual memoization
+  223 |
+  224 |   const selectedDayScheduled = getScheduledSubjects();
+  225 |   const selectedDayAllSubjects = subjects;  react-hooks/preserve-manual-memoization
+  178:45  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `getMonthlyStats`, but the source dependencies were [subjects, attendanceData, searchQuery, filterStatus, sortField, sortOrder]. Inferred different dependency than source.
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\sections\AttendanceTracker.tsx:178:45
+  176 |   const overallStats = getOverallAttendance();
+  177 |
+> 178 |   const filteredAndSortedSubjects = useMemo(() => {
+      |                                             ^^^^^^^
+> 179 |     let data = subjects.map(s => {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 180 |       const stats = calculateSubjectAttendance(s.id);
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 221 |     return data;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 222 |   }, [subjects, attendanceData, searchQuery, filterStatus, sortField, sortOrder]);
+      | ^^^^ Could not preserve existing manual memoization
+  223 |
+  224 |   const selectedDayScheduled = getScheduledSubjects();
+  225 |   const selectedDayAllSubjects = subjects;             react-hooks/preserve-manual-memoization
+  178:45  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `calculateSubjectAttendance`, but the source dependencies were [subjects, attendanceData, searchQuery, filterStatus, sortField, sortOrder]. Inferred different dependency than source.
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\sections\AttendanceTracker.tsx:178:45
+  176 |   const overallStats = getOverallAttendance();
+  177 |
+> 178 |   const filteredAndSortedSubjects = useMemo(() => {
+      |                                             ^^^^^^^
+> 179 |     let data = subjects.map(s => {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 180 |       const stats = calculateSubjectAttendance(s.id);
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 221 |     return data;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 222 |   }, [subjects, attendanceData, searchQuery, filterStatus, sortField, sortOrder]);
+      | ^^^^ Could not preserve existing manual memoization
+  223 |
+  224 |   const selectedDayScheduled = getScheduledSubjects();
+  225 |   const selectedDayAllSubjects = subjects;  react-hooks/preserve-manual-memoization
+  178:45  error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `getMonthlyStats`, but the source dependencies were [subjects, attendanceData, searchQuery, filterStatus, sortField, sortOrder]. Inferred different dependency than source.
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\sections\AttendanceTracker.tsx:178:45
+  176 |   const overallStats = getOverallAttendance();
+  177 |
+> 178 |   const filteredAndSortedSubjects = useMemo(() => {
+      |                                             ^^^^^^^
+> 179 |     let data = subjects.map(s => {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 180 |       const stats = calculateSubjectAttendance(s.id);
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 221 |     return data;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 222 |   }, [subjects, attendanceData, searchQuery, filterStatus, sortField, sortOrder]);
+      | ^^^^ Could not preserve existing manual memoization
+  223 |
+  224 |   const selectedDayScheduled = getScheduledSubjects();
+  225 |   const selectedDayAllSubjects = subjects;             react-hooks/preserve-manual-memoization
+  222:6   warning  React Hook useMemo has missing dependencies: 'calculateSubjectAttendance' and 'getMonthlyStats'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          react-hooks/exhaustive-deps
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\sections\Dashboard.tsx
+  88:6  warning  React Hook useEffect has a missing dependency: 'calculateSubjectAttendance'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\sections\FocusMode.tsx
+  52:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\sections\FocusMode.tsx:52:13
+  50 |     useEffect(() => {
+  51 |         if (session.isActive && session.subjectId) {
+> 52 |             setSelectedSubjectId(session.subjectId);
+     |             ^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  53 |         }
+  54 |     }, [session.isActive, session.subjectId]);
+  55 |  react-hooks/set-state-in-effect
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\sections\LoginPage.tsx
+  85:6  warning  React Hook useEffect has a missing dependency: 'handleGoogleResponse'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\sections\ProgressTracker.tsx
+  31:14  error  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\sections\Settings.tsx
+   193:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   208:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   236:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   251:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   265:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   278:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   293:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   304:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   315:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   337:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   354:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   925:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   947:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1059:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1080:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1190:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\chinm\Downloads\Poject Edu\EDU_1\EduTracker-main\src\sections\StudyPlanner.tsx
+  98:9  error  'handleToggleWithConfetti' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 135 problems (122 errors, 13 warnings)
+

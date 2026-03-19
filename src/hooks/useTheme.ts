@@ -1,10 +1,22 @@
 // ============================================
-// Dark Mode + Accent Color Theme Hook
+// Dark Mode + Accent Color + Visual Theme Hook
 // ============================================
 
 import { useState, useEffect, useCallback } from 'react';
 
 export type Theme = 'light' | 'dark' | 'system';
+
+export type VisualTheme = 'default' | 'tokyo-night' | 'dracula' | 'nord' | 'gruvbox' | 'monokai' | 'solarized';
+
+export const VISUAL_THEMES: { id: VisualTheme; name: string; preview: string; description: string }[] = [
+  { id: 'default',      name: 'Default',        preview: '#0a0a0a',  description: 'Obsidian Glass' },
+  { id: 'tokyo-night',  name: 'Tokyo Night',     preview: '#1a1b2e',  description: 'Soft blues & pinks' },
+  { id: 'dracula',      name: 'Dracula',         preview: '#282a36',  description: 'Purple & green accents' },
+  { id: 'nord',         name: 'Nord',            preview: '#2e3440',  description: 'Arctic tones' },
+  { id: 'gruvbox',      name: 'Gruvbox',         preview: '#282828',  description: 'Warm retro palette' },
+  { id: 'monokai',      name: 'Monokai',         preview: '#272822',  description: 'Classic editor feel' },
+  { id: 'solarized',    name: 'Solarized Dark',  preview: '#002b36',  description: 'Precise lab colors' },
+];
 
 export const ACCENT_PRESETS = [
   { name: 'Blue', hue: 220, color: 'hsl(220, 60%, 45%)' },
@@ -41,6 +53,18 @@ function applyAccentHue(hue: number, isDark: boolean) {
   }
 }
 
+const THEME_CLASSES = ['theme-tokyo-night', 'theme-dracula', 'theme-nord', 'theme-gruvbox', 'theme-monokai', 'theme-solarized'];
+
+function applyVisualTheme(vt: VisualTheme) {
+  const root = document.documentElement;
+  // Remove all theme classes first
+  THEME_CLASSES.forEach(cls => root.classList.remove(cls));
+  // Apply the selected one (if not default)
+  if (vt !== 'default') {
+    root.classList.add(`theme-${vt}`);
+  }
+}
+
 interface UseThemeOptions {
   /** Called when theme changes — use this to persist to MongoDB */
   onThemeChange?: (theme: Theme) => void;
@@ -61,6 +85,13 @@ export function useTheme(options?: UseThemeOptions) {
     return stored ? parseInt(stored, 10) : 220;
   });
 
+  const [visualTheme, setVisualThemeState] = useState<VisualTheme>(() => {
+    if (typeof window === 'undefined') return 'default';
+    const stored = window.localStorage.getItem('edu-tracker-visual-theme') as VisualTheme;
+    if (stored && VISUAL_THEMES.some(t => t.id === stored)) return stored;
+    return 'default';
+  });
+
   const resolved = resolveTheme(theme);
 
   useEffect(() => {
@@ -74,7 +105,9 @@ export function useTheme(options?: UseThemeOptions) {
     localStorage.setItem('edu-tracker-theme', theme);
     // Re-apply accent for the new mode
     applyAccentHue(accentHue, resolved === 'dark');
-  }, [theme, resolved, accentHue]);
+    // Re-apply visual theme
+    applyVisualTheme(resolved === 'dark' ? visualTheme : 'default');
+  }, [theme, resolved, accentHue, visualTheme]);
 
   useEffect(() => {
     if (theme !== 'system') return;
@@ -92,6 +125,9 @@ export function useTheme(options?: UseThemeOptions) {
       }
       if (e.key === 'edu-tracker-accent' && e.newValue) {
         setAccentHueState(parseInt(e.newValue, 10));
+      }
+      if (e.key === 'edu-tracker-visual-theme' && e.newValue) {
+        setVisualThemeState(e.newValue as VisualTheme);
       }
     };
 
@@ -124,6 +160,12 @@ export function useTheme(options?: UseThemeOptions) {
     applyAccentHue(hue, resolveTheme(theme) === 'dark');
   }, [theme]);
 
+  const setVisualTheme = useCallback((vt: VisualTheme) => {
+    setVisualThemeState(vt);
+    localStorage.setItem('edu-tracker-visual-theme', vt);
+    applyVisualTheme(resolveTheme(theme) === 'dark' ? vt : 'default');
+  }, [theme]);
+
   const toggleTheme = useCallback(() => {
     // Current state from either our system evaluate or the explicit theme
     const isCurrentlyDark = theme === 'system'
@@ -149,6 +191,7 @@ export function useTheme(options?: UseThemeOptions) {
     isDark: resolved === 'dark',
     accentHue,
     setAccentHue,
+    visualTheme,
+    setVisualTheme,
   };
 }
-
