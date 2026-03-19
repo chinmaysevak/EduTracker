@@ -89,7 +89,7 @@ export default function FocusMode({ onExit }: FocusModeProps) {
                 <div className="orb orb-2" style={{ width: '160px', height: '160px', filter: 'blur(60px)' }} />
 
                 {/* Close Button */}
-                <Button variant="ghost" size="icon" onClick={onExit} className="absolute top-4 right-4 rounded-full hover:bg-destructive/10 hover:text-destructive z-10">
+                <Button variant="ghost" size="icon" onClick={onExit} className="absolute top-4 right-4 rounded-full hover:bg-destructive/10 hover:text-destructive z-50">
                     <X className="w-5 h-5" />
                 </Button>
 
@@ -202,19 +202,19 @@ export default function FocusMode({ onExit }: FocusModeProps) {
             <div className="orb orb-3" style={{ width: '120px', height: '120px', filter: 'blur(50px)' }} />
 
             {/* Close Button */}
-            <Button variant="ghost" size="icon" onClick={onExit} className="absolute top-4 right-4 rounded-full hover:bg-destructive/10 hover:text-destructive z-10">
+            <Button variant="ghost" size="icon" onClick={onExit} className="absolute top-4 right-4 rounded-full hover:bg-destructive/10 hover:text-destructive z-50">
                 <X className="w-5 h-5" />
             </Button>
 
-            <div className="w-full max-w-md space-y-8 py-8 relative z-10">
+            <div className="w-full max-w-md space-y-4 sm:space-y-6 py-6 sm:py-8 mt-6 sm:mt-0 relative z-10">
                 {/* Header */}
-                <div className="text-center space-y-2">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-violet-500/20 flex items-center justify-center mx-auto mb-4 card-glow-pulse">
-                        <Zap className="w-8 h-8 text-primary" />
+                <div className="text-center space-y-1 sm:space-y-2">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-violet-500/20 flex items-center justify-center mx-auto mb-2 sm:mb-4 card-glow-pulse">
+                        <Zap className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                     </div>
-                    <h1 className="text-3xl font-bold tracking-tight font-display gradient-text-vibrant">Ready to Focus?</h1>
-                    <p className="text-muted-foreground text-sm flex items-center justify-center gap-1.5">
-                        <Sparkles className="w-3 h-3 text-primary" />
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-display gradient-text-vibrant">Ready to Focus?</h1>
+                    <p className="text-muted-foreground text-xs sm:text-sm flex items-center justify-center gap-1.5 px-4 text-center">
+                        <Sparkles className="w-3 h-3 justify-center text-primary flex-shrink-0" />
                         Pick your subject and duration, then lock in.
                     </p>
                 </div>
@@ -246,20 +246,20 @@ export default function FocusMode({ onExit }: FocusModeProps) {
                 </div>
 
                 {/* Duration — Large Tappable Chips with gradient selection */}
-                <div className="space-y-3">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest ml-1">Study Duration</label>
-                    <div className="grid grid-cols-4 gap-3">
+                <div className="space-y-2 sm:space-y-3 px-2 sm:px-0">
+                    <label className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-widest ml-1">Study Duration</label>
+                    <div className="grid grid-cols-4 gap-2 sm:gap-3">
                         {DURATION_PRESETS.map(preset => (
                             <button
                                 key={preset.value}
                                 onClick={() => setSelectedDuration(preset.value)}
-                                className={`flex flex-col items-center justify-center py-4 rounded-2xl text-center transition-all border ${selectedDuration === preset.value
+                                className={`flex flex-col items-center justify-center py-2 sm:py-4 rounded-xl sm:rounded-2xl text-center transition-all border ${selectedDuration === preset.value
                                     ? 'bg-gradient-to-br from-primary/15 to-violet-500/15 border-primary/40 text-primary shadow-lg shadow-primary/10'
                                     : 'bg-card border-border/50 text-foreground hover:border-primary/20 hover:shadow-md'
                                     }`}
                             >
-                                <span className="text-2xl font-bold mono-data">{preset.label}</span>
-                                <span className="text-[10px] text-muted-foreground uppercase">{preset.unit}</span>
+                                <span className="text-xl sm:text-2xl font-bold mono-data">{preset.label}</span>
+                                <span className="text-[9px] sm:text-[10px] text-muted-foreground uppercase">{preset.unit}</span>
                             </button>
                         ))}
                     </div>

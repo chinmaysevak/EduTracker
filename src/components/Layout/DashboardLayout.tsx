@@ -55,7 +55,7 @@ import {
 import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
 import api from '@/lib/api';
-import { useNotifications, useResources, useStudyTasks, useSubjects } from '@/hooks/useData';
+import { useNotifications, useResources, useStudyTasks, useSubjects, useUserProfile } from '@/hooks/useData';
 // Navigation items - Now mapped to URLs
 const navItems = [
     { id: 'dashboard', path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -86,7 +86,8 @@ export default function DashboardLayout() {
     const [moreDrawerOpen, setMoreDrawerOpen] = useState(false);
 
     const { user, logout } = useAuth();
-    const userName = user?.name || '';
+    const { profile } = useUserProfile();
+    const userName = profile?.name || user?.name || '';
 
     const getGreeting = (): string => {
         const hour = new Date().getHours();
@@ -491,13 +492,12 @@ export default function DashboardLayout() {
             <main className="flex flex-col flex-1 min-w-0 transition-all duration-300 ease-in-out">
                 <header className={`sticky top-0 z-30 w-full backdrop-blur bg-background/80 border-b border-white/10 transition-all duration-200 ${isScrolled ? 'shadow-sm' : ''}`}>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-fluid-md py-3">
-                        <div className="hidden lg:block">
-                            <h2 className="text-2xl font-semibold">{activeItem?.label}</h2>
-                            <p className="text-sm text-muted-foreground mt-0.5">
+                        <div className="block">
+                            <h2 className="text-xl sm:text-2xl font-semibold">{activeItem?.label}</h2>
+                            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                                 {activeItem?.label === 'Dashboard' ? getGreeting() : `Manage your ${activeItem?.label.toLowerCase()}`}
                             </p>
                         </div>
-                        <div className="lg:hidden h-[44px]" />
 
                         <div className="hidden lg:flex items-center gap-4">
                             <div className="flex flex-col items-end px-3 py-2 rounded-xl bg-muted/50 border border-border/50 min-w-[120px]">

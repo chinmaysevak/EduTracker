@@ -51,7 +51,8 @@ export default function UnitItem({ unit, onAddTopic }: UnitItemProps) {
                                 type="checkbox"
                                 checked={unit.teacherCompleted}
                                 onChange={() => syllabus.toggleUnitTeacherCompletion(unit.id)}
-                                className="w-3.5 h-3.5 rounded border-gray-300 text-blue-500 focus:ring-blue-500 cursor-pointer"
+                                className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500 cursor-pointer flex-shrink-0"
+                                style={{ minWidth: '14px', minHeight: '14px' }}
                             />
                             <GraduationCap className={`w-3.5 h-3.5 ${unit.teacherCompleted ? 'text-blue-500' : 'text-muted-foreground group-hover/toggle:text-blue-400'}`} />
                         </label>
@@ -61,13 +62,14 @@ export default function UnitItem({ unit, onAddTopic }: UnitItemProps) {
                                 type="checkbox"
                                 checked={unit.studentCompleted}
                                 onChange={() => syllabus.toggleUnitStudentCompletion(unit.id)}
-                                className="w-3.5 h-3.5 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+                                className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer flex-shrink-0"
+                                style={{ minWidth: '14px', minHeight: '14px' }}
                             />
                             <Target className={`w-3.5 h-3.5 ${unit.studentCompleted ? 'text-emerald-500' : 'text-muted-foreground group-hover/toggle:text-emerald-400'}`} />
                         </label>
                     </div>
 
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 transition-opacity">
                         <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-blue-500" onClick={handleEdit}>
                             <Edit2 className="w-3 h-3" />
                         </Button>

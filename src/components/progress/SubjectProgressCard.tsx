@@ -55,7 +55,7 @@ export default function SubjectProgressCard({ subject }: SubjectProgressCardProp
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 lg:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-0 sm:gap-1 transition-opacity">
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-blue-500" onClick={handleEdit}>
                             <Edit2 className="w-4 h-4" />
                         </Button>

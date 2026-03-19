@@ -38,7 +38,8 @@ export default function TopicItem({ topic }: TopicItemProps) {
                             type="checkbox"
                             checked={topic.teacherCompleted}
                             onChange={() => syllabus.toggleTopicTeacherCompletion(topic.id)}
-                            className="w-3 h-3 rounded border-gray-300 text-blue-500 focus:ring-blue-500 cursor-pointer"
+                            className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-500 rounded border-gray-300 focus:ring-blue-500 cursor-pointer flex-shrink-0"
+                            style={{ minWidth: '12px', minHeight: '12px' }}
                         />
                         <GraduationCap className={`w-3 h-3 ${topic.teacherCompleted ? 'text-blue-500' : 'text-muted-foreground group-hover/toggle:text-blue-400'}`} />
                     </label>
@@ -48,13 +49,14 @@ export default function TopicItem({ topic }: TopicItemProps) {
                             type="checkbox"
                             checked={topic.studentCompleted}
                             onChange={() => syllabus.toggleTopicStudentCompletion(topic.id)}
-                            className="w-3 h-3 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+                            className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-500 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer flex-shrink-0"
+                            style={{ minWidth: '12px', minHeight: '12px' }}
                         />
                         <Target className={`w-3 h-3 ${topic.studentCompleted ? 'text-emerald-500' : 'text-muted-foreground group-hover/toggle:text-emerald-400'}`} />
                     </label>
                 </div>
 
-                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-0.5 transition-opacity">
                     <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-blue-500" onClick={handleEdit}>
                         <Edit2 className="w-2.5 h-2.5" />
                     </Button>
