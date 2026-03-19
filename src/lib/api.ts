@@ -28,7 +28,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (res.status === 401) {
     // DO NOT intercept and force reload if the user is literally trying to login or register
-    if (!path.includes('/auth/login') && !path.includes('/auth/register')) {
+    if (!path.includes('/auth/login') && !path.includes('/auth/register') && !path.includes('/auth/google')) {
       if (!isRedirecting) {
         isRedirecting = true;
         // Token expired or invalid — clear it

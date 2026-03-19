@@ -87,7 +87,7 @@ export default function DashboardLayout() {
 
     const { user, logout } = useAuth();
     const { profile } = useUserProfile();
-    const userName = profile?.name || user?.name || '';
+    const userName = user?.name || profile?.name || '';
 
     const getGreeting = (): string => {
         const hour = new Date().getHours();

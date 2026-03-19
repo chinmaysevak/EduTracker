@@ -1,6 +1,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useUserProfile, useTimetable, useStudyTasks } from '@/hooks/useData';
+import { useAuth } from '@/context/AuthContext';
 import type { TimetableSlot } from '@/types';
 import { Flame, Clock, Zap, ArrowRight, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
@@ -19,6 +20,7 @@ const MOTIVATIONAL_QUOTES = [
 
 export function WelcomeSection({ onNavigate }: { onNavigate: (module: ModuleType) => void }) {
     const { profile } = useUserProfile();
+    const { user } = useAuth();
     const { getWeekSchedule } = useTimetable();
     const { getPendingTasks } = useStudyTasks();
 
@@ -52,7 +54,7 @@ export function WelcomeSection({ onNavigate }: { onNavigate: (module: ModuleType
     const now = new Date();
     const todayIndex = now.getDay();
 
-    const findNextClass = useCallback(() => {
+    const findNextClass = useCallback((): { subject: string; start: Date; end: Date } | null => {
         const week = getWeekSchedule();
         let best: { subject: string; start: Date; end: Date } | null = null;
         week.forEach(({ dayIndex, classes }: { dayIndex: number; classes: TimetableSlot[] }) => {
@@ -90,7 +92,7 @@ export function WelcomeSection({ onNavigate }: { onNavigate: (module: ModuleType
                             {format(new Date(), 'EEEE, MMMM do')}
                         </p>
                         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-display gradient-text-vibrant">
-                            {greeting}, {profile.name.split(' ')[0]}! 👋
+                            {greeting}, {user?.name ? user.name.split(' ')[0] : 'Student'}! 👋
                         </h1>
 
                         {/* Rotating motivational quote */}
