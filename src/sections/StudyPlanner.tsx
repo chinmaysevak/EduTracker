@@ -2,7 +2,8 @@
 // Academic Planner Module (Complete)
 // ============================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Plus,
   CheckCircle2,
@@ -65,6 +66,23 @@ export default function StudyPlanner() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'tasks');
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab);
+    } else if (!tab && activeTab !== 'tasks') {
+      setSearchParams({ tab: activeTab });
+    }
+  }, [searchParams, activeTab, setSearchParams]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setSearchParams({ tab: value });
+  };
 
   const { fire: fireConfetti, ConfettiCanvas } = useConfetti();
 
@@ -409,7 +427,7 @@ export default function StudyPlanner() {
 
 
       {/* Main Content */}
-      <Tabs defaultValue="tasks" className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full max-w-2xl grid-cols-4 rounded-xl h-12">
           <TabsTrigger value="tasks" className="rounded-lg">Tasks ({pendingTasks.length})</TabsTrigger>
           <TabsTrigger value="calendar" className="rounded-lg">Calendar</TabsTrigger>

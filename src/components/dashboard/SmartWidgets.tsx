@@ -9,12 +9,11 @@ import {
     ArrowRight,
     Sparkles
 } from "lucide-react";
-import { useAcademicInsights, useUserProfile, useSubjects } from "@/hooks/useData";
+import { useAcademicInsights, useUserProfile, useExams } from "@/hooks/useData";
 
-import type { ModuleType } from '@/types';
 
 interface WidgetProps {
-    onNavigate: (module: ModuleType) => void;
+    onNavigate: (path: string) => void;
 }
 
 export function SmartRecommendationWidget({ onNavigate }: WidgetProps) {
@@ -96,44 +95,51 @@ export function StreakWidget() {
 }
 
 export function ExamCountdownWidget({ onNavigate }: WidgetProps) {
-    const { subjects } = useSubjects();
+    const { getUpcomingExams } = useExams();
+    const upcomingExams = getUpcomingExams();
+    
+    let nearestExamWithDays = null;
+    
+    if (upcomingExams.length > 0) {
+        const exam = upcomingExams[0];
+        const examDate = new Date(exam.examDate);
+        const today = new Date();
+        // Reset time part for accurate day calculation
+        today.setHours(0, 0, 0, 0);
+        examDate.setHours(0, 0, 0, 0);
+        const diffTime = examDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        nearestExamWithDays = {
+            ...exam,
+            daysLeft: diffDays >= 0 ? diffDays : 0,
+            name: exam.title
+        };
+    }
 
-    // Find nearest exam
-    const upcomingExams = subjects
-        .filter(s => s.examDate)
-        .map(s => {
-            const examDate = new Date(s.examDate!);
-            const today = new Date();
-            const diffTime = examDate.getTime() - today.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return { ...s, daysLeft: diffDays };
-        })
-        .filter(s => s.daysLeft >= 0)
-        .sort((a, b) => a.daysLeft - b.daysLeft);
-
-    const nearestExam = upcomingExams[0];
-
-    if (!nearestExam) return (
-        <Card className="card-professional flex flex-col justify-center items-center text-center p-4 text-muted-foreground">
+    if (!nearestExamWithDays) return (
+        <Card className="card-professional h-full flex flex-col justify-center items-center text-center p-4 text-muted-foreground">
             <Clock className="w-5 h-5 mb-1 opacity-20" />
             <p className="text-xs">No upcoming exams</p>
-            <Button variant="link" className="text-xs h-auto p-0 mt-0.5" onClick={() => onNavigate('settings')}>
+            <Button variant="link" className="text-xs h-auto p-0 mt-0.5" onClick={() => onNavigate('planner?tab=exams')}>
                 Add Dates
             </Button>
         </Card>
     );
 
     return (
-        <Card className="card-professional dark:status-glow-blue">
-            <CardContent className="p-4">
+        <Card className="card-professional h-full dark:status-glow-blue cursor-pointer hover:shadow-lg transition-shadow" onClick={() => onNavigate('planner?tab=exams')}>
+            <CardContent className="p-4 h-full flex flex-col">
                 <div className="flex items-center gap-2 mb-2">
                     <Clock className="w-4 h-4 text-blue-500" />
                     <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Exam Countdown</span>
                 </div>
-                <div className="text-2xl font-bold text-foreground mono-data">
-                    {nearestExam.daysLeft} <span className="text-sm font-normal text-muted-foreground">days</span>
+                <div className="flex-1 flex flex-col justify-center">
+                    <div className="text-2xl font-bold text-foreground mono-data">
+                        {nearestExamWithDays.daysLeft} <span className="text-sm font-normal text-muted-foreground">days</span>
+                    </div>
+                    <p className="text-xs font-medium text-muted-foreground mt-1 truncate">{nearestExamWithDays.name}</p>
                 </div>
-                <p className="text-xs font-medium text-muted-foreground mt-1 truncate">{nearestExam.name}</p>
             </CardContent>
         </Card>
     );

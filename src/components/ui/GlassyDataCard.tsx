@@ -48,7 +48,7 @@ export function GlassyDataCard({
         <motion.div
             whileHover={{ y: -3 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className={`@container relative rounded-xl cursor-pointer ${glowClass} gradient-border-animated`}
+            className={`@container relative rounded-xl h-full cursor-pointer ${glowClass} gradient-border-animated`}
             style={{ willChange: 'transform' }}
             onClick={onClick}
         >
@@ -56,6 +56,7 @@ export function GlassyDataCard({
             <div
                 className="
           relative rounded-xl p-4 card-shine
+          h-full flex flex-col
           bg-white dark:bg-white/[0.04]
           border border-border
           dark:border-transparent
@@ -79,18 +80,25 @@ export function GlassyDataCard({
                     </span>
                 </div>
 
-                {/* Value — fluid size with container query */}
-                <div className="text-2xl @xs:text-3xl font-bold mono-data leading-none">
-                    {value}
+                {/* Value & Subtitle Centered Vertically */}
+                <div className="flex-1 flex flex-col justify-center py-1">
+                    {/* Value — fluid size with container query */}
+                    <div className="text-2xl @xs:text-3xl font-bold mono-data leading-none">
+                        {value}
+                    </div>
+
+                    {/* Subtitle */}
+                    {subtitle && (
+                        <p className="text-xs text-muted-foreground mt-1.5 truncate">{subtitle}</p>
+                    )}
                 </div>
 
-                {/* Subtitle */}
-                {subtitle && (
-                    <p className="text-xs text-muted-foreground mt-1.5 truncate">{subtitle}</p>
-                )}
-
                 {/* Children (e.g. Progress bars) */}
-                {children}
+                {children && (
+                    <div className="mt-auto">
+                        {children}
+                    </div>
+                )}
             </div>
         </motion.div>
     );

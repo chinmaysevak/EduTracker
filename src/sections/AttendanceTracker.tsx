@@ -306,16 +306,16 @@ export default function AttendanceTracker() {
             <p className="text-muted-foreground text-sm mt-1">Stay consistent, stay ahead — every class counts! 📚</p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button variant="outline" className="rounded-xl gap-2 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800 hover:shadow-lg hover:shadow-violet-500/10 transition-all" onClick={() => setIsPredictionOpen(true)}>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="outline" className="rounded-xl gap-1.5 text-xs sm:text-sm text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800 hover:shadow-lg hover:shadow-violet-500/10 transition-all" onClick={() => setIsPredictionOpen(true)}>
               <TrendingUp className="w-4 h-4" />
               Forecast
             </Button>
-            <Button variant="outline" className="rounded-xl gap-2 hover:shadow-lg transition-all" onClick={handleExportCSV}>
+            <Button variant="outline" className="rounded-xl gap-1.5 text-xs sm:text-sm hover:shadow-lg transition-all" onClick={handleExportCSV}>
               <Download className="w-4 h-4" />
               Export CSV
             </Button>
-            <Button className="btn-gradient btn-glow rounded-xl gap-2" onClick={() => setIsAddSubjectOpen(true)}>
+            <Button className="btn-gradient btn-glow rounded-xl gap-1.5 text-xs sm:text-sm" onClick={() => setIsAddSubjectOpen(true)}>
               <Plus className="w-4 h-4" />
               Add Subject
             </Button>
