@@ -24,6 +24,7 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:4173',
+  'https://edu-tracker-six.vercel.app',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
@@ -116,11 +117,19 @@ mongoose
   .then(() => {
     console.log('✅ Connected to MongoDB Atlas');
 
-    app.listen(process.env.PORT || 5000, '0.0.0.0', () => {
-      console.log(`🚀 Server running on port ${process.env.PORT || 5000}`);
-    });
+    // Only listen dynamically if we are NOT running in a Vercel serverless environment
+    if (process.env.NODE_ENV !== 'production') {
+      app.listen(process.env.PORT || 5000, '0.0.0.0', () => {
+        console.log(`🚀 Server running on port ${process.env.PORT || 5000}`);
+      });
+    }
   })
   .catch((err) => {
     console.error('❌ MongoDB connection error:', err.message);
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
   });
+
+// Export the app for Vercel Serverless Function compatibility
+export default app;
