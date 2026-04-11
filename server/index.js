@@ -38,6 +38,31 @@ app.use(
 app.use(express.json({ limit: '50mb' }));
 
 /* =========================
+   Serverless Database Connection
+========================= */
+
+const connectDB = async () => {
+  if (mongoose.connections[0].readyState) return;
+  
+  try {
+    // Await the connection directly here so no requests pass until db is ready
+    await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000, 
+      socketTimeoutMS: 45000,
+    });
+    console.log('✅ Connected to MongoDB Atlas (Serverless)');
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err.message);
+  }
+};
+
+// Ensure database is connected BEFORE passing to routes
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
+
+/* =========================
    Route Imports
 ========================= */
 
@@ -109,27 +134,17 @@ app.use((err, req, res, next) => {
 });
 
 /* =========================
-   Database + Server Start
+   Serverless Database Connection
 ========================= */
 
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('✅ Connected to MongoDB Atlas');
-
-    // Only listen dynamically if we are NOT running in a Vercel serverless environment
-    if (process.env.NODE_ENV !== 'production') {
-      app.listen(process.env.PORT || 5000, '0.0.0.0', () => {
-        console.log(`🚀 Server running on port ${process.env.PORT || 5000}`);
-      });
-    }
-  })
-  .catch((err) => {
-    console.error('❌ MongoDB connection error:', err.message);
-    if (process.env.NODE_ENV !== 'production') {
-      process.exit(1);
-    }
+// Start server purely if running locally
+if (process.env.NODE_ENV !== 'production') {
+  connectDB().then(() => {
+    app.listen(process.env.PORT || 5000, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${process.env.PORT || 5000}`);
+    });
   });
+}
 
 // Export the app for Vercel Serverless Function compatibility
 export default app;
