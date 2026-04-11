@@ -1,0 +1,294 @@
+A 
+MINI 
+PROJECT
+ 
+REPORT
+ON
+“
+Project Name
+”
+Submitted in the partial fulfillment of the requirements for
+The degree of
+BACHELOR of 
+COMPUTER APPLICATION
+By
+1) 
+2) 
+3) 
+UNDER THE GUIDANCE OF
+Dr. Anjali Dadhich
+Department of Management S
+tudies 
+Bharati
+ 
+Vidyapeeth
+ Deemed to be University
+2025-26
+Vision
+Preparing the Students to cope with the rigor of Post Graduate 
+Programmes
+ in global and creating high caliber solution architects for software development, who will also be sensitive to societal concerns
+Mission
+We aim to drive transformation, technology and innovation through problem solving approach and research development.
+We aim to provide students with the IT tools to become productive and lifelong learner.
+CERTIFICATE
+This is to certify that the requirements for the project report 
+entitled”
+Project
+ Title
+” have been successfully completed by the following students:
+Roll numbers
+Name
+In  p
+artial
+ fulfillment of  
+Sem
+ –IV
+ , 
+Bachelor of 
+Computer Application
+  of 
+“
+Bharati
+ 
+Vidyapeeth
+ Deemed to be University, Department of management studies
+”
+,
+ 
+Khargh
+ar
+ during the academic year 2025-26
+.
+Project Co-
+ordinator
+External Examiner
+Dr. Anjali Dadhich
+         
+Director
+Dr. 
+Premashish
+ Roy
+PROGRAM EDUCATIONAL OBJECTIVE’s
+I. To prepare the youth to take up positions as system analysts, system engineers, software engineers and programmers. 
+II. To aim at developing 'systems thinking' 'abstract thinking', 'skills to 
+analyze
+ and synthesize', and 'skills to apply knowledge', through 'extensive problem solving sessions', 'hands on practice under various hardware/software environments' and' projects developed’. 
+III. To prepare students with 'social interaction skills', 'communication skills', 'life skills', 'entrepreneurial skills', and 
+PROGRAM OUTCOMES
+PO1. Computational Knowledge
+: Understand and apply mathematical foundation, computing and domain knowledge for the conceptualization of computing models from defined problems. 
+PO2. Problem Analysis
+: Ability to identify, critically analyze and formulate complex computing problems using fundamentals of computer science and application domains.
+ 
+PO3. Design / Development of Solutions
+: Ability to transform complex business scenarios and contemporary issues into problems, investigate, understand and propose integrated solutions using emerging technologies. 
+PO4. Conduct Investigations of Complex Computing Problems
+: Ability to devise and conduct experiments, interpret data and provide well informed conclusions. 
+PO5. Modern Tool Usage
+: Ability to select modern computing tools, skills and techniques necessary for innovative software solutions 
+PO6. Professional Ethics
+: Ability to apply and commit professional ethics and cyber regulations in a global economic environment.
+ 
+PO7. Life-long Learning
+: Recognize the need for and develop the ability to engage in continuous learning as a Computing professional. 
+PO8. Project Management
+: Ability to understand management and computing principles with computing knowledge to manage projects in multidisciplinary environments. 
+PO9. Communication Efficacy
+: Communicate effectively with the computing community as well as society by being able to comprehend effective documentations and presentations. 
+PO10. Societal & Environmental Concern
+: Ability to recognize 
+economical
+, environmental, social, health, legal, ethical issues involved in the use of computer technology and other consequential responsibilities relevant to professional practice. 
+PO11. Individual & Team Work
+: Ability to work as a member or leader in diverse teams in multidisciplinary environment.
+PO12. Innovation and Entrepreneurship
+: Identify opportunities, entrepreneurship vision and use of innovative ideas to create value and wealth for the betterment of the individual and society.
+PROGRAMME SPECIFIC OUTCOME
+After the completion of the course, a student is able to 
+PSO1
+: Ability to learn the various programming languages with database concepts along with development environment 
+PSO
+2 
+:
+ Ability to apply theoretical and practical knowledge to solve business problems through data communication technology concepts. 
+PSO
+3 
+:
+ Flourish the innovation and research attitude to develop IT artifact. 
+PSO4
+: Foster analytical and critical thinking abilities for efficient programming 
+PSO5
+: Demonstrate and apply the programming knowledge to develop effective software solution. 
+PSO6
+: Enrich the knowledge in the areas of Advanced technologies and business practices. 
+PSO7
+: Maintain the personality with environmental and social concerns
+DECLARATION
+I declare that this written submission represents my ideas in my own words and where others’ ideas or words have been included. I have adequately cited and referenced the original sources. I also declare that I have adhered to all principles of academic honesty and integrity and have not misrepresented or fabricated or falsified any idea/data/fact/source in my submission. I understand that any violation of the above will be cause for disciplinary action by the Institute and can also evoke penal action from the sources which have thus not been properly cited or from whom proper permission has not been taken when needed. 
+Member 1
+Member 2
+Member 3
+Date:
+ACKNOWLEDGEMENT
+After the completion of this work, words are not enough to express feelings about all those who helped us to reach goal.
+It’s a great pleasure and moment of immense satisfaction for us to express my profound gratitude to 
+Project Guide
+, 
+Prof.
+,
+ whose constant encouragement enabled us to work enthusiastically. His perpetual motivation, patience and excellent expertise in discussion during progress of the project work have benefited us to an extent, which is beyond expression.
+We would also like to give our sincere thanks to
+ 
+Dr. Mona Sinha
+,
+ Head of Department
+, and 
+Dr. Anjali Dadhich
+, Project
+ Co-
+ordinator
+ 
+from Department of
+ Management studies, 
+Kharghar
+,
+ for their guidance, encouragement, and support during a project.
+I am thankful to 
+Dr. 
+Premashish
+ Roy, Director
+ 
+for providing an outstanding academic environment, also for providing the adequate facilities.
+Last but not the least we would also like to thank all the staffs 
+of 
+ 
+Bharati
+ 
+Vidyapeeth
+ Deemed to be University, Department of management studies
+ 
+for their valuable guidance with their interest and valuable suggestions brightened us.
+1.  
+2.  
+Abstract
+Table of Contents
+List of Figures ………………………………………………………………………...
+1
+1. Introduction ………………………………………………………………………..
+2
+     1.1 General ……………………………………………………………………..….
+2
+     1.2 Objective and problem statement ……………………………........................
+3
+2
+. Methodology ……………………………………………………………….............
+6
+     2
+.1 Algorithmic details .…………………………………………………………...
+6
+2
+.2 H
+ardware
+ 
+and 
+S
+oftware requirements
+…………………………….
+.............
+12
+2
+.3 Design Details…………………………………………………………………
+13
+3
+. Implementation and Results    …………………………………………………….
+1
+5
+     3
+.1. Implementation ....………………………………………………….................
+1
+5
+     3
+.2. Results  ...………………………………………………………………............
+1
+6
+4
+.
+Conclusion 
+and Future Scope……………………………………………………..
+18
+5
+. Reference
+s…………
+……………………………………………………...........
+19
+List of Figures
+Figure No.
+Name
+Page No.
+CHAPTER 1
+INTRODUCTON
+1.2 OBJECTIVE AND 
+PROBLEM STATEMENT
+CHAPTER 2
+METHODOLOGY
+2
+.1 ALGORITHMIC DETAILS
+Algorithm:
+Flowchart:-
+2
+.2 
+HARDWARE
+ AND 
+SOFTWARE REQUIREMENTS
+2
+.2.1
+ HARDWARE REQUIREMENTS
+RAM :
+ 
+512 MB RAM
+Hard 
+Drive :
+ 
+40 GB Hard Drive
+Processor :
+ Intel Core 2 Processor
+camera module (Webcam)
+Projector 
+Colour Markers 
+2
+.2.2
+ SOFTWARE REQUIREMENTS
+2
+.
+3
+ DESIGN 
+DETAILS :
+CHAPTER 3
+IMPLEMENTATION AND RESULTS 
+3
+.1
+IMPLEMENATAION
+:
+3
+.2 RESULTS
+:
+CHAPTER 4
+CONCLUSION
+ AND
+FUTURE SCOPE
+CHAPTER 
+5
+REFERENCE
+S
+Note: 
+ 1. Printing: on A4 size bond paper with 1.5 line spacing
+             2. Margins: Left-1.25”, Right- 1”, Top and Bottom-0.75”   
+             3. Font Style: Times New Roman
+             4. Font Sizes: Title of the chapter (18), sections (16), subsections (14) and the 
+text(
+12).           
+             5. Number of pages 
+should not exceed 25
+             6. All equations, figures, and tables 
+should be numbered

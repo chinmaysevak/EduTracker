@@ -89,6 +89,16 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// DELETE /api/tasks/reset
+router.delete('/reset', async (req, res) => {
+  try {
+    await StudyTask.deleteMany({ userId: req.userId });
+    res.json({ message: 'Tasks reset successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to reset tasks' });
+  }
+});
+
 // DELETE /api/tasks/:id
 router.delete('/:id', async (req, res) => {
   try {

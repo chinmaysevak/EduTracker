@@ -84,4 +84,14 @@ router.put('/by-date/:date', async (req, res) => {
   }
 });
 
+// DELETE /api/attendance/reset — reset user's attendance
+router.delete('/reset', async (req, res) => {
+  try {
+    await Attendance.deleteMany({ userId: req.userId });
+    res.json({ message: 'Attendance reset successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to reset attendance' });
+  }
+});
+
 export default router;

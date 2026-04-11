@@ -10,6 +10,7 @@ import {
     Sparkles
 } from "lucide-react";
 import { useAcademicInsights, useUserProfile, useExams } from "@/hooks/useData";
+import { useAuth } from "@/context/AuthContext";
 
 
 interface WidgetProps {
@@ -55,6 +56,7 @@ export function SmartRecommendationWidget({ onNavigate }: WidgetProps) {
 
 export function StreakWidget() {
     const { profile } = useUserProfile();
+    const { user } = useAuth();
 
     // Calculate Progress to next level
     const xpForNextLevel = profile.level * 1000;
@@ -77,7 +79,7 @@ export function StreakWidget() {
                         </div>
                         <div>
                             <p className="font-bold text-lg font-display"><span className="mono-data">{profile.currentStreak}</span> Day Streak</p>
-                            <p className="text-xs text-muted-foreground">Keep it up, {profile.name}!</p>
+                            <p className="text-xs text-muted-foreground">Keep it up, {user?.name ? user.name.split(' ')[0] : profile.name}!</p>
                         </div>
                     </div>
                 </div>

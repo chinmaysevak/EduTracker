@@ -1,24 +1,26 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, ChevronLeft, ChevronRight, Settings, Plus, Trash2, GripVertical } from 'lucide-react';
+import { Calendar, Clock, ChevronLeft, ChevronRight, Settings, Plus, Trash2, GripVertical, AlertCircle } from 'lucide-react';
 import { useTimetable, useSubjects } from '@/hooks/useData';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 // dnd-kit imports
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 // Sortable item wrapper
 interface SortableClassItemProps {
     id: string;
     index: number;
-    cls: any;
+    cls: { subject: string; startTime: string; endTime: string };
     getSubjectName: (id: string) => string;
     removeClass: (day: string, index: number) => void;
     currentDayName: string;
@@ -49,7 +51,7 @@ function SortableClassItem({ id, index, cls, getSubjectName, removeClass, curren
 }
 
 export function TimetableWidget() {
-    const { getTimetableForDay, addClass, removeClass, reorderClass } = useTimetable();
+    const { getTimetableForDay, addClass, removeClass, reorderClass, resetTimetable } = useTimetable();
     const { subjects } = useSubjects();
 
     const getSubjectName = (subjectOrId: string) => {
@@ -106,7 +108,7 @@ export function TimetableWidget() {
         }
     };
 
-    const EmptyState = () => (
+    const emptyState = (
         <CardContent className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center min-h-[120px]">
             <Clock className="w-8 h-8 opacity-20 mb-2" />
             <p>No classes scheduled for {isToday ? 'today' : currentDayName}. {isToday && 'Enjoy your time!'}</p>
@@ -148,7 +150,7 @@ export function TimetableWidget() {
             </CardHeader>
 
             {todayClasses.length === 0 ? (
-                <EmptyState />
+                emptyState
             ) : (
                 <CardContent className="p-0">
                     <div className="flex overflow-x-auto p-4 gap-4 pb-6 custom-scrollbar">
@@ -264,7 +266,34 @@ export function TimetableWidget() {
                         </div>
                     </div>
 
-                    <DialogFooter className="flex-shrink-0 pt-2">
+                    <DialogFooter className="flex-shrink-0 pt-2 flex items-center justify-between">
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="outline" className="gap-2 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:text-rose-700 hover:border-rose-300 transition-all">
+                                    <Trash2 className="w-4 h-4" />
+                                    Reset Timetable
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl shadow-2xl">
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                                        <AlertCircle className="w-5 h-5" />
+                                        Reset Weekly Timetable
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription className="text-muted-foreground text-base">
+                                        Are you sure you want to permanently clear <strong>your entire weekly timetable</strong>?
+                                        <br /><br />
+                                        This is usually done at the start of a new semester. This action cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => { resetTimetable(); toast.success('Timetable has been reset.'); setIsEditMode(false); }} className="rounded-xl bg-rose-600 text-white hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-500/20 shadow-rose-500/10 border-0">
+                                        Yes, Reset Timetable
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                         <Button onClick={() => setIsEditMode(false)}>Done</Button>
                     </DialogFooter>
                 </DialogContent>

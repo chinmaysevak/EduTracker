@@ -25,10 +25,12 @@ import type {
 // ============================================
 function useApiCollection<T>(endpoint: string, defaultValue: T[]) {
   const { isAuthenticated } = useAuth();
-  // Use a ref for defaultValue so it stays stable across renders and
   // doesn't cause infinite re-renders in the reset useEffect below.
   const defaultValueRef = useRef<T[]>(defaultValue);
-  const [data, setData] = useState<T[]>(defaultValueRef.current);
+  useEffect(() => {
+    defaultValueRef.current = defaultValue;
+  }, [defaultValue]);
+  const [data, setData] = useState<T[]>(() => defaultValue);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,7 +98,7 @@ function useApiCollection<T>(endpoint: string, defaultValue: T[]) {
 // ============================================
 // Subjects Hook
 // ============================================
-export function useSubjects(_timetableData?: Record<string, string[]>, _userId?: string) {
+export function useSubjects() {
   const { data: subjects, setData: setSubjects, isLoading, isError, error, refetch } = useApiCollection<Subject>('/subjects', []);
 
   const addSubject = (name: string, difficulty: number = 3): string => {
@@ -144,7 +146,7 @@ export function useSubjects(_timetableData?: Record<string, string[]>, _userId?:
 // ============================================
 import type { UserProfile, Badge } from '@/types';
 
-export function useUserProfile(_userId?: string) {
+export function useUserProfile() {
   const { isAuthenticated } = useAuth();
   const defaultProfile: UserProfile = {
     name: 'Student',
@@ -167,9 +169,14 @@ export function useUserProfile(_userId?: string) {
       .catch(err => { console.error('Failed to fetch profile:', err); toast.error('Failed to fetch profile'); });
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    if (!isAuthenticated) { setProfile(defaultProfile); fetchedRef.current = false; }
-  }, [isAuthenticated]);
+  const [prevAuth, setPrevAuth] = useState(isAuthenticated);
+  if (isAuthenticated !== prevAuth) {
+    setPrevAuth(isAuthenticated);
+    if (!isAuthenticated) {
+      setProfile(defaultProfile);
+      fetchedRef.current = false;
+    }
+  }
 
   // Debounced save to server
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -246,18 +253,21 @@ export function useUserProfile(_userId?: string) {
 // Academic Insights Hook
 // ============================================
 import { calculateAttendanceSafeZone, calculateSubjectPriority, calculateExamReadiness } from '@/lib/academicMath';
+import { useSettings } from '@/hooks/useSettings';
 
 export function useAcademicInsights() {
   const { subjects } = useSubjects();
   const { calculateSubjectAttendance } = useAttendance();
   const { tasks } = useStudyTasks();
+  const { settings } = useSettings();
+  const targetPercentage = settings?.attendanceGoal || 75;
 
   const getSubjectInsights = (subjectId: string) => {
     const subject = subjects.find(s => s.id === subjectId);
     if (!subject) return null;
 
     const attendance = calculateSubjectAttendance(subjectId);
-    const attendanceAnalysis = calculateAttendanceSafeZone(attendance.present, attendance.total);
+    const attendanceAnalysis = calculateAttendanceSafeZone(attendance.present, attendance.total, targetPercentage);
 
     const priorityScore = calculateSubjectPriority(subject, tasks);
 
@@ -268,7 +278,8 @@ export function useAcademicInsights() {
       subject,
       attendance.percentage,
       completedTasks,
-      subjectTasks.length
+      subjectTasks.length,
+      targetPercentage
     );
 
     return {
@@ -291,7 +302,7 @@ export function useAcademicInsights() {
 // ============================================
 // Attendance Hook
 // ============================================
-export function useAttendance(_userId?: string) {
+export function useAttendance() {
   const { data: attendanceData, setData: setAttendanceData, isLoading, isError, error, refetch } = useApiCollection<DailyAttendance>('/attendance', []);
 
   const syncAttendance = useCallback((date: string, updated: DailyAttendance) => {
@@ -464,6 +475,14 @@ export function useAttendance(_userId?: string) {
     return { present, absent, cancelled, total: present + absent };
   };
 
+  const resetAttendance = () => {
+    setAttendanceData([]);
+    api.delete('/attendance/reset').catch(err => {
+      console.error('Failed to reset attendance:', err);
+      toast.error('Failed to reset attendance');
+    });
+  };
+
   return {
     attendanceData,
     markAttendance,
@@ -476,6 +495,7 @@ export function useAttendance(_userId?: string) {
     removeExtraClass,
     markExtraClassAttendance,
     getExtraClasses,
+    resetAttendance,
     isLoading, isError, error, refetch
   };
 }
@@ -483,7 +503,7 @@ export function useAttendance(_userId?: string) {
 // ============================================
 // Timetable Hook
 // ============================================
-export function useTimetable(_userId?: string) {
+export function useTimetable() {
   const { isAuthenticated } = useAuth();
   const emptyTimetable: Record<string, string[]> = {
     "Monday": [], "Tuesday": [], "Wednesday": [], "Thursday": [], "Friday": [], "Saturday": [], "Sunday": []
@@ -503,9 +523,15 @@ export function useTimetable(_userId?: string) {
       .catch(err => { console.error('Failed to fetch timetable:', err); toast.error('Failed to fetch timetable'); });
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    if (!isAuthenticated) { setTimetableData(emptyTimetable); setCustomTimes(defaultCustomTimes); fetchedRef.current = false; }
-  }, [isAuthenticated]);
+  const [prevAuth, setPrevAuth] = useState(isAuthenticated);
+  if (isAuthenticated !== prevAuth) {
+    setPrevAuth(isAuthenticated);
+    if (!isAuthenticated) {
+      setTimetableData(emptyTimetable);
+      setCustomTimes(defaultCustomTimes);
+      fetchedRef.current = false;
+    }
+  }
 
   const syncTimetable = useCallback((data: Record<string, string[]>, times: Record<string, { startTime: string; endTime: string }[]>) => {
     api.put('/timetable', { timetableData: data, customTimes: times })
@@ -627,7 +653,7 @@ export function useTimetable(_userId?: string) {
 import { saveFile, deleteFile as deleteDbFile } from '@/lib/db';
 import type { Resource } from '@/types';
 
-export function useResources(_userId?: string) {
+export function useResources() {
   const { data: resources, setData: setResources, isLoading, isError, error, refetch } = useApiCollection<Resource>('/resources', []);
 
   const addResource = async (resource: Omit<Resource, 'id' | 'createdAt'>, file?: File) => {
@@ -688,6 +714,14 @@ export function useResources(_userId?: string) {
     return resources.filter(r => r.subjectId === subjectId);
   };
 
+  const resetResources = () => {
+    setResources([]);
+    api.delete('/resources/reset').catch(err => {
+      console.error('Failed to reset resources:', err);
+      toast.error('Failed to reset resources');
+    });
+  };
+
   return {
     resources,
     addResource,
@@ -695,6 +729,7 @@ export function useResources(_userId?: string) {
     deleteResource,
     toggleFavorite,
     getResourcesForSubject,
+    resetResources,
     isLoading, isError, error, refetch
   };
 }
@@ -702,7 +737,7 @@ export function useResources(_userId?: string) {
 // ============================================
 // Study Tasks Hook
 // ============================================
-export function useStudyTasks(_userId?: string) {
+export function useStudyTasks() {
   const { data: tasks, setData: setTasks, isLoading, isError, error, refetch } = useApiCollection<StudyTask>('/tasks', []);
   const { updateStreak, addXP } = useUserProfile();
 
@@ -764,6 +799,14 @@ export function useStudyTasks(_userId?: string) {
     return tasks.filter(t => t.targetDate === today);
   };
 
+  const resetTasks = () => {
+    setTasks([]);
+    api.delete('/tasks/reset').catch(err => {
+      console.error('Failed to reset tasks:', err);
+      toast.error('Failed to reset tasks');
+    });
+  };
+
   return {
     tasks,
     addTask,
@@ -774,6 +817,7 @@ export function useStudyTasks(_userId?: string) {
     getCompletedTasks,
     getOverdueTasks,
     getTodaysTasks,
+    resetTasks,
     isLoading, isError, error, refetch
   };
 }
@@ -783,7 +827,7 @@ export function useStudyTasks(_userId?: string) {
 // ============================================
 import type { SyllabusUnit, SyllabusTopic } from '@/types';
 
-export function useSyllabus(_userId?: string) {
+export function useSyllabus() {
   const { data: units, setData: setUnits, isLoading: unitsLoading, isError: unitsError, error: unitsErrorMsg, refetch: refetchUnits } = useApiCollection<SyllabusUnit>('/syllabus/units', []);
   const { data: topics, setData: setTopics, isLoading: topicsLoading, isError: topicsError, error: topicsErrorMsg, refetch: refetchTopics } = useApiCollection<SyllabusTopic>('/syllabus/topics', []);
 
@@ -966,7 +1010,7 @@ export function useSyllabus(_userId?: string) {
 // ============================================
 const defaultNotifications: import('@/types').Notification[] = [];
 
-export function useNotifications(_userId?: string) {
+export function useNotifications() {
   const { data: notifications, setData: setNotifications, isLoading, isError, error, refetch } = useApiCollection<import('@/types').Notification>('/notifications', defaultNotifications);
 
   const addNotification = (notification: Omit<import('@/types').Notification, 'id' | 'createdAt' | 'read'>) => {
@@ -1074,7 +1118,7 @@ export function useNotifications(_userId?: string) {
 // ============================================
 // Topic Tracking Hook (separate from Syllabus)
 // ============================================
-export function useTopics(_userId?: string) {
+export function useTopics() {
   const { data: topics, setData: setTopics, isLoading, isError, error, refetch } = useApiCollection<Topic>('/topics', []);
 
   const addTopic = (topic: Omit<Topic, 'id' | 'status'>) => {
@@ -1110,7 +1154,7 @@ export function useTopics(_userId?: string) {
 // ============================================
 // Focus History Hook
 // ============================================
-export function useFocusHistory(_userId?: string) {
+export function useFocusHistory() {
   const { data: history, setData: setHistory, isLoading, isError, error, refetch } = useApiCollection<FocusSessionLog>('/focus-sessions', []);
 
   const logSession = (session: Omit<FocusSessionLog, 'id'>) => {
@@ -1140,7 +1184,7 @@ export function useFocusHistory(_userId?: string) {
 // ============================================
 // Exams Hook
 // ============================================
-export function useExams(_userId?: string) {
+export function useExams() {
   const { data: exams, setData: setExams, isLoading, isError, error, refetch } = useApiCollection<Exam>('/exams', []);
 
   const addExam = (exam: Omit<Exam, 'id' | 'createdAt'>) => {
@@ -1188,7 +1232,7 @@ export function useExams(_userId?: string) {
 // ============================================
 // Study Sessions Hook
 // ============================================
-export function useStudyPlannerSessions(_userId?: string) {
+export function useStudyPlannerSessions() {
   const { data: sessions, setData: setSessions, isLoading, isError, error, refetch } = useApiCollection<StudySession>('/studysessions', []);
 
   const addSession = (session: Omit<StudySession, 'id' | 'createdAt'>) => {

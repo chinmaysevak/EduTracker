@@ -31,7 +31,15 @@ export function useLocalStorage<T>(key: string, initialValue: T, userId?: string
     }
   }, [scopedKey]);
 
-  const [storedValue, setStoredValue] = useState<T>(readValue);
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    if (typeof window === 'undefined') return initialValue;
+    try {
+      const item = window.localStorage.getItem(scopedKey);
+      return item ? (JSON.parse(item) as T) : initialValue;
+    } catch (error) {
+      return initialValue;
+    }
+  });
 
   // Update localStorage when state changes
   const setValue = useCallback((value: T | ((val: T) => T)) => {

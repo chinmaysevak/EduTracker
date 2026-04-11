@@ -38,17 +38,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSubjects, useStudyTasks, useExams, useStudyPlannerSessions } from '@/hooks/useData';
 import { toast } from 'sonner';
-import { useConfetti } from '@/components/ui/Confetti';
+
 import type { StudyTask, Exam, StudySession } from '@/types';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday } from 'date-fns';
 
 export default function StudyPlanner() {
   const { subjects } = useSubjects();
-  const { tasks, addTask, updateTask, deleteTask, toggleTaskStatus, getPendingTasks, getCompletedTasks, getOverdueTasks, getTodaysTasks } = useStudyTasks();
+  const { tasks, addTask, updateTask, deleteTask, toggleTaskStatus, getPendingTasks, getCompletedTasks, getOverdueTasks, getTodaysTasks, resetTasks } = useStudyTasks();
   const { exams, addExam, updateExam, deleteExam, getUpcomingExams, getOverdueExams } = useExams();
   const { sessions, addSession, updateSession, deleteSession, getTodaysSessions, getUpcomingSessions } = useStudyPlannerSessions();
 
@@ -84,7 +85,7 @@ export default function StudyPlanner() {
     setSearchParams({ tab: value });
   };
 
-  const { fire: fireConfetti, ConfettiCanvas } = useConfetti();
+
 
   const [taskFormData, setTaskFormData] = useState({
     subjectId: '',
@@ -113,27 +114,10 @@ export default function StudyPlanner() {
     notes: ''
   });
 
-  const handleToggleWithConfetti = (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (task && task.status !== 'completed') {
-      fireConfetti();
-    }
+  const handleToggleTask = (taskId: string) => {
     toggleTaskStatus(taskId);
   };
 
-  const filteredTasks = tasks.filter(t => {
-    const matchesSubject = selectedSubject === 'all' || t.subjectId === selectedSubject;
-    const matchesSearch = t.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSubject && matchesSearch;
-  });
-
-  const pendingTasks = filteredTasks.filter(t => t.status === 'pending');
-  const completedTasks = filteredTasks.filter(t => t.status === 'completed');
-  const overdueTasks = getOverdueTasks();
-  const todaysTasks = getTodaysTasks();
-  const upcomingExams = getUpcomingExams();
-  const overdueExams = getOverdueExams();
-  const todaysSessions = getTodaysSessions();
   const upcomingSessions = getUpcomingSessions();
 
   const getSubjectName = (subjectId: string) => subjects.find(s => s.id === subjectId)?.name || subjectId;
@@ -348,6 +332,20 @@ export default function StudyPlanner() {
     return { tasks: dayTasks, exams: dayExams, sessions: daySessions };
   };
 
+  const filteredTasks = tasks.filter(t => {
+    const matchesSubject = selectedSubject === 'all' || t.subjectId === selectedSubject;
+    const matchesSearch = t.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSubject && matchesSearch;
+  });
+
+  const pendingTasks = filteredTasks.filter(t => t.status === 'pending');
+  const completedTasks = filteredTasks.filter(t => t.status === 'completed');
+  const overdueTasks = getOverdueTasks();
+  const todaysTasks = getTodaysTasks();
+  const upcomingExams = getUpcomingExams();
+  const overdueExams = getOverdueExams();
+  const todaysSessions = getTodaysSessions();
+
   const stats = {
     total: tasks.length,
     pending: getPendingTasks().length,
@@ -364,14 +362,50 @@ export default function StudyPlanner() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold gradient-text">Academic Planner</h2>
-          <p className="text-muted-foreground mt-1">Manage tasks, exams, and study sessions</p>
-        </div>
+      {/* Hero Header */}
+      <div className="section-hero mesh-gradient" data-tutorial="planner-header">
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="section-hero-icon">
+              <ClipboardList className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-display section-hero-title">Study Planner</h2>
+              <p className="text-muted-foreground mt-2 text-sm">Manage your tasks, exams, and study sessions.</p>
+            </div>
+          </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2" data-tutorial="planner-actions">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" className="rounded-xl gap-2 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:text-rose-700 hover:border-rose-300 transition-all">
+                <AlertTriangle className="w-4 h-4" />
+                Reset Tasks
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl shadow-2xl">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                  <AlertTriangle className="w-5 h-5" />
+                  Reset Study Tasks
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-muted-foreground text-base">
+                  Are you sure you want to permanently delete <strong>all your study tasks</strong>? 
+                  <br /><br />
+                  This is usually done at the start of a new semester. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => { resetTasks(); toast.success('Tasks reset.'); }} className="rounded-xl bg-rose-600 text-white hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-500/20 shadow-rose-500/10 border-0">
+                  Yes, Reset Tasks
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <Button className="btn-gradient rounded-xl gap-2" onClick={() => setIsAddTaskDialogOpen(true)}>
             <Plus className="w-4 h-4" />
             Add Task
@@ -387,6 +421,8 @@ export default function StudyPlanner() {
             Add Session
           </Button>
         </div>
+        </div>
+      </div>
 
         {/* Standalone Task Modal */}
         {isAddTaskDialogOpen && (
@@ -423,12 +459,11 @@ export default function StudyPlanner() {
             onClose={() => setIsAddSessionDialogOpen(false)}
           />
         )}
-      </div>
 
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full max-w-2xl grid-cols-4 rounded-xl h-12">
+        <TabsList className="grid w-full max-w-2xl grid-cols-4 rounded-xl h-12" data-tutorial="planner-tabs">
           <TabsTrigger value="tasks" className="rounded-lg">Tasks ({pendingTasks.length})</TabsTrigger>
           <TabsTrigger value="calendar" className="rounded-lg">Calendar</TabsTrigger>
           <TabsTrigger value="exams" className="rounded-lg">Exams ({upcomingExams.length})</TabsTrigger>
@@ -498,7 +533,7 @@ export default function StudyPlanner() {
                 <TaskCard
                   key={task.id}
                   task={task}
-                  onToggle={() => handleToggleWithConfetti(task.id)}
+                  onToggle={() => handleToggleTask(task.id)}
                   onEdit={() => openEditTask(task)}
                   onDelete={() => setTaskToDelete(task)}
                   getStatus={getTaskStatus}
@@ -522,7 +557,7 @@ export default function StudyPlanner() {
                   <TaskCard
                     key={task.id}
                     task={task}
-                    onToggle={() => handleToggleWithConfetti(task.id)}
+                    onToggle={() => handleToggleTask(task.id)}
                     onEdit={() => openEditTask(task)}
                     onDelete={() => setTaskToDelete(task)}
                     getStatus={getTaskStatus}
@@ -722,7 +757,7 @@ export default function StudyPlanner() {
       </Tabs>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4" data-tutorial="planner-stats">
         <StatCard icon={<ClipboardList className="w-6 h-6 text-white" />} value={stats.total} label="Total Tasks" color="from-violet-400 to-purple-500" />
         <StatCard icon={<Clock className="w-6 h-6 text-white" />} value={stats.pending} label="Pending" color="from-amber-400 to-orange-500" />
         <StatCard icon={<CheckCircle2 className="w-6 h-6 text-white" />} value={stats.completed} label="Completed" color="from-emerald-400 to-teal-500" />
@@ -818,7 +853,7 @@ export default function StudyPlanner() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {ConfettiCanvas}
+
 
       {/* Delete Session Confirmation */}
       <AlertDialog open={!!sessionToDelete} onOpenChange={(open) => !open && setSessionToDelete(null)}>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Upload, Sparkles } from 'lucide-react';
+import { Plus, Upload, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStudentStore } from '@/context/StudentContext';
 import ProgressSummary from '@/components/progress/ProgressSummary';
@@ -36,18 +36,19 @@ export default function ProgressTracker() {
   return (
     <div className="settings-bg h-full flex flex-col max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-8">
       {/* ── Premium Hero Header ── */}
-      <div className="section-hero mesh-gradient mb-5">
+      <div className="section-hero mesh-gradient mb-5" data-tutorial="progress-hero">
         <div className="orb orb-1" />
         <div className="orb orb-2" />
         <div className="orb orb-3" />
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Sparkles className="w-5 h-5 text-primary" />
-              <span className="text-xs font-semibold text-primary uppercase tracking-widest">Track & Conquer</span>
+          <div className="flex items-center gap-4">
+            <div className="section-hero-icon">
+              <Target className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-display gradient-text-vibrant">Progress Tracker</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Master your syllabus — every topic checked is a step closer to success! 🎯</p>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-display section-hero-title">Progress Tracker</h1>
+              <p className="text-muted-foreground mt-2 text-sm">Track your syllabus completion across all subjects.</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" className="gap-2 rounded-xl hover:shadow-lg transition-all" onClick={() => setShowImport(!showImport)}>
@@ -61,7 +62,9 @@ export default function ProgressTracker() {
       </div>
 
       {/* ── Summary (moved above subjects) ── */}
-      <ProgressSummary />
+      <div data-tutorial="progress-summary">
+        <ProgressSummary />
+      </div>
 
       {/* ── Import Section (collapsible) ── */}
       {showImport && (
@@ -71,7 +74,7 @@ export default function ProgressTracker() {
       )}
 
       {/* ── Subjects Grid ── */}
-      <div className="flex-1 space-y-4">
+      <div className="flex-1 space-y-4" data-tutorial="progress-subjects">
         <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
           <span className="w-1.5 h-6 rounded-full bg-gradient-to-b from-primary to-violet-500" />
           Subjects Overview

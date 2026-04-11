@@ -14,7 +14,7 @@ export default function PWAInstallPrompt(): ReactElement | null {
 
   return (
     <div
-      className="fixed z-50 p-4 bg-background/80 backdrop-blur-xl border border-border rounded-2xl shadow-2xl max-w-sm mx-4 lg:mx-0 lg:right-6 right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:bottom-6 animate-in slide-in-from-bottom-5 duration-500"
+      className="fixed z-40 p-4 bg-background/80 backdrop-blur-xl border border-border rounded-2xl shadow-2xl max-w-sm mx-4 lg:mx-0 lg:right-6 right-4 top-20 lg:top-24 animate-in slide-in-from-top-5 duration-500"
     >
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">

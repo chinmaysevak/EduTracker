@@ -6,8 +6,6 @@ import User from '../models/User.js';
 import auth from '../middleware/auth.js';
 import { sendOtpEmail } from '../lib/mailer.js';
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
 const router = Router();
 
 // POST /api/auth/register
@@ -53,7 +51,8 @@ router.post('/register', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        theme: user.theme || 'system'
+        theme: user.theme || 'system',
+        profilePhoto: user.profilePhoto || ''
       }
     });
   } catch (err) {
@@ -96,7 +95,8 @@ router.post('/login', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        theme: user.theme || 'system'
+        theme: user.theme || 'system',
+        profilePhoto: user.profilePhoto || ''
       }
     });
   } catch (err) {
@@ -189,7 +189,8 @@ router.get('/me', auth, async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        theme: user.theme || 'system'
+        theme: user.theme || 'system',
+        profilePhoto: user.profilePhoto || ''
       }
     });
   } catch (err) {
@@ -217,7 +218,8 @@ router.put('/profile', auth, async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        theme: user.theme || 'system'
+        theme: user.theme || 'system',
+        profilePhoto: user.profilePhoto || ''
       }
     });
   } catch (err) {
@@ -235,6 +237,8 @@ router.post('/google', async (req, res) => {
     if (!credential) {
       return res.status(400).json({ error: 'Google credential is required' });
     }
+
+    const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
     // Verify the Google ID token
     const ticket = await googleClient.verifyIdToken({

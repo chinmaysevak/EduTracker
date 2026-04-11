@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { useSubjects, useAttendance } from '@/hooks/useData';
+import { useSettings } from '@/hooks/useSettings';
 import { TrendingUp, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 interface AttendancePredictionModalProps {
@@ -16,6 +17,9 @@ interface AttendancePredictionModalProps {
 export function AttendancePredictionModal({ isOpen, onClose }: AttendancePredictionModalProps) {
     const { subjects } = useSubjects();
     const { calculateSubjectAttendance } = useAttendance();
+    const { settings } = useSettings();
+    const attendanceGoal = settings?.attendanceGoal || 75;
+    const warningLimit = Math.max(0, attendanceGoal - 15);
 
     // State for simulated classes (negative = miss, positive = attend)
     const [simulation, setSimulation] = useState<Record<string, number>>({});
@@ -44,8 +48,8 @@ export function AttendancePredictionModal({ isOpen, onClose }: AttendancePredict
         const newPercentage = newTotal > 0 ? Math.round((newPresent / newTotal) * 100) : 0;
 
         let status: 'safe' | 'risk' | 'critical' = 'safe';
-        if (newPercentage < 60) status = 'critical';
-        else if (newPercentage < 75) status = 'risk';
+        if (newPercentage < warningLimit) status = 'critical';
+        else if (newPercentage < attendanceGoal) status = 'risk';
 
         return {
             current: stats.percentage,
@@ -115,19 +119,19 @@ export function AttendancePredictionModal({ isOpen, onClose }: AttendancePredict
                                             className="py-1"
                                         />
 
-                                        {prediction.predicted < 75 && (
-                                            <div className={`text-xs flex items-center gap-1.5 p-2 rounded-lg ${prediction.predicted < 60
+                                        {prediction.predicted < attendanceGoal && (
+                                            <div className={`text-xs flex items-center gap-1.5 p-2 rounded-lg ${prediction.predicted < warningLimit
                                                 ? 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'
                                                 : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'
                                                 }`}>
                                                 <AlertTriangle className="w-3 h-3 shrink-0" />
                                                 <span>
-                                                    {prediction.predicted < 60 ? 'Critical Warning! Attendance is too low.' : 'Warning: Falling below 75% target.'}
+                                                    {prediction.predicted < warningLimit ? 'Critical Warning! Attendance is too low.' : 'Warning: Falling below ${attendanceGoal}% target.'}
                                                 </span>
                                             </div>
                                         )}
 
-                                        {prediction.predicted >= 75 && prediction.current < 75 && (
+                                        {prediction.predicted >= attendanceGoal && prediction.current < attendanceGoal && (
                                             <div className="text-xs flex items-center gap-1.5 p-2 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
                                                 <CheckCircle2 className="w-3 h-3 shrink-0" />
                                                 <span>Great! You're back on track.</span>

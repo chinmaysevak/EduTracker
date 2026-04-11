@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart3 } from 'lucide-react';
 import { AttendanceTrendChart } from '@/components/analytics/AttendanceTrendChart';
 import { SubjectComparisonChart } from '@/components/analytics/SubjectComparisonChart';
 import { ReadinessScorecard } from '@/components/analytics/ReadinessScorecard';
@@ -16,10 +17,20 @@ export default function Analytics() {
   if (!hasData) {
     return (
       <div className="settings-bg space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold gradient-text">Analytics</h2>
-            <p className="text-muted-foreground text-sm">Visualize your academic performance and patterns</p>
+        {/* Hero Header */}
+        <div className="section-hero mesh-gradient">
+          <div className="orb orb-1" />
+          <div className="orb orb-2" />
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="section-hero-icon">
+                <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold font-display section-hero-title">Analytics</h2>
+                <p className="text-muted-foreground text-sm mt-2">Visualize your academic performance and patterns</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -42,11 +53,21 @@ export default function Analytics() {
 
   return (
     <div className="settings-bg space-y-3">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold gradient-text">Analytics</h2>
-          <p className="text-muted-foreground text-sm">Visualize your academic performance and patterns</p>
+      {/* Hero Header */}
+      <div className="section-hero mesh-gradient">
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="section-hero-icon">
+              <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-display section-hero-title">Analytics</h2>
+              <p className="text-muted-foreground text-sm mt-2">Visualize your academic performance and patterns</p>
+            </div>
+          </div>
         </div>
       </div>
 

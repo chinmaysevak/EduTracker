@@ -3,6 +3,7 @@
 // ============================================
 
 import { Card, CardContent } from '@/components/ui/card';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ShieldAlert, Download } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -15,9 +16,12 @@ export function BackupReminderWidget() {
     const [lastExportDate, setLastExportDate] = useLocalStorage<string | null>('edu-tracker-last-export', null, userId);
     const { exportData } = useImportExport(userId);
 
-    const daysSinceExport = lastExportDate
-        ? Math.floor((Date.now() - new Date(lastExportDate).getTime()) / (1000 * 60 * 60 * 24))
-        : null;
+    // Use useMemo to avoid calling impure Date.now() on every render
+    const daysSinceExport = React.useMemo(() => {
+        return lastExportDate
+            ? Math.floor((Date.now() - new Date(lastExportDate).getTime()) / (1000 * 60 * 60 * 24))
+            : null;
+    }, [lastExportDate]);
 
     // Show if never exported or more than 7 days ago
     const shouldShow = daysSinceExport === null || daysSinceExport >= 7;

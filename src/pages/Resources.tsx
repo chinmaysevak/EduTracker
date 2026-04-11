@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from 'react';
-import { Plus, Search, Filter, BookOpen, Star, Clock, FolderOpen, FileUp } from 'lucide-react';
+import { Plus, Search, Filter, BookOpen, Star, Clock, FolderOpen, FileUp, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useStudentStore } from '@/context/StudentContext';
 import ResourceCard from '@/components/resources/ResourceCard';
 import AddResourceModal from '@/components/resources/AddResourceModal';
@@ -57,32 +58,74 @@ export default function Resources() {
 
     return (
         <div className="h-full flex flex-col max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-            {/* Header section */}
-            <div className="mb-4">
-                <h1 className="text-2xl font-bold mb-1 tracking-tight">Resources Library</h1>
-                <p className="text-muted-foreground text-sm mb-3">Store, organize, and access all your study materials in one place.</p>
-
-                <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                    <div className="relative w-full max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <input
-                            type="text"
-                            placeholder="Search resources by title or tag..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 bg-card border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm"
-                        />
+            {/* Premium Hero Header */}
+            <div className="section-hero mesh-gradient mb-5" data-tutorial="resources-header">
+                <div className="orb orb-1" />
+                <div className="orb orb-2" />
+                <div className="orb orb-3" />
+                <div className="relative z-10">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
+                        <div className="flex items-center gap-4">
+                            <div className="section-hero-icon">
+                                <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-display section-hero-title">Resources Library</h1>
+                                <p className="text-muted-foreground text-sm mt-2">Store, organize, and access all your study materials in one place.</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="outline" className="w-full sm:w-auto gap-2 rounded-xl text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:text-rose-700 hover:border-rose-300 transition-all">
+                                        <Trash2 className="w-4 h-4" />
+                                        Reset
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl shadow-2xl">
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                                            <AlertCircle className="w-5 h-5" />
+                                            Reset Resource Library
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription className="text-muted-foreground text-base">
+                                            Are you sure you want to permanently delete <strong>all your resources</strong> (notes, links, uploads)? 
+                                            <br /><br />
+                                            This is usually done at the start of a new semester. This action cannot be undone.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => { resources.resetResources(); }} className="rounded-xl bg-rose-600 text-white hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-500/20 shadow-rose-500/10 border-0">
+                                            Yes, Reset Resources
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                            <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto gap-2 rounded-xl btn-gradient btn-glow">
+                                <FileUp className="w-4 h-4" />
+                                Add Resource
+                            </Button>
+                        </div>
                     </div>
-                    <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto gap-2 rounded-xl">
-                        <FileUp className="w-4 h-4" />
-                        Add Resource
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-4 items-center" data-tutorial="resources-search">
+                        <div className="relative w-full max-w-md">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <input
+                                type="text"
+                                placeholder="Search resources by title or tag..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2.5 bg-card/80 backdrop-blur border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm"
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div className="flex flex-col lg:flex-row gap-4 pb-6 flex-1">
                 {/* Sidebar / Subject Filter */}
-                <div className="w-full lg:w-56 flex-shrink-0 space-y-4">
+                <div className="w-full lg:w-56 flex-shrink-0 space-y-4" data-tutorial="resources-filter">
                     <div className="bg-card border border-border/50 rounded-xl p-4 sticky top-[90px]">
                         <h3 className="font-semibold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider text-muted-foreground">
                             <Filter className="w-4 h-4" /> Filter by Subject

@@ -55,15 +55,17 @@ export interface AttendanceResult {
 }
 
 /**
- * Calculates attendance status based on a 75% requirement.
+ * Calculates attendance status based on a required target percentage.
  * 
  * @param attendedClasses Number of classes attended
  * @param totalClasses Total number of classes held
- * @returns Object containing percentage, status, and classes needed to reach 75%
+ * @param targetPercentage Required attendance percentage
+ * @returns Object containing percentage, status, and classes needed to reach target
  */
 export const calculateAttendanceStatus = (
     attendedClasses: number,
-    totalClasses: number
+    totalClasses: number,
+    targetPercentage: number = 75
 ): AttendanceResult => {
     if (totalClasses === 0) {
         return { percentage: 0, status: 'Safe' };
@@ -72,20 +74,22 @@ export const calculateAttendanceStatus = (
     const percentageVal = (attendedClasses / totalClasses) * 100;
     const percentage = Number(percentageVal.toFixed(2));
 
-    if (percentage >= 75) {
+    if (percentage >= targetPercentage) {
         return { percentage, status: 'Safe' };
     } else {
         // Calculate needed consecutive classes:
-        // (attended + needed) / (total + needed) = 0.75
-        // attended + needed = 0.75 * total + 0.75 * needed
-        // 0.25 * needed = 0.75 * total - attended
-        // needed = (0.75 * total - attended) / 0.25
-        const needed = Math.ceil((0.75 * totalClasses - attendedClasses) / 0.25);
+        // (attended + needed) / (total + needed) = target
+        // attended + needed = target * total + target * needed
+        // needed - target * needed = target * total - attended
+        // needed * (1 - target) = target * total - attended
+        // needed = (target * total - attended) / (1 - target)
+        const target = targetPercentage / 100;
+        const needed = Math.ceil((target * totalClasses - attendedClasses) / (1 - target));
 
         return {
             percentage,
             status: 'At Risk',
-            classesNeeded: needed
+            classesNeeded: Math.max(0, needed)
         };
     }
 };
@@ -129,13 +133,15 @@ export const calculateExamReadiness = (
     subject: Subject,
     attendancePercentage: number,
     completedTasks: number,
-    totalTasks: number
+    totalTasks: number,
+    targetPercentage: number = 75
 ): { score: number; label: string; color: string } => {
     let score = 0;
+    const warningLimit = Math.max(0, targetPercentage - 15);
 
     // Attendance weight (40%)
-    if (attendancePercentage >= 75) score += 40;
-    else if (attendancePercentage >= 60) score += 20;
+    if (attendancePercentage >= targetPercentage) score += 40;
+    else if (attendancePercentage >= warningLimit) score += 20;
 
     // Task completion weight (40%)
     if (totalTasks > 0) {

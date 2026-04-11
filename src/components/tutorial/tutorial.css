@@ -1,0 +1,666 @@
+/* ============================================
+   Tutorial System — Premium Styles
+   ============================================ */
+
+/* ────────── Overlay ────────── */
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+.tutorial-overlay.active {
+  pointer-events: auto;
+}
+
+.tutorial-overlay-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+}
+
+/* ────────── Spotlight Glow Ring ────────── */
+.tutorial-spotlight-ring {
+  position: fixed;
+  z-index: 100000;
+  pointer-events: none;
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 3px hsl(var(--primary) / 0.6),
+    0 0 20px 4px hsl(var(--primary) / 0.25),
+    0 0 60px 8px hsl(var(--primary) / 0.1);
+  animation: tutorial-spotlight-pulse 2s ease-in-out infinite;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tutorial-spotlight-ring.circle {
+  border-radius: 50%;
+}
+
+@keyframes tutorial-spotlight-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px hsl(var(--primary) / 0.6),
+      0 0 20px 4px hsl(var(--primary) / 0.25),
+      0 0 60px 8px hsl(var(--primary) / 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 5px hsl(var(--primary) / 0.4),
+      0 0 30px 8px hsl(var(--primary) / 0.35),
+      0 0 80px 16px hsl(var(--primary) / 0.15);
+  }
+}
+
+/* ────────── Speech Bubble ────────── */
+.tutorial-speech-bubble {
+  position: fixed;
+  z-index: 100002;
+  max-width: 380px;
+  width: calc(100vw - 32px);
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 20px;
+  padding: 20px 24px;
+  box-shadow:
+    0 20px 60px -12px rgba(0, 0, 0, 0.3),
+    0 0 0 1px hsl(var(--primary) / 0.1);
+  animation: tutorial-bubble-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes tutorial-bubble-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.tutorial-bubble-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.tutorial-bubble-description {
+  font-size: 13.5px;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.tutorial-bubble-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tutorial-bubble-step-counter {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tutorial-bubble-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tutorial-btn-back {
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tutorial-btn-back:hover {
+  background: hsl(var(--muted) / 0.8);
+  color: hsl(var(--foreground));
+}
+
+.tutorial-btn-next {
+  padding: 8px 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px hsl(var(--primary) / 0.3);
+}
+
+.tutorial-btn-next:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px hsl(var(--primary) / 0.4);
+}
+
+.tutorial-btn-next:active {
+  transform: translateY(0);
+}
+
+.tutorial-btn-skip {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100003;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: hsl(var(--card) / 0.9);
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border) / 0.5);
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(8px);
+}
+
+.tutorial-btn-skip:hover {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+
+/* ────────── Progress Bar ────────── */
+.tutorial-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  z-index: 100003;
+  background: hsl(var(--muted) / 0.3);
+}
+
+.tutorial-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.7));
+  border-radius: 0 2px 2px 0;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+}
+
+/* ────────── Chapter Transition ────────── */
+.tutorial-chapter-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 100005;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--background) / 0.95);
+  backdrop-filter: blur(20px);
+  animation: tutorial-chapter-enter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tutorial-chapter-transition.exiting {
+  animation: tutorial-chapter-exit 0.4s ease-in forwards;
+}
+
+@keyframes tutorial-chapter-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes tutorial-chapter-exit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+}
+
+.tutorial-chapter-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  animation: tutorial-chapter-icon-bounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+}
+
+@keyframes tutorial-chapter-icon-bounce {
+  from {
+    opacity: 0;
+    transform: scale(0) rotate(-10deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.tutorial-chapter-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: hsl(var(--primary));
+  margin-bottom: 8px;
+  animation: tutorial-chapter-label-enter 0.4s ease-out 0.3s both;
+}
+
+@keyframes tutorial-chapter-label-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tutorial-chapter-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: hsl(var(--foreground));
+  text-align: center;
+  animation: tutorial-chapter-title-enter 0.4s ease-out 0.4s both;
+}
+
+@keyframes tutorial-chapter-title-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ────────── Mascot ────────── */
+.tutorial-mascot {
+  position: fixed;
+  z-index: 100001;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: tutorial-mascot-enter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes tutorial-mascot-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.5) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Mascot Body */
+.mascot-container {
+  width: 72px;
+  height: 80px;
+  position: relative;
+  cursor: default;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+.mascot-body {
+  width: 56px;
+  height: 52px;
+  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+  border-radius: 50% 50% 45% 45%;
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: mascot-breathe 3s ease-in-out infinite;
+}
+
+@keyframes mascot-breathe {
+  0%, 100% { transform: translateX(-50%) scaleY(1); }
+  50% { transform: translateX(-50%) scaleY(1.03); }
+}
+
+.mascot-belly {
+  width: 38px;
+  height: 30px;
+  background: linear-gradient(180deg, #DDD6FE, #C4B5FD);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Eyes */
+.mascot-eyes {
+  display: flex;
+  gap: 10px;
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.mascot-eye {
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+}
+
+.mascot-pupil {
+  width: 8px;
+  height: 8px;
+  background: #1E1B4B;
+  border-radius: 50%;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  animation: mascot-look 4s ease-in-out infinite;
+}
+
+@keyframes mascot-look {
+  0%, 40%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(2px, -1px); }
+  25% { transform: translate(-2px, 1px); }
+}
+
+.mascot-pupil-shine {
+  width: 3px;
+  height: 3px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 1px;
+  right: 1px;
+}
+
+/* Blink */
+.mascot-eye::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+  border-radius: 50%;
+  transform: scaleY(0);
+  animation: mascot-blink 4s ease-in-out infinite;
+}
+
+@keyframes mascot-blink {
+  0%, 95%, 100% { transform: scaleY(0); }
+  97% { transform: scaleY(1); }
+}
+
+/* Beak */
+.mascot-beak {
+  width: 10px;
+  height: 8px;
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.mascot-beak::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 8px solid #F59E0B;
+}
+
+/* Ear Tufts */
+.mascot-tufts {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+}
+
+.mascot-tuft {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 12px solid #7C3AED;
+}
+
+/* Wings */
+.mascot-wing-left,
+.mascot-wing-right {
+  width: 16px;
+  height: 28px;
+  background: linear-gradient(135deg, #7C3AED, #6D28D9);
+  border-radius: 50% 50% 40% 60%;
+  position: absolute;
+  top: 20px;
+}
+
+.mascot-wing-left {
+  left: -4px;
+  transform: rotate(-15deg);
+  transform-origin: top right;
+  border-radius: 60% 40% 50% 50%;
+  animation: mascot-wing-idle-left 3s ease-in-out infinite;
+}
+
+.mascot-wing-right {
+  right: -4px;
+  transform: rotate(15deg);
+  transform-origin: top left;
+  border-radius: 40% 60% 50% 50%;
+  animation: mascot-wing-idle-right 3s ease-in-out infinite;
+}
+
+@keyframes mascot-wing-idle-left {
+  0%, 100% { transform: rotate(-15deg); }
+  50% { transform: rotate(-20deg); }
+}
+
+@keyframes mascot-wing-idle-right {
+  0%, 100% { transform: rotate(15deg); }
+  50% { transform: rotate(20deg); }
+}
+
+/* Feet */
+.mascot-feet {
+  display: flex;
+  gap: 12px;
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.mascot-foot {
+  width: 14px;
+  height: 6px;
+  background: #F59E0B;
+  border-radius: 0 0 50% 50%;
+}
+
+/* ── Mascot Pose Variants ── */
+
+/* Waving */
+.mascot-container.waving .mascot-wing-right {
+  animation: mascot-wave 0.8s ease-in-out infinite !important;
+}
+
+@keyframes mascot-wave {
+  0%, 100% { transform: rotate(15deg); }
+  25% { transform: rotate(-30deg); }
+  75% { transform: rotate(30deg); }
+}
+
+/* Pointing Right */
+.mascot-container.pointing-right .mascot-wing-right {
+  animation: none !important;
+  transform: rotate(-60deg) scaleX(1.2);
+}
+
+/* Pointing Down */
+.mascot-container.pointing-down .mascot-wing-right {
+  animation: none !important;
+  transform: rotate(60deg) translateY(4px);
+}
+
+/* Celebrating */
+.mascot-container.celebrating .mascot-wing-left {
+  animation: mascot-celebrate-left 0.5s ease-in-out infinite !important;
+}
+
+.mascot-container.celebrating .mascot-wing-right {
+  animation: mascot-celebrate-right 0.5s ease-in-out infinite !important;
+}
+
+.mascot-container.celebrating .mascot-body {
+  animation: mascot-bounce 0.5s ease-in-out infinite !important;
+}
+
+@keyframes mascot-celebrate-left {
+  0%, 100% { transform: rotate(-40deg); }
+  50% { transform: rotate(-60deg); }
+}
+
+@keyframes mascot-celebrate-right {
+  0%, 100% { transform: rotate(40deg); }
+  50% { transform: rotate(60deg); }
+}
+
+@keyframes mascot-bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-6px); }
+}
+
+/* ────────── Tutorial Trigger Button ────────── */
+.tutorial-trigger-btn {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-height, 64px) + 16px);
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.85));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  cursor: pointer;
+  box-shadow:
+    0 8px 32px hsl(var(--primary) / 0.3),
+    0 0 0 1px hsl(var(--primary) / 0.2);
+  animation: tutorial-trigger-glow 2s ease-in-out infinite;
+  transition: all 0.3s;
+}
+
+.tutorial-trigger-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 12px 40px hsl(var(--primary) / 0.4),
+    0 0 0 1px hsl(var(--primary) / 0.3);
+}
+
+@keyframes tutorial-trigger-glow {
+  0%, 100% {
+    box-shadow:
+      0 8px 32px hsl(var(--primary) / 0.3),
+      0 0 0 1px hsl(var(--primary) / 0.2);
+  }
+  50% {
+    box-shadow:
+      0 8px 32px hsl(var(--primary) / 0.5),
+      0 0 0 3px hsl(var(--primary) / 0.15);
+  }
+}
+
+@media (min-width: 1024px) {
+  .tutorial-trigger-btn {
+    bottom: 24px;
+    right: 24px;
+  }
+}
+
+/* ────────── Spotlight click-through for interactive steps ────────── */
+.tutorial-spotlight-interactive {
+  position: fixed;
+  z-index: 100000;
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 16px;
+}
+
+.tutorial-spotlight-interactive.circle {
+  border-radius: 50%;
+}
+
+/* ────────── Mobile Adjustments ────────── */
+@media (max-width: 640px) {
+  .tutorial-speech-bubble {
+    max-width: calc(100vw - 24px);
+    padding: 16px 18px;
+    border-radius: 16px;
+  }
+
+  .tutorial-bubble-title {
+    font-size: 15px;
+  }
+
+  .tutorial-bubble-description {
+    font-size: 13px;
+  }
+
+  .mascot-container {
+    width: 56px;
+    height: 64px;
+    transform: scale(0.85);
+  }
+
+  .tutorial-chapter-icon {
+    font-size: 48px;
+  }
+
+  .tutorial-chapter-title {
+    font-size: 22px;
+    padding: 0 24px;
+  }
+}
+
+/* ────────── Confetti for finale ────────── */
+.tutorial-confetti-container {
+  position: fixed;
+  inset: 0;
+  z-index: 100006;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.tutorial-confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  animation: tutorial-confetti-fall linear forwards;
+}
+
+@keyframes tutorial-confetti-fall {
+  to {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
+}

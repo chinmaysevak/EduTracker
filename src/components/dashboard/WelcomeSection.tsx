@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useUserProfile, useTimetable, useStudyTasks } from '@/hooks/useData';
 import { useAuth } from '@/context/AuthContext';
 import type { TimetableSlot } from '@/types';
-import { Flame, Clock, Zap, ArrowRight, Sparkles } from 'lucide-react';
+import { Clock, Zap, ArrowRight, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import type { ModuleType } from '@/types';
 
@@ -86,29 +86,25 @@ export function WelcomeSection({ onNavigate }: { onNavigate: (module: ModuleType
                 <div className="orb orb-3" />
 
                 <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                    <div>
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                            <Sparkles className="w-3 h-3 text-primary" />
-                            {format(new Date(), 'EEEE, MMMM do')}
-                        </p>
-                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-display gradient-text-vibrant">
-                            {greeting}, {user?.name ? user.name.split(' ')[0] : 'Student'}! 👋
-                        </h1>
-
-                        {/* Rotating motivational quote */}
-                        <p key={quoteKey} className="text-sm text-muted-foreground mt-2 quote-fade-in flex items-center gap-1.5">
-                            <span>{quote.emoji}</span>
-                            <span className="italic">{quote.text}</span>
-                        </p>
-                    </div>
-
-                    {profile.currentStreak > 0 && (
-                        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-sm font-semibold w-fit streak-pulse shadow-lg shadow-amber-500/10">
-                            <Flame className="w-4 h-4" />
-                            <span className="mono-data">{profile.currentStreak} day streak</span>
-                            <span className="text-amber-400">🔥</span>
+                    <div className="flex items-start gap-4">
+                        <div className="section-hero-icon mt-1">
+                            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                         </div>
-                    )}
+                        <div>
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                                {format(new Date(), 'EEEE, MMMM do')}
+                            </p>
+                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-display section-hero-title">
+                                {greeting}, {user?.name ? user.name.split(' ')[0] : 'Student'}! 👋
+                            </h1>
+
+                            {/* Rotating motivational quote */}
+                            <p key={quoteKey} className="text-sm text-muted-foreground mt-3 quote-fade-in flex items-center gap-1.5">
+                                <span>{quote.emoji}</span>
+                                <span className="italic">{quote.text}</span>
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 

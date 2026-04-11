@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Toaster } from 'sonner'
 import './index.css'
+import '@/components/tutorial/tutorial.css'
 
 // Font Awesome removed in favor of Lucide React
 

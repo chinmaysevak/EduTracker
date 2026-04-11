@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { TutorialProvider } from '@/components/tutorial/TutorialContext';
+import { TutorialOverlay } from '@/components/tutorial/TutorialOverlay';
 import {
     LayoutDashboard,
     CalendarCheck,
@@ -52,6 +54,7 @@ import {
     DrawerHeader,
     DrawerTitle,
 } from '@/components/ui/drawer';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
 import api from '@/lib/api';
@@ -84,10 +87,29 @@ export default function DashboardLayout() {
     const [searchOpen, setSearchOpen] = useState(false);
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
     const [moreDrawerOpen, setMoreDrawerOpen] = useState(false);
+    const [fetchedProfilePhoto, setFetchedProfilePhoto] = useState<string | null>(null);
 
     const { user, logout } = useAuth();
     const { profile } = useUserProfile();
     const userName = user?.name || profile?.name || '';
+
+    useEffect(() => {
+        // Fetch photo initially
+        api.get('/users/me')
+            .then((res: any) => {
+                if (res.profilePhoto) {
+                    setFetchedProfilePhoto(res.profilePhoto);
+                }
+            })
+            .catch(() => {}); // silently ignore if failed
+
+        // Listen for setting changes
+        const handlePhotoUpdate = (e: any) => {
+            setFetchedProfilePhoto(e.detail || null);
+        };
+        window.addEventListener('profile-photo-updated', handlePhotoUpdate);
+        return () => window.removeEventListener('profile-photo-updated', handlePhotoUpdate);
+    }, []);
 
     const getGreeting = (): string => {
         const hour = new Date().getHours();
@@ -195,13 +217,11 @@ export default function DashboardLayout() {
     };
 
     return (
+      <TutorialProvider>
         <div className="min-h-screen w-full flex bg-background text-foreground font-display">
-            {/* Absolute Portal Container */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden z-[100]">
-                <div className="pointer-events-auto">
-                    <PWAInstallPrompt />
-                </div>
-            </div>
+            {/* Tutorial Overlay (rendered above everything) */}
+            <TutorialOverlay />
+            <PWAInstallPrompt />
 
             {/* ══ Search Command Dialog ══ */}
             <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
@@ -406,11 +426,15 @@ export default function DashboardLayout() {
                                 </div>
                             </DropdownMenuContent>
                         </DropdownMenu>
+                        <Avatar className="h-8 w-8 ml-1 border-2 border-primary/20 cursor-pointer overflow-hidden" onClick={() => navigate('/settings')} title="Profile Settings">
+                            <AvatarImage src={fetchedProfilePhoto || user?.profilePhoto || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userName || 'User'}`} alt={userName || 'User'} className="object-cover w-full h-full" />
+                            <AvatarFallback>{(userName || 'User').substring(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
                     </div>
                 </div>
             </div>
 
-            <nav className="bottom-nav lg:hidden glass border-t border-white/10">
+            <nav className="bottom-nav lg:hidden glass border-t border-white/10" data-tutorial="bottom-nav">
                 <div className="flex items-stretch h-full max-w-lg mx-auto">
                     {bottomTabItems.map((item) => {
                         const Icon = item.icon;
@@ -427,6 +451,7 @@ export default function DashboardLayout() {
                         );
                     })}
                     <button
+                        data-tutorial="focus-nav"
                         onClick={() => navigate('/focus')}
                         className={`bottom-nav-item ${isFocusMode ? 'text-primary' : 'text-muted-foreground'}`}
                     >
@@ -491,13 +516,7 @@ export default function DashboardLayout() {
          ══════════════════════════════════════ */}
             <main className="flex flex-col flex-1 min-w-0 transition-all duration-300 ease-in-out">
                 <header className={`sticky top-0 z-30 w-full backdrop-blur bg-background/80 border-b border-white/10 transition-all duration-200 ${isScrolled ? 'shadow-sm' : ''}`}>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-fluid-md py-3">
-                        <div className="block">
-                            <h2 className="text-xl sm:text-2xl font-semibold">{activeItem?.label}</h2>
-                            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                                {activeItem?.label === 'Dashboard' ? getGreeting() : `Manage your ${activeItem?.label.toLowerCase()}`}
-                            </p>
-                        </div>
+                    <div className="flex items-center justify-end gap-2 px-fluid-md py-3">
 
                         <div className="hidden lg:flex items-center gap-4">
                             <div className="flex flex-col items-end px-3 py-2 rounded-xl bg-muted/50 border border-border/50 min-w-[120px]">
@@ -567,6 +586,11 @@ export default function DashboardLayout() {
                                     </div>
                                 </DropdownMenuContent>
                             </DropdownMenu>
+                            <div className="h-8 w-px bg-border/50 mx-1 hidden sm:block"></div>
+                            <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-sm cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all overflow-hidden" onClick={() => navigate('/settings')} title="Profile Settings">
+                                <AvatarImage src={fetchedProfilePhoto || user?.profilePhoto || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userName || 'User'}`} alt={userName || 'User'} className="object-cover w-full h-full" />
+                                <AvatarFallback className="font-medium bg-primary/10 text-primary">{(userName || 'User').substring(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
                         </div>
                     </div>
                 </header>
@@ -581,5 +605,6 @@ export default function DashboardLayout() {
                 </footer>
             </main>
         </div>
+      </TutorialProvider>
     );
 }

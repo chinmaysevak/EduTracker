@@ -89,6 +89,16 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// DELETE /api/resources/reset
+router.delete('/reset', async (req, res) => {
+  try {
+    await Resource.deleteMany({ userId: req.userId });
+    res.json({ message: 'Resources reset successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to reset resources' });
+  }
+});
+
 // DELETE /api/resources/:id
 router.delete('/:id', async (req, res) => {
   try {

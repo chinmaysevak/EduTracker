@@ -22,7 +22,8 @@ import {
   Shield,
   X,
   Check,
-  Smartphone
+  Smartphone,
+  Settings2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,6 +39,7 @@ import { EduNotifications } from '@/lib/notifications';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { usePwa } from '@/context/PwaContext';
+import { TutorialReplayButton } from '@/components/tutorial/TutorialTrigger';
 
 interface UserProfile {
   id: string;
@@ -74,7 +76,7 @@ interface StorageInfo {
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const { theme: _theme, setTheme, accentHue, setAccentHue, visualTheme, setVisualTheme } = useTheme();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -233,6 +235,7 @@ export default function Settings() {
       setIsPhotoPreviewOpen(false);
       setPhotoPreview('');
       toast.success('Profile photo updated');
+      window.dispatchEvent(new CustomEvent('profile-photo-updated', { detail: photoPreview }));
     } catch (error: any) {
       toast.error(error.message || 'Failed to update photo');
     } finally {
@@ -248,6 +251,7 @@ export default function Settings() {
       setIsPhotoPreviewOpen(false);
       setPhotoPreview('');
       toast.success('Profile photo removed');
+      window.dispatchEvent(new CustomEvent('profile-photo-updated', { detail: '' }));
     } catch (error: any) {
       toast.error(error.message || 'Failed to remove photo');
     } finally {
@@ -368,16 +372,29 @@ export default function Settings() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Account Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your profile, preferences, and account
-        </p>
+      {/* Premium Hero Header */}
+      <div className="section-hero mesh-gradient">
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="section-hero-icon">
+              <Settings2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-display section-hero-title">Account Settings</h1>
+              <p className="text-muted-foreground text-sm mt-2">
+                Manage your profile, preferences, and account
+              </p>
+            </div>
+          </div>
+          <TutorialReplayButton />
+        </div>
       </div>
 
-
       {/* SECTION 1: Profile Section */}
-      <Card>
+      <Card data-tutorial="settings-profile">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
@@ -509,7 +526,7 @@ export default function Settings() {
       </Card>
 
       {/* SECTION 3: Academic Settings */}
-      <Card>
+      <Card data-tutorial="settings-academic">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5" />
@@ -612,7 +629,7 @@ export default function Settings() {
       </Card>
 
       {/* SECTION 2: Appearance */}
-      <Card>
+      <Card data-tutorial="settings-appearance">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
             {profile.theme === 'dark' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
@@ -712,6 +729,25 @@ export default function Settings() {
                 ))}
               </div>
             </div>
+
+            <div className="flex flex-col gap-3 mt-6 p-4 border rounded-2xl bg-muted/20">
+              <Label className="text-sm font-semibold flex items-center gap-2">Dashboard Layout</Label>
+              <p className="text-xs text-muted-foreground">Restore the dashboard widgets to their default order and positions.</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  if (user?.id) {
+                      localStorage.removeItem(`dashboard_layout_${user.id}`);
+                      window.dispatchEvent(new CustomEvent('dashboard-layout-reset'));
+                      toast.success('Dashboard layout has been reset to default');
+                  }
+                }}
+                className="w-fit"
+              >
+                Reset to Default
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -772,7 +808,7 @@ export default function Settings() {
       </Card>
 
       {/* SECTION 8: Export Data */}
-      <Card>
+      <Card data-tutorial="settings-data">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
             <Download className="h-5 w-5" />

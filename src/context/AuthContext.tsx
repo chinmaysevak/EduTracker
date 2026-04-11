@@ -6,6 +6,7 @@ interface User {
     name: string;
     email?: string;
     theme?: string;
+    profilePhoto?: string;
 }
 
 const applyTheme = (theme?: string) => {

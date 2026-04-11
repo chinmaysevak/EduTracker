@@ -29,9 +29,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useSubjects, useAttendance, useTimetable } from '@/hooks/useData';
+import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 import type { AttendanceStatus } from '@/types';
 import { AttendancePredictionModal } from '@/components/attendance/AttendancePredictionModal';
@@ -52,7 +54,10 @@ type SortOrder = 'asc' | 'desc';
 
 export default function AttendanceTracker() {
   const { subjects, addSubject, removeSubject } = useSubjects();
-  const { attendanceData, markAttendance, calculateSubjectAttendance, getOverallAttendance, getDayAttendance, getMonthlyStats, addExtraClass, removeExtraClass, markExtraClassAttendance, getExtraClasses } = useAttendance();
+  const { settings } = useSettings();
+  const attendanceGoal = settings?.attendanceGoal || 75;
+  const warningLimit = Math.max(0, attendanceGoal - 15);
+  const { attendanceData, markAttendance, calculateSubjectAttendance, getOverallAttendance, getDayAttendance, getMonthlyStats, addExtraClass, removeExtraClass, markExtraClassAttendance, getExtraClasses, resetAttendance } = useAttendance();
   const getSubjectName = (id: string) => subjects.find(s => s.id === id)?.name || id;
   const { isSubjectScheduled, getTimetableForDay } = useTimetable();
 
@@ -184,7 +189,7 @@ export default function AttendanceTracker() {
         ...s,
         stats,
         monthlyStats,
-        status: stats.percentage >= 75 ? 'good' : stats.percentage >= 60 ? 'warning' : 'critical'
+        status: stats.percentage >= attendanceGoal ? 'good' : stats.percentage >= warningLimit ? 'warning' : 'critical'
       };
     });
 
@@ -289,25 +294,30 @@ export default function AttendanceTracker() {
   };
 
   const getStatusBadge = (percentage: number) => {
-    if (percentage >= 75) return <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0"><Award className="w-3 h-3 mr-1" /> Good</Badge>;
-    if (percentage >= 60) return <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-0"><AlertCircle className="w-3 h-3 mr-1" /> Warning</Badge>;
+    if (percentage >= attendanceGoal) return <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0"><Award className="w-3 h-3 mr-1" /> Good</Badge>;
+    if (percentage >= warningLimit) return <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-0"><AlertCircle className="w-3 h-3 mr-1" /> Warning</Badge>;
     return <Badge className="bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border-0"><X className="w-3 h-3 mr-1" /> Critical</Badge>;
   };
 
   return (
     <div className="settings-bg space-y-3">
       {/* Hero Header */}
-      <div className="section-hero mesh-gradient">
+      <div className="section-hero mesh-gradient" data-tutorial="attendance-hero">
         <div className="orb orb-1" />
         <div className="orb orb-2" />
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold gradient-text-vibrant font-display">Attendance Tracker</h2>
-            <p className="text-muted-foreground text-sm mt-1">Stay consistent, stay ahead — every class counts! 📚</p>
+          <div className="flex items-center gap-4">
+            <div className="section-hero-icon">
+              <CalendarCheck className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-display section-hero-title">Attendance Tracker</h2>
+              <p className="text-muted-foreground text-sm mt-2">Track every class and keep your attendance on target.</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="outline" className="rounded-xl gap-1.5 text-xs sm:text-sm text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800 hover:shadow-lg hover:shadow-violet-500/10 transition-all" onClick={() => setIsPredictionOpen(true)}>
+            <Button variant="outline" className="rounded-xl gap-1.5 text-xs sm:text-sm text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800 hover:shadow-lg hover:shadow-violet-500/10 transition-all" onClick={() => setIsPredictionOpen(true)} data-tutorial="attendance-forecast">
               <TrendingUp className="w-4 h-4" />
               Forecast
             </Button>
@@ -315,11 +325,39 @@ export default function AttendanceTracker() {
               <Download className="w-4 h-4" />
               Export CSV
             </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="rounded-xl gap-1.5 text-xs sm:text-sm text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:text-rose-700 hover:border-rose-300 transition-all">
+                  <Trash2 className="w-4 h-4" />
+                  Reset
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl shadow-2xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                    <AlertCircle className="w-5 h-5" />
+                    Reset Attendance Data
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-muted-foreground text-base">
+                    Are you sure you want to permanently delete <strong>all your attendance records</strong>? 
+                    <br /><br />
+                    This is usually done at the start of a new semester. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => { resetAttendance(); toast.success('Attendance data has been reset.'); }} className="rounded-xl bg-rose-600 text-white hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-500/20 shadow-rose-500/10 border-0">
+                    Yes, Reset Attendance
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button className="btn-gradient btn-glow rounded-xl gap-1.5 text-xs sm:text-sm" onClick={() => setIsAddSubjectOpen(true)}>
               <Plus className="w-4 h-4" />
               Add Subject
             </Button>
           </div>
+
         </div>
       </div>
 
@@ -333,7 +371,7 @@ export default function AttendanceTracker() {
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Calendar - Modern Design */}
-        <Card className="lg:col-span-2 card-modern border-0">
+        <Card className="lg:col-span-2 card-modern border-0" data-tutorial="attendance-calendar">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -440,7 +478,7 @@ export default function AttendanceTracker() {
         </Card>
 
         {/* Daily Attendance Panel - Modern */}
-        <Card ref={dayPanelRef} className="card-modern border-0">
+        <Card ref={dayPanelRef} className="card-modern border-0" data-tutorial="attendance-daily-panel">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -637,7 +675,7 @@ export default function AttendanceTracker() {
       </div>
 
       {/* Stats Overview - Modern Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-tutorial="attendance-stats">
         {/* ... existing stats cards ... */}
         <Card className="card-modern card-hover border-0">
           <CardContent className="p-3.5">
@@ -645,11 +683,11 @@ export default function AttendanceTracker() {
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center shadow-md">
                 <Percent className="w-4 h-4 text-white" />
               </div>
-              <div className={`px-3 py-1 rounded-full text-xs font-medium ${overallStats.percentage >= 75 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' :
-                overallStats.percentage >= 60 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' :
+              <div className={`px-3 py-1 rounded-full text-xs font-medium ${overallStats.percentage >= attendanceGoal ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' :
+                overallStats.percentage >= warningLimit ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' :
                   'bg-rose-100 text-rose-700 dark:bg-rose-900/30'
                 }`}>
-                {overallStats.percentage >= 75 ? 'Excellent' : overallStats.percentage >= 60 ? 'Good' : 'At Risk'}
+                {overallStats.percentage >= attendanceGoal ? 'Excellent' : overallStats.percentage >= warningLimit ? 'Good' : 'At Risk'}
               </div>
             </div>
             <p className="text-2xl font-bold">{overallStats.percentage}%</p>
@@ -685,19 +723,23 @@ export default function AttendanceTracker() {
         <Card className="card-modern card-hover border-0">
           <CardContent className="p-3.5">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-md">
-                <BookOpen className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-md">
+                <CalendarCheck className="w-4 h-4 text-white" />
               </div>
             </div>
-            <p className="text-2xl font-bold">{subjects.length}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Total Subjects</p>
+            <div className="flex items-baseline gap-1.5">
+              <span className={`text-2xl font-bold ${overallStats.percentage >= attendanceGoal ? 'text-emerald-600' : overallStats.percentage >= warningLimit ? 'text-amber-500' : 'text-rose-500'}`}>{overallStats.percentage}</span>
+              <span className="text-sm text-muted-foreground font-medium">| {attendanceGoal}</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">Overall Attendance</p>
           </CardContent>
         </Card>
       </div>
 
 
-      {/* Advanced Subject Table - Modern */}
-      <Card className="card-modern border-0">
+
+      {/* Advanced Subject Table - Modern */}
+      <Card className="card-modern border-0" data-tutorial="attendance-table">
         <CardHeader className="pb-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -730,8 +772,8 @@ export default function AttendanceTracker() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="rounded-xl">
                   <DropdownMenuItem onClick={() => setFilterStatus('all')}>All Subjects</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterStatus('good')}>Good (≥75%)</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterStatus('warning')}>Warning (60-74%)</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus('good')}>Good (≥{attendanceGoal}%)</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus('warning')}>Warning ({warningLimit}-{attendanceGoal-1}%)</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setFilterStatus('critical')}>Critical (&lt;60%)</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -795,8 +837,8 @@ export default function AttendanceTracker() {
                   <div className="sm:col-span-2 flex items-center justify-between sm:justify-center">
                     <span className="sm:hidden text-xs font-medium text-muted-foreground">Attendance:</span>
                     <div className="flex items-center gap-2">
-                      <span className={`text-2xl font-bold ${subject.stats.percentage >= 75 ? 'text-emerald-600' :
-                        subject.stats.percentage >= 60 ? 'text-amber-500' : 'text-rose-500'
+                      <span className={`text-2xl font-bold ${subject.stats.percentage >= attendanceGoal ? 'text-emerald-600' :
+                        subject.stats.percentage >= warningLimit ? 'text-amber-500' : 'text-rose-500'
                         }`}>
                         {subject.stats.percentage}%
                       </span>
@@ -821,18 +863,18 @@ export default function AttendanceTracker() {
 
                   <div className="sm:col-span-3 flex flex-col justify-center gap-1.5 min-w-[200px]">
                     <div className="flex items-center justify-between text-xs w-full">
-                      <span className="font-semibold text-foreground">75% Goal Info</span>
+                      <span className="font-semibold text-foreground">{attendanceGoal}% Goal Info</span>
                       {subject.stats.total > 0 && (
-                        <span className={`font-medium ${subject.stats.percentage >= 75 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        <span className={`font-medium ${subject.stats.percentage >= attendanceGoal ? 'text-emerald-500' : 'text-rose-500'}`}>
                           {(() => {
                             const currentPresent = subject.stats.present;
                             const currentTotal = subject.stats.total;
 
-                            if (subject.stats.percentage >= 75) {
-                              const canMiss = Math.floor((currentPresent / 0.75) - currentTotal);
+                            if (subject.stats.percentage >= attendanceGoal) {
+                              const canMiss = Math.floor((currentPresent / (attendanceGoal / 100)) - currentTotal);
                               return canMiss > 0 ? `Can miss ${canMiss} class${canMiss > 1 ? 'es' : ''}` : 'On track';
                             } else {
-                              const needed = Math.ceil((0.75 * currentTotal - currentPresent) / 0.25);
+                              const needed = Math.ceil(((attendanceGoal / 100) * currentTotal - currentPresent) / (1 - (attendanceGoal / 100)));
                               return `Need ${needed} class${needed > 1 ? 'es' : ''}`;
                             }
                           })()}
@@ -840,12 +882,12 @@ export default function AttendanceTracker() {
                       )}
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden w-full relative">
-                      {/* Target 75% Line Marker */}
-                      <div className="absolute left-[75%] top-0 bottom-0 w-0.5 bg-foreground/20 z-10" />
+                      {/* Target Dynamic Line Marker */}
+                      <div className="absolute left-[${attendanceGoal}%] top-0 bottom-0 w-0.5 bg-foreground/20 z-10" />
 
                       <div
-                        className={`h-full rounded-full transition-all duration-500 ${subject.stats.percentage >= 75 ? 'bg-emerald-500' :
-                          subject.stats.percentage >= 60 ? 'bg-amber-500' : 'bg-rose-500'
+                        className={`h-full rounded-full transition-all duration-500 ${subject.stats.percentage >= attendanceGoal ? 'bg-emerald-500' :
+                          subject.stats.percentage >= warningLimit ? 'bg-amber-500' : 'bg-rose-500'
                           }`}
                         style={{ width: `${subject.stats.percentage}%` }}
                       />

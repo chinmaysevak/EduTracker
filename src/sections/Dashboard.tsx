@@ -1,5 +1,5 @@
 // ============================================
-// Dashboard — Premium Animated Redesign
+// Dashboard — Premium Animated Redesign (Sortable)
 // ============================================
 
 import {
@@ -9,7 +9,10 @@ import {
   ArrowUpRight,
   Target,
   Zap,
-  Sparkles
+  Sparkles,
+  Settings2,
+  Save,
+  X
 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,15 +27,36 @@ import {
 } from '@/hooks/useData';
 import { AttendanceWidget } from '@/components/dashboard/AttendanceWidget';
 import {
-  StreakWidget,
   ExamCountdownWidget
 } from '@/components/dashboard/SmartWidgets';
 import { WelcomeSection } from '@/components/dashboard/WelcomeSection';
 import { TimetableWidget } from '@/components/dashboard/TimetableWidget';
 import { ResumeSessionCard } from '@/components/dashboard/ResumeSessionCard';
+import { TutorialTrigger } from '@/components/tutorial/TutorialTrigger';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { EduNotifications } from '@/lib/notifications';
+
+// Dnd Kit Imports
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import { DragOverlay, defaultDropAnimationSideEffects } from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableWidget } from '@/components/dashboard/SortableWidget';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 /** Tiny SVG ring chart for subject attendance */
 function MiniRing({ percentage, color, size = 36 }: { percentage: number; color: string; size?: number }) {
@@ -53,8 +77,21 @@ function MiniRing({ percentage, color, size = 36 }: { percentage: number; color:
   );
 }
 
+const DEFAULT_LAYOUT = [
+  'welcome',
+  'stat-pending',
+  'stat-exam',
+  'stat-progress',
+  'stat-classes',
+  'timetable',
+  'attendance',
+  'quick-actions',
+  'subjects'
+];
+
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { subjects } = useSubjects();
   const { calculateSubjectAttendance } = useAttendance();
   const { getTodayClasses } = useTimetable();
@@ -66,6 +103,83 @@ export default function Dashboard() {
   const overallProgress = getOverallProgress(subjectIds);
   const pendingTasksCount = getPendingTasks().length;
   const overdueTasksCount = getOverdueTasks().length;
+
+  // Edit Mode State
+  const [isEditingLayout, setIsEditingLayout] = useState(false);
+  const [items, setItems] = useState<string[]>(DEFAULT_LAYOUT);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  
+  // Load layout from localStorage on mount
+  useEffect(() => {
+    if (user?.id) {
+        const saved = localStorage.getItem(`dashboard_layout_${user.id}`);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                // Simple validation to ensure it's an array of matching length
+                if (Array.isArray(parsed) && parsed.length === DEFAULT_LAYOUT.length) {
+                    setItems(parsed);
+                }
+            } catch (e) {
+                console.error("Failed to parse saved layout", e);
+            }
+        }
+    }
+    
+    // Listen for cross-component reset signal (e.g. from Settings)
+    const handleReset = () => {
+        setItems(DEFAULT_LAYOUT);
+    };
+    window.addEventListener('dashboard-layout-reset', handleReset);
+    return () => window.removeEventListener('dashboard-layout-reset', handleReset);
+  }, [user?.id]);
+
+  const saveLayout = () => {
+      if (user?.id) {
+          localStorage.setItem(`dashboard_layout_${user.id}`, JSON.stringify(items));
+          setIsEditingLayout(false);
+          toast.success("Dashboard layout saved successfully");
+      }
+  };
+
+  const cancelLayout = () => {
+      if (user?.id) {
+          const saved = localStorage.getItem(`dashboard_layout_${user.id}`);
+          if (saved) {
+              setItems(JSON.parse(saved));
+          } else {
+              setItems(DEFAULT_LAYOUT);
+          }
+      }
+      setIsEditingLayout(false);
+      toast.info("Layout changes discarded");
+  };
+
+  // DnD Sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+        activationConstraint: { distance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+        coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setItems((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
   // Auto-schedule push notifications for today's classes
   useEffect(() => {
@@ -87,23 +201,34 @@ export default function Dashboard() {
     return () => EduNotifications.clearScheduled();
   }, [todayClasses, subjects]);
 
-  return (
-    <div className="settings-bg space-y-5">
-      <WelcomeSection onNavigate={(path) => navigate(`/${path}`)} />
-
-      {/* ── Stats Row ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full items-stretch">
-        <GlassyDataCard
-          title="Pending Tasks"
-          value={pendingTasksCount}
-          subtitle={overdueTasksCount > 0 ? `${overdueTasksCount} overdue` : 'All on track'}
-          glowColor={overdueTasksCount > 0 ? 'amber' : undefined}
-          icon={<ClipboardList className="w-4 h-4 text-amber-500" />}
-          onClick={() => navigate('/planner?filter=pending')}
-        />
-
-        <ExamCountdownWidget onNavigate={(path) => navigate(`/${path}`)} />
-
+  // Widget Library Configuration mapped to components
+  const WIDGETS = useMemo<Record<string, { spanClasses: string; element: React.ReactNode }>>(() => ({
+    'welcome': {
+      spanClasses: 'col-span-1 md:col-span-12',
+      element: <div data-tutorial="welcome-section"><WelcomeSection onNavigate={(path) => navigate(`/${path}`)} /></div>
+    },
+    'stat-pending': {
+      spanClasses: 'col-span-1 md:col-span-6 lg:col-span-3 min-h-[120px]',
+      element: (
+        <div data-tutorial="stat-pending" className="h-full">
+          <GlassyDataCard
+            title="Pending Tasks"
+            value={pendingTasksCount}
+            subtitle={overdueTasksCount > 0 ? `${overdueTasksCount} overdue` : 'All on track'}
+            glowColor={overdueTasksCount > 0 ? 'amber' : undefined}
+            icon={<ClipboardList className="w-4 h-4 text-amber-500" />}
+            onClick={() => navigate('/planner?filter=pending')}
+          />
+        </div>
+      )
+    },
+    'stat-exam': {
+      spanClasses: 'col-span-1 md:col-span-6 lg:col-span-3 min-h-[120px]',
+      element: <ExamCountdownWidget onNavigate={(path) => navigate(`/${path}`)} />
+    },
+    'stat-progress': {
+      spanClasses: 'col-span-1 md:col-span-6 lg:col-span-3 min-h-[120px]',
+      element: (
         <GlassyDataCard
           title="Overall Progress"
           value={`${overallProgress.student}%`}
@@ -114,7 +239,11 @@ export default function Dashboard() {
         >
           <Progress value={overallProgress.student} className="h-1.5 mt-3" />
         </GlassyDataCard>
-
+      )
+    },
+    'stat-classes': {
+      spanClasses: 'col-span-1 md:col-span-6 lg:col-span-3 min-h-[120px]',
+      element: (
         <GlassyDataCard
           title="Today's Classes"
           value={todayClasses.length}
@@ -123,33 +252,35 @@ export default function Dashboard() {
           icon={<BookOpen className="w-4 h-4 text-blue-500" />}
           onClick={() => navigate('/attendance')}
         />
-      </div>
-
-      {/* ── Timetable (full width) ── */}
-      <TimetableWidget />
-
-      {/* ── Attendance + Resume/Streak ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full">
-        <div className="lg:col-span-8 space-y-5">
-          <AttendanceWidget onNavigate={(path) => navigate(`/${path}`)} />
-        </div>
-        <div className="lg:col-span-4 space-y-5">
-          <ResumeSessionCard onNavigate={(path) => navigate(`/${path}`)} />
-          <StreakWidget />
-        </div>
-      </div>
-
-      {/* ── Quick Actions + Subjects (Premium redesign) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full">
-        {/* Quick Actions — Circular icon buttons with gradient glow */}
-        <Card className="lg:col-span-4 card-professional card-shine">
+      )
+    },
+    'timetable': {
+      spanClasses: 'col-span-1 md:col-span-12',
+      element: <div data-tutorial="timetable-widget"><TimetableWidget /></div>
+    },
+    'attendance': {
+      spanClasses: 'col-span-1 md:col-span-12 lg:col-span-8 flex flex-col',
+      element: <div className="flex-1" data-tutorial="attendance-widget"><AttendanceWidget onNavigate={(path) => navigate(`/${path}`)} /></div>
+    },
+    'resume-streak': {
+      spanClasses: 'col-span-1 md:col-span-12 lg:col-span-4 flex flex-col gap-5',
+      element: (
+        <>
+          <div className="flex-1 w-full"><ResumeSessionCard onNavigate={(path) => navigate(`/${path}`)} /></div>
+        </>
+      )
+    },
+    'quick-actions': {
+      spanClasses: 'col-span-1 md:col-span-12 lg:col-span-4 flex flex-col',
+      element: (
+        <Card className="card-professional flex-1 w-full flex flex-col" data-tutorial="quick-actions">
           <CardHeader className="pb-2">
             <h3 className="font-semibold font-display flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-primary" />
               Quick Actions
             </h3>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col justify-between flex-1">
             <div className="flex items-center justify-around py-2">
               {[
                 { icon: CalendarCheck, label: 'Attendance', path: '/attendance', color: 'text-blue-500', bg: 'from-blue-500/15 to-indigo-500/15', glow: 'group-hover:shadow-blue-500/20' },
@@ -169,17 +300,20 @@ export default function Dashboard() {
                 </button>
               ))}
             </div>
-            <div className="mt-3">
-              <Button className="w-full btn-gradient btn-glow h-11 rounded-xl gap-2 text-sm font-bold" onClick={() => navigate('/focus')}>
+            <div className="mt-4 pt-2">
+              <Button data-tutorial="focus-dashboard-btn" className="w-full btn-gradient btn-glow h-11 rounded-xl gap-2 text-sm font-bold" onClick={() => navigate('/focus')}>
                 <Zap className="w-4 h-4" />
                 Start Focus Session
               </Button>
             </div>
           </CardContent>
         </Card>
-
-        {/* Subjects — With mini ring charts and enhanced styling */}
-        <Card className="lg:col-span-8 card-professional card-shine">
+      )
+    },
+    'subjects': {
+      spanClasses: 'col-span-1 md:col-span-12 lg:col-span-8 flex flex-col',
+      element: (
+        <Card className="card-professional flex-1 w-full">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold font-display flex items-center gap-2">
@@ -223,7 +357,77 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
+      )
+    }
+  }), [pendingTasksCount, overdueTasksCount, overallProgress.student, todayClasses, navigate, subjects, calculateSubjectAttendance]);
+
+  return (
+    <div className="settings-bg space-y-5 pb-6">
+      
+      {/* Tutorial Trigger Button */}
+      <TutorialTrigger />
+
+      {/* Settings / Edit Layout Header */}
+      <div className="flex items-center justify-end mb-2 w-full pr-1">
+          {!isEditingLayout ? (
+              <Button variant="outline" size="sm" className="gap-2 rounded-xl text-muted-foreground hover:text-foreground border-border/50 bg-background/50 backdrop-blur" onClick={() => setIsEditingLayout(true)} data-tutorial="customize-layout">
+                  <Settings2 className="w-4 h-4" />
+                  Customize Layout
+              </Button>
+          ) : (
+              <div className="flex items-center gap-3 bg-card border border-primary/30 p-2 rounded-2xl shadow-lg animate-in slide-in-from-top-2">
+                  <span className="text-xs font-semibold px-2 text-primary">Edit Mode Active</span>
+                  <Button variant="ghost" size="sm" onClick={cancelLayout} className="gap-1.5 h-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+                      <X className="w-4 h-4" /> Cancel
+                  </Button>
+                  <Button variant="default" size="sm" onClick={saveLayout} className="gap-1.5 h-8">
+                      <Save className="w-4 h-4" /> Save Layout
+                  </Button>
+              </div>
+          )}
       </div>
+
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={() => setActiveId(null)}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 w-full items-stretch">
+          <SortableContext
+            items={items}
+            strategy={rectSortingStrategy}
+          >
+            {items.map((id) => (
+              <SortableWidget
+                key={id}
+                id={id}
+                spanClasses={WIDGETS[id]?.spanClasses || 'col-span-1 md:col-span-12'}
+                isEditing={isEditingLayout}
+              >
+                {WIDGETS[id]?.element}
+              </SortableWidget>
+            ))}
+          </SortableContext>
+        </div>
+
+        <DragOverlay 
+          dropAnimation={{
+            duration: 250,
+            easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+            sideEffects: defaultDropAnimationSideEffects({
+               styles: { active: { opacity: '0.4' } }
+            })
+          }}
+        >
+          {activeId ? (
+            <div className={`${WIDGETS[activeId]?.spanClasses || ''} opacity-95 scale-[1.02] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2rem] overflow-hidden`}>
+               {WIDGETS[activeId]?.element}
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
     </div>
   );
 }

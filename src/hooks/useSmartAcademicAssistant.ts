@@ -23,9 +23,11 @@ export function useSmartAcademicAssistant() {
   const tasksRef = useRef(tasks);
   const attendanceRef = useRef(attendanceData);
 
-  subjectsRef.current = subjects;
-  tasksRef.current = tasks;
-  attendanceRef.current = attendanceData;
+  useEffect(() => {
+    subjectsRef.current = subjects;
+    tasksRef.current = tasks;
+    attendanceRef.current = attendanceData;
+  }, [subjects, tasks, attendanceData]);
 
   // Compute all analytics when data changes (single effect, no circular deps)
   useEffect(() => {
